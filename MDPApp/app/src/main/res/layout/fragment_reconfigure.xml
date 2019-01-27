@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true">
+        <Button
+            android:id="@+id/F1Btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="F1"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:onClick="ReconfigOnClickMethods"/>
+
+        <Button
+            android:id="@+id/F2Btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="F2"
+            android:layout_toRightOf="@+id/F1Btn"
+            android:layout_toEndOf="@+id/F1Btn"
+            android:onClick="ReconfigOnClickMethods"/>
+
+        <Button
+            android:id="@+id/reconfigBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="reconfigure"
+            android:layout_below="@+id/F1Btn"
+            android:layout_centerHorizontal="true"
+            android:onClick="ReconfigOnClickMethods"/>
+    </RelativeLayout>
+
+</RelativeLayout>

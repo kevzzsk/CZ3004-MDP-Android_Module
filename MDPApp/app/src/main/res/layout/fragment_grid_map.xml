@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/topLayout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintHeight_default="percent"
+        app:layout_constraintHeight_percent="0.7">
+
+        <RelativeLayout
+            android:id="@+id/gridMapHolder"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            app:layout_constraintWidth_default="percent"
+            app:layout_constraintWidth_percent="0.7"
+            android:background="#000000">
+            <TableLayout
+                android:id="@+id/gridMap"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true">
+            </TableLayout>
+        </RelativeLayout>
+
+
+        <ScrollView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            app:layout_constraintWidth_default="percent"
+            app:layout_constraintWidth_percent="0.3"
+            app:layout_constraintStart_toEndOf="@id/gridMapHolder"
+            >
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:id="@+id/statusWindowTV"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="STATUS WINDOW \n\nLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."/>
+            </RelativeLayout>
+        </ScrollView>
+    </android.support.constraint.ConstraintLayout>
+
+    <RelativeLayout
+        android:id="@+id/bottomLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/topLayout">
+
+        <RelativeLayout
+            android:id="@+id/switchLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/autoTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="AUTO"
+                android:layout_centerVertical="true"/>
+            <TextView
+                android:id="@+id/manualTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="MANUAL"
+                android:layout_toRightOf="@id/autoManualToggleBtn"
+                android:layout_toEndOf="@id/autoManualToggleBtn"
+                android:layout_centerVertical="true" />
+            <Switch
+                android:id="@+id/autoManualToggleBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/autoTV"
+                android:layout_toEndOf="@+id/autoTV"
+                android:layout_centerVertical="true" />
+        </RelativeLayout>
+
+        <Button
+            android:id="@+id/updateBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="UPDATE"
+            android:layout_below="@+id/switchLayout"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:onClick="GridMapOnClickMethods"/>
+
+        <Button
+            android:id="@+id/wayPointBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="WAYPOINT"
+            android:layout_below="@+id/switchLayout"
+            android:layout_toRightOf="@+id/updateBtn"
+            android:onClick="GridMapOnClickMethods"/>
+
+        <Button
+            android:id="@+id/fastestBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="FASTEST"
+            android:layout_below="@+id/switchLayout"
+            android:layout_toRightOf="@+id/wayPointBtn"
+            android:onClick="GridMapOnClickMethods"/>
+
+        <Button
+            android:id="@+id/stopBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="STOP"
+            android:layout_below="@+id/updateBtn"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:onClick="GridMapOnClickMethods" />
+
+        <Button
+            android:id="@+id/exploreBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="EXPLORE"
+            android:layout_below="@+id/wayPointBtn"
+            android:layout_toRightOf="@+id/stopBtn"
+            android:onClick="GridMapOnClickMethods"/>
+
+        <Button
+            android:id="@+id/extraBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="extra"
+            android:layout_below="@+id/fastestBtn"
+            android:layout_toRightOf="@+id/wayPointBtn"
+            android:onClick="GridMapOnClickMethods"/>
+
+        <Button
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:text="d-pad\n(haven't do)"
+            android:layout_toRightOf="@+id/fastestBtn"
+            android:layout_centerVertical="true"
+            android:onClick="GridMapOnClickMethods"
+            />
+    </RelativeLayout>
+
+
+</android.support.constraint.ConstraintLayout>
