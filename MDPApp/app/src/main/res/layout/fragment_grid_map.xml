@@ -7,7 +7,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     tools:context=".MainActivity">
-
     <android.support.constraint.ConstraintLayout
         android:id="@+id/topLayout"
         android:layout_width="match_parent"
@@ -56,7 +55,8 @@
         android:id="@+id/bottomLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/topLayout">
+        app:layout_constraintTop_toBottomOf="@id/topLayout"
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <RelativeLayout
             android:id="@+id/switchLayout"
@@ -102,7 +102,8 @@
             android:text="WAYPOINT"
             android:layout_below="@+id/switchLayout"
             android:layout_toRightOf="@+id/updateBtn"
-            android:onClick="GridMapOnClickMethods"/>
+            android:onClick="GridMapOnClickMethods"
+            android:layout_toEndOf="@+id/updateBtn" />
 
         <Button
             android:id="@+id/fastestBtn"
@@ -111,7 +112,8 @@
             android:text="FASTEST"
             android:layout_below="@+id/switchLayout"
             android:layout_toRightOf="@+id/wayPointBtn"
-            android:onClick="GridMapOnClickMethods"/>
+            android:onClick="GridMapOnClickMethods"
+            android:layout_toEndOf="@+id/wayPointBtn" />
 
         <Button
             android:id="@+id/stopBtn"
@@ -130,7 +132,8 @@
             android:text="EXPLORE"
             android:layout_below="@+id/wayPointBtn"
             android:layout_toRightOf="@+id/stopBtn"
-            android:onClick="GridMapOnClickMethods"/>
+            android:onClick="GridMapOnClickMethods"
+            android:layout_toEndOf="@+id/stopBtn" />
 
         <Button
             android:id="@+id/extraBtn"
@@ -139,17 +142,25 @@
             android:text="extra"
             android:layout_below="@+id/fastestBtn"
             android:layout_toRightOf="@+id/wayPointBtn"
-            android:onClick="GridMapOnClickMethods"/>
-
-        <Button
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:text="d-pad\n(haven't do)"
-            android:layout_toRightOf="@+id/fastestBtn"
-            android:layout_centerVertical="true"
             android:onClick="GridMapOnClickMethods"
-            />
+            android:layout_toEndOf="@+id/wayPointBtn" />
+
+        <com.andretietz.android.controller.DirectionView
+            android:id="@+id/viewDirection"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/fastestBtn"
+            android:layout_toEndOf="@+id/fastestBtn"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"/>
     </RelativeLayout>
 
+    <RelativeLayout
+        android:id="@+id/gridMapFragmentLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </RelativeLayout>
 
 </android.support.constraint.ConstraintLayout>

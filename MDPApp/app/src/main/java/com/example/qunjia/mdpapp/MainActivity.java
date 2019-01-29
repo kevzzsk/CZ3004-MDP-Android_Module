@@ -10,8 +10,8 @@ import android.view.View;
 
 import com.astuetz.PagerSlidingTabStrip;
 
-
 public class MainActivity extends AppCompatActivity {
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
         PagerSlidingTabStrip tabs = (PagerSlidingTabStrip) findViewById(R.id.topTabs);
         tabs.setViewPager(pager);
     }
+
 
     public class MyPagerAdapter extends FragmentStatePagerAdapter {
 
@@ -60,11 +61,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public static void ReconfigOnClickMethods(View v) {
+    public void ReconfigOnClickMethods(View v) {
         ReconfigureFragment.myClickMethod(v);
     }
 
-    public static void GridMapOnClickMethods(View v) {
+    public void GridMapOnClickMethods(View v) {
         GridMapFragment.myClickMethod(v);
     }
 
