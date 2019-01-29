@@ -10,8 +10,8 @@ import android.view.View;
 
 import com.astuetz.PagerSlidingTabStrip;
 
-public class MainActivity extends AppCompatActivity {
 
+public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,5 +66,14 @@ public class MainActivity extends AppCompatActivity {
 
     public static void GridMapOnClickMethods(View v) {
         GridMapFragment.myClickMethod(v);
+    }
+
+    public void BluetoothOnclickMethods(View v) {
+        for (Fragment fragment: getSupportFragmentManager().getFragments()) {
+            if (fragment instanceof BluetoothFragment) {
+                BluetoothFragment bluetooth_fragment = (BluetoothFragment) fragment;
+                bluetooth_fragment.myClickMethod(v, this);
+            }
+        }
     }
 }
