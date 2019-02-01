@@ -191,7 +191,7 @@ public class GridMapFragment extends Fragment {
         ImageView robotCellPosition = ((Activity) context).findViewById(getImageViewID(columnNumber,rowNumber));
         robotCellPosition.getLocationOnScreen(location);
         int x = location[0] - cellSize - cellMargin;
-        int y = location[1] - cellSize * 6 - cellMargin * 7;
+        int y = location[1] - cellSize * 4 - (int) (cellMargin * 8.5);
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
                 cellSize*3 + 2 * cellMargin, cellSize*3 + 3 * cellMargin);
         params.setMargins(x, y,0,0);
