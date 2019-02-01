@@ -41,12 +41,12 @@
             <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
+
                 <TextView
                     android:id="@+id/statusWindowTV"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="STATUS WINDOW \n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris tincidunt varius risus eget fermentum. Morbi fermentum at tellus vehicula venenatis. Aenean eget sem et sem fringilla porta eu nec felis. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse leo diam, tempus nec purus in, mollis imperdiet nisl. Quisque id nisi vel tortor eleifend congue quis ut metus. Suspendisse aliquam odio nulla, ut tincidunt ex commodo quis. Morbi sed porta tellus, vel semper arcu. Vestibulum cursus sem purus, sit amet auctor ante malesuada quis. \nPhasellus accumsan neque id orci condimentum fermentum. Duis nec consectetur augue. Suspendisse nec pellentesque enim. Donec ut pulvinar lacus. Aenean gravida gravida tortor, ut facilisis tortor iaculis tincidunt. Sed blandit lacus non diam dapibus, ac varius magna pretium. Nullam vel augue non elit scelerisque feugiat vel eu arcu. Phasellus id sagittis purus. Aliquam id nisl varius, pretium lacus at, blandit quam. Pellentesque sed dui efficitur, aliquet sapien sit amet, placerat lectus. Suspendisse ut posuere nunc. Duis aliquet metus a tortor efficitur imperdiet. Curabitur gravida quam non magna bibendum mattis. Phasellus facilisis quis mi ut imperdiet. Aenean nec augue in nunc consectetur finibus in vel nunc. Etiam auctor lorem a mi tristique dignissim.\nDuis feugiat sit amet justo vitae mattis. Curabitur pharetra eleifend tincidunt. Phasellus lacinia tellus lacus, id porttitor odio egestas ac. Maecenas malesuada congue mauris sed molestie. Mauris non purus accumsan, venenatis turpis vel, pulvinar magna. Cras ultricies, dui non viverra gravida, massa ante fermentum sapien, vitae tristique ligula metus eu velit. Ut consectetur vestibulum mi, ac mollis tellus. Nam sit amet tristique tortor. Pellentesque ac turpis aliquet, tempor ligula sed, luctus felis. Donec sit amet efficitur dui. Maecenas eleifend tortor ut nunc blandit, id efficitur erat vulputate.">
-                </TextView>
+                    android:text="STATUS WINDOW \n\n"></TextView>
             </RelativeLayout>
         </ScrollView>
     </android.support.constraint.ConstraintLayout>

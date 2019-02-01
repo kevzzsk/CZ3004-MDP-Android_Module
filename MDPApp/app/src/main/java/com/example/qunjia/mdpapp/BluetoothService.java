@@ -1,5 +1,6 @@
 package com.example.qunjia.mdpapp;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -8,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
+import android.os.ParcelUuid;
 import android.util.Log;
 
 import java.io.IOException;
@@ -36,6 +38,7 @@ interface HandlerConstants {
     int MESSAGE_FINISH_DISCOVERY = 7;
     int MESSAGE_DEVICE_BONDED = 8;
     int MESSAGE_TOAST = 9;
+    int MESSAGE_DEVICE_RECONNECT = 10;
 }
 
 interface ConnectionConstants {
@@ -52,7 +55,7 @@ public class BluetoothService {
     static String BLUETOOTH_PAIR_TAG = "Bluetooth (Pair)";
 
     // Unique UUID for this application
-    private static UUID DEFAULT_UUID = UUID.fromString("0000111f-0000-1000-8000-00805f9b34fb");
+    private static UUID DEFAULT_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     // Member fields
     private final BluetoothAdapter mAdapter;
@@ -61,6 +64,36 @@ public class BluetoothService {
     private ConnectedThread mConnectedThread;
     private int mState;
     private int mNewState;
+    private BluetoothDevice current_device;
+    boolean reconnecting = false;
+
+    BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+
+            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                // Discovery has found a device. Get the BluetoothDevice
+                // object and its info from the Intent.
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                if (reconnecting) {
+                    mHandler.obtainMessage(HandlerConstants.MESSAGE_DEVICE_RECONNECT, device).sendToTarget();
+                } else {
+                    mHandler.obtainMessage(HandlerConstants.MESSAGE_DEVICE_FOUND, device).sendToTarget();
+                }
+
+            } else if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
+                mHandler.obtainMessage(HandlerConstants.MESSAGE_START_DISCOVERY, reconnecting).sendToTarget();
+            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                mHandler.obtainMessage(HandlerConstants.MESSAGE_FINISH_DISCOVERY, reconnecting).sendToTarget();
+            } else if (BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(action)) {
+                int bond_state = intent.getIntExtra(EXTRA_BOND_STATE, 0);
+                if (bond_state == BOND_BONDED) {
+                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                    mHandler.obtainMessage(HandlerConstants.MESSAGE_DEVICE_BONDED, device).sendToTarget();
+                }
+            }
+        }
+    };
 
     /**
      * Constructor. Prepares a new BluetoothChat session.
@@ -69,8 +102,8 @@ public class BluetoothService {
      * @param handler A Handler to send messages back to the UI Activity
      */
     public BluetoothService(Context context, BluetoothAdapter adapter, Handler handler) {
-        if (adapter == null || !adapter.isEnabled()) {
-            throw new RuntimeException("Bluetooth is not enabled!");
+        if (adapter == null) {
+            throw new RuntimeException("Bluetooth is not supported!");
         }
 
         mAdapter = adapter;
@@ -84,28 +117,6 @@ public class BluetoothService {
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-        BroadcastReceiver mReceiver = new BroadcastReceiver() {
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-
-                if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                    // Discovery has found a device. Get the BluetoothDevice
-                    // object and its info from the Intent.
-                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                    mHandler.obtainMessage(HandlerConstants.MESSAGE_DEVICE_FOUND, device).sendToTarget();
-                } else if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
-                    mHandler.obtainMessage(HandlerConstants.MESSAGE_START_DISCOVERY).sendToTarget();
-                } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                    mHandler.obtainMessage(HandlerConstants.MESSAGE_FINISH_DISCOVERY).sendToTarget();
-                } else if (BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(action)) {
-                    int bond_state = intent.getIntExtra(EXTRA_BOND_STATE, 0);
-                    if (bond_state == BOND_BONDED) {
-                        BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                        mHandler.obtainMessage(HandlerConstants.MESSAGE_DEVICE_BONDED, device).sendToTarget();
-                    }
-                }
-            }
-        };
         context.registerReceiver(mReceiver, filter);
     }
 
@@ -124,8 +135,20 @@ public class BluetoothService {
     /**
      * Return the current connection state.
      */
-    private synchronized int getState() {
+    synchronized int getState() {
         return mState;
+    }
+
+    void setDevice(BluetoothDevice device) {
+        current_device = device;
+    }
+
+    BluetoothDevice getDevice() {
+        return current_device;
+    }
+
+    void removeDevice() {
+        current_device = null;
     }
 
     void scan(){
@@ -134,8 +157,8 @@ public class BluetoothService {
     }
 
     void pair(BluetoothDevice device){
-        Log.d(BLUETOOTH_PAIR_TAG, "Pairing with " + device);
         if (device.getBondState() == BOND_NONE){
+            Log.d(BLUETOOTH_PAIR_TAG, "Pairing with " + device);
             device.createBond();
         }
     }
@@ -191,7 +214,7 @@ public class BluetoothService {
     /**
      * Stop all threads
      */
-    public synchronized void stop() {
+    public synchronized void stop(Activity activity) {
         Log.d(BLUETOOTH_CONNECTION_TAG, "Connection stop");
 
         if (mConnectThread != null) {
@@ -206,9 +229,11 @@ public class BluetoothService {
 
         mState = ConnectionConstants.STATE_DISCONNECTED;
         updateUIStatus();
+
+        activity.unregisterReceiver(mReceiver);
     }
 
-    public void write(byte[] out) {
+    void write(byte[] out) {
         // Create temporary object
         ConnectedThread r;
         // Synchronize a copy of the ConnectedThread
@@ -232,8 +257,9 @@ public class BluetoothService {
         // Send a failure message back to the Activity
         mHandler.obtainMessage(HandlerConstants.MESSAGE_TOAST, "Device connection was lost").sendToTarget();
         mState = ConnectionConstants.STATE_DISCONNECTED;
+        reconnecting = true;
         ReconnectThread thread = new ReconnectThread();
-        thread.run();
+        thread.start();
 
         updateUIStatus();
     }
@@ -250,6 +276,11 @@ public class BluetoothService {
             while (mState != ConnectionConstants.STATE_CONNECTED) {
                 if (!mAdapter.isDiscovering()) {
                     scan();
+                    try {
+                        sleep(3000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
@@ -349,6 +380,8 @@ public class BluetoothService {
             mmInStream = tmpIn;
             mmOutStream = tmpOut;
             mState = ConnectionConstants.STATE_CONNECTED;
+            reconnecting = false;
+            mHandler.obtainMessage(HandlerConstants.MESSAGE_TOAST, "Device connected").sendToTarget();
         }
 
         public void run() {
@@ -380,7 +413,6 @@ public class BluetoothService {
         void write(byte[] buffer) {
             try {
                 mmOutStream.write(buffer);
-
                 // Share the sent message back to the UI Activity
                 mHandler.obtainMessage(HandlerConstants.MESSAGE_WRITE, -1, -1, buffer)
                         .sendToTarget();

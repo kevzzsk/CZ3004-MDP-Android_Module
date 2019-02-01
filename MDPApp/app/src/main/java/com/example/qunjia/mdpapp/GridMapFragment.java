@@ -143,27 +143,35 @@ public class GridMapFragment extends Fragment {
                 switch (buttons&0xff) {
                     case DirectionView.DIRECTION_DOWN:
                         Toast.makeText(context, "DOWN", Toast.LENGTH_LONG).show();
+                        BluetoothFragment.sendMessage("DOWN");
                         break;
                     case DirectionView.DIRECTION_LEFT:
                         Toast.makeText(context, "LEFT", Toast.LENGTH_LONG).show();
+                        BluetoothFragment.sendMessage("LEFT");
                         break;
                     case DirectionView.DIRECTION_RIGHT:
                         Toast.makeText(context, "RIGHT", Toast.LENGTH_LONG).show();
+                        BluetoothFragment.sendMessage("RIGHT");
                         break;
                     case DirectionView.DIRECTION_UP:
                         Toast.makeText(context, "UP", Toast.LENGTH_LONG).show();
+                        BluetoothFragment.sendMessage("UP");
                         break;
                     case DirectionView.DIRECTION_DOWN_LEFT:
                         Toast.makeText(context, "DOWN_LEFT", Toast.LENGTH_LONG).show();
+                        BluetoothFragment.sendMessage("DOWN_LEFT");
                         break;
                     case DirectionView.DIRECTION_UP_LEFT:
                         Toast.makeText(context, "UP_LEFT", Toast.LENGTH_LONG).show();
+                        BluetoothFragment.sendMessage("UP_LEFT");
                         break;
                     case DirectionView.DIRECTION_DOWN_RIGHT:
                         Toast.makeText(context, "DOWN_RIGHT", Toast.LENGTH_LONG).show();
+                        BluetoothFragment.sendMessage("DOWN_RIGHT");
                         break;
                     case DirectionView.DIRECTION_UP_RIGHT:
                         Toast.makeText(context, "UP_RIGHT", Toast.LENGTH_LONG).show();
+                        BluetoothFragment.sendMessage("UP_RIGHT");
                         break;
                 }
             }
