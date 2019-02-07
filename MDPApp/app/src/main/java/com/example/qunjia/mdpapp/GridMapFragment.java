@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.Switch;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -70,6 +71,7 @@ public class GridMapFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        SetupSwitchListener();
         CreateGridMap(getActivity());
         DirectionViewSetup(getActivity());
         //
@@ -80,6 +82,12 @@ public class GridMapFragment extends Fragment {
             }
         }, 200);
     }
+
+    private void SetupSwitchListener(){
+        Switch directionSwitch = (Switch) getActivity().findViewById(R.id.directionToggleBtn);
+        directionSwitch.setOnCheckedChangeListener(new AccelerometerSwitchListener());
+    }
+
     private void CreateGridMap (final Context context){
         TableLayout tbl= ((Activity) context).findViewById(R.id.gridMap);
 
@@ -263,44 +271,8 @@ public class GridMapFragment extends Fragment {
     public static void myClickMethod(final View v) {
         switch(v.getId()) {
             case R.id.extraBtn:
-                if(handler.hasMessages(0)){
-                    handler.removeCallbacks(runnable);
-                }
-                else {
-                    runnable = new Runnable() {
-                        @Override
-                        public void run() {
-                            timer++;
-                            timer = timer % 40;
-
-                            if(timer<10){
-                                robotCurrentRow--;
-                                SetArrowPicture(v.getContext(), 0,robotCurrentRow,4);
-                                SetArrowPicture(v.getContext(), 90,robotCurrentRow,5);
-                            }
-                            else if(timer <20){
-                                robotCurrentColumn++;
-                                ChangeCellColor(v.getContext(), Color.BLACK, 2, robotCurrentColumn);
-                            }
-                            else if(timer < 30){
-                                robotCurrentRow++;
-                                RemoveArrowPicture(v.getContext(), robotCurrentRow,4);
-                                RemoveArrowPicture(v.getContext(), robotCurrentRow,5);
-                            }
-                            else {
-                                robotCurrentColumn--;
-                                ChangeCellColor(v.getContext(), Color.WHITE, 2, robotCurrentColumn);
-                            }
-
-                            setRobotPosition(v.getContext(), robotCurrentColumn,robotCurrentRow);
-
-                            handler.postDelayed(this, 100);
-                        }
-                    };
-                    handler.postDelayed(runnable, 100);
-                }
-
-                break;
+                RobotMovingSimulator(v);
+                return;
            /* case R.id.
                 break;
             case R.id.
@@ -308,5 +280,70 @@ public class GridMapFragment extends Fragment {
         }
 
         Toast.makeText(v.getContext(), "to be updated", Toast.LENGTH_LONG).show();
+    }
+
+    private static void RobotMovingSimulator(final View v){
+        if(handler.hasMessages(0)){
+            handler.removeCallbacks(runnable);
+        }
+        else {
+            runnable = new Runnable() {
+                @Override
+                public void run() {
+                    timer++;
+                    timer = timer % 40;
+
+                    if(timer<10){
+                        robotCurrentRow--;
+                        SetArrowPicture(v.getContext(), 0,robotCurrentRow,4);
+                        SetArrowPicture(v.getContext(), 90,robotCurrentRow,5);
+                    }
+                    else if(timer <20){
+                        robotCurrentColumn++;
+                        ChangeCellColor(v.getContext(), Color.BLACK, 2, robotCurrentColumn);
+                    }
+                    else if(timer < 30){
+                        robotCurrentRow++;
+                        RemoveArrowPicture(v.getContext(), robotCurrentRow,4);
+                        RemoveArrowPicture(v.getContext(), robotCurrentRow,5);
+                    }
+                    else {
+                        robotCurrentColumn--;
+                        ChangeCellColor(v.getContext(), Color.WHITE, 2, robotCurrentColumn);
+                    }
+
+                    setRobotPosition(v.getContext(), robotCurrentColumn,robotCurrentRow);
+
+                    handler.postDelayed(this, 100);
+                }
+            };
+            handler.postDelayed(runnable, 100);
+        }
+    }
+
+    public static void GridMapBluetoothHandler(Activity activity, String readMessage){
+        switch (readMessage){
+            case "2"://unexplored
+                ChangeCellColor(activity,Color.RED,5,5);
+                return;
+            case "1"://obstacles
+                ChangeCellColor(activity,Color.WHITE,5,5);
+                return;
+            case "0"://no obstacles
+                ChangeCellColor(activity,Color.BLACK,5,5);
+                return;
+            case "-1"://current position
+                setRobotPosition(activity,5, 5 );
+                return;
+            case "-2"://start
+                //ChangeCellColor(activity,Color.RED,5,5);
+                return;
+            case "-3"://goal usually is top right)
+                //ChangeCellColor(activity,Color.RED,5,5);
+                return;
+            case "-4"://way point (android set this)
+                //ChangeCellColor(activity,Color.RED,5,5);
+                return;
+        }
     }
 }

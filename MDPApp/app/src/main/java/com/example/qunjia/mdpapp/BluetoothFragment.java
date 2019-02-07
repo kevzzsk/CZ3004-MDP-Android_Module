@@ -77,6 +77,16 @@ public class BluetoothFragment extends Fragment {
                     if (activity != null) {
                         TextView status_view = (TextView) activity.findViewById(R.id.statusWindowTV);
                         status_view.setText(status_view.getText() + readMessage + "\n");
+
+                        try
+                        {
+                            // checking valid integer using parseInt() method
+                            Integer.parseInt(readMessage);
+                            GridMapFragment.GridMapBluetoothHandler(activity, readMessage);
+                        }
+                        catch (NumberFormatException e)
+                        {/*do nothing*/}
+
                     }
                     break;
                 case HandlerConstants.MESSAGE_WRITE:
