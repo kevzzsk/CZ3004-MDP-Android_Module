@@ -38,7 +38,6 @@ interface HandlerConstants {
     int MESSAGE_FINISH_DISCOVERY = 7;
     int MESSAGE_DEVICE_BONDED = 8;
     int MESSAGE_TOAST = 9;
-    int MESSAGE_DEVICE_RECONNECT = 10;
 }
 
 interface ConnectionConstants {
@@ -62,6 +61,7 @@ public class BluetoothService {
     private final Handler mHandler;
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
+    private ReconnectThread mReconnectThread;
     private int mState;
     private int mNewState;
     private BluetoothDevice current_device;
@@ -75,14 +75,9 @@ public class BluetoothService {
                 // Discovery has found a device. Get the BluetoothDevice
                 // object and its info from the Intent.
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                if (reconnecting) {
-                    mHandler.obtainMessage(HandlerConstants.MESSAGE_DEVICE_RECONNECT, device).sendToTarget();
-                } else {
-                    mHandler.obtainMessage(HandlerConstants.MESSAGE_DEVICE_FOUND, device).sendToTarget();
-                }
-
+                mHandler.obtainMessage(HandlerConstants.MESSAGE_DEVICE_FOUND, device).sendToTarget();
             } else if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
-                mHandler.obtainMessage(HandlerConstants.MESSAGE_START_DISCOVERY, reconnecting).sendToTarget();
+                mHandler.obtainMessage(HandlerConstants.MESSAGE_START_DISCOVERY).sendToTarget();
             } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
                 mHandler.obtainMessage(HandlerConstants.MESSAGE_FINISH_DISCOVERY, reconnecting).sendToTarget();
             } else if (BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(action)) {
@@ -202,6 +197,10 @@ public class BluetoothService {
             mConnectedThread = null;
         }
 
+        if (mReconnectThread != null) {
+            mReconnectThread = null;
+        }
+
         // Start the thread to manage the connection and perform transmissions
         mConnectedThread = new ConnectedThread(socket, socketType);
         mConnectedThread.start();
@@ -227,6 +226,10 @@ public class BluetoothService {
             mConnectedThread = null;
         }
 
+        if (mReconnectThread != null) {
+            mReconnectThread = null;
+        }
+
         mState = ConnectionConstants.STATE_DISCONNECTED;
         updateUIStatus();
 
@@ -247,9 +250,13 @@ public class BluetoothService {
 
     private void connectionFailed() {
         // Send a failure message back to the Activity
-        mHandler.obtainMessage(HandlerConstants.MESSAGE_TOAST, "Unable to connect device").sendToTarget();
+//        mHandler.obtainMessage(HandlerConstants.MESSAGE_TOAST, "Unable to connect device").sendToTarget();
         mState = ConnectionConstants.STATE_DISCONNECTED;
-
+        reconnecting = true;
+        if (mReconnectThread == null) {
+            mReconnectThread = new ReconnectThread(current_device);
+            mReconnectThread.start();
+        }
         updateUIStatus();
     }
 
@@ -258,9 +265,10 @@ public class BluetoothService {
         mHandler.obtainMessage(HandlerConstants.MESSAGE_TOAST, "Device connection was lost").sendToTarget();
         mState = ConnectionConstants.STATE_DISCONNECTED;
         reconnecting = true;
-        ReconnectThread thread = new ReconnectThread();
-        thread.start();
-
+        if (mReconnectThread == null) {
+            mReconnectThread = new ReconnectThread(current_device);
+            mReconnectThread.start();
+        }
         updateUIStatus();
     }
 
@@ -269,18 +277,23 @@ public class BluetoothService {
      * for last connected device and reconnect with it.
      */
     private class ReconnectThread extends Thread {
-        ReconnectThread() {}
+        private final BluetoothDevice mmDevice;
+
+        ReconnectThread(BluetoothDevice device) {
+            mmDevice = device;
+        }
 
         public void run() {
             Log.i(BLUETOOTH_CONNECTION_TAG, "Attempting to reconnect");
-            while (mState != ConnectionConstants.STATE_CONNECTED) {
-                if (!mAdapter.isDiscovering()) {
-                    scan();
-                    try {
-                        sleep(3000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+            while (mState != ConnectionConstants.STATE_CONNECTED && mAdapter.isEnabled()) {
+                if (reconnecting) {
+                    connect(mmDevice, true);
+                }
+                reconnecting = false;
+                try {
+                    sleep(3000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
         }

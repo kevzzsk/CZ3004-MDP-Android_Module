@@ -116,27 +116,13 @@ public class BluetoothFragment extends Fragment {
                                 String.format("Found device (MAC address: %s)", deviceHardwareAddress));
                     }
                     break;
-                case HandlerConstants.MESSAGE_DEVICE_RECONNECT:
-                    BluetoothDevice device_ = (BluetoothDevice) msg.obj;
-                    if (activity != null) {
-                        String last_connected_MAC = getLastConnectedDevice(activity).first;
-                        if (mBluetoothAdapter.isEnabled() && last_connected_MAC != null &&
-                                last_connected_MAC.equals(device_.getAddress())) {
-                            mBluetoothService.setDevice(device_);
-                            accessBluetooth(REQUEST_CONNECT, getActivity());
-                        }
-                    }
-                    break;
                 case HandlerConstants.MESSAGE_START_DISCOVERY:
                     Log.d(BluetoothService.BLUETOOTH_SCAN_TAG, "Started Bluetooth scanning");
-                    boolean reconnecting = (boolean) msg.obj;
-                    if (!reconnecting) {
-                        mDataAdapter.clear();
-                        View view = getView();
-                        if (view != null) {
-                            getView().findViewById(R.id.bluetooth_scan_btn).setVisibility(View.GONE);
-                            getView().findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
-                        }
+                    mDataAdapter.clear();
+                    View view = getView();
+                    if (view != null) {
+                        getView().findViewById(R.id.bluetooth_scan_btn).setVisibility(View.GONE);
+                        getView().findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
                     }
                     break;
                 case HandlerConstants.MESSAGE_FINISH_DISCOVERY:
@@ -185,6 +171,14 @@ public class BluetoothFragment extends Fragment {
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         mBluetoothService = new BluetoothService(getContext(), mBluetoothAdapter, mHandler);
+
+        // Register for bluetooth scanning broadcast
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+        Activity activity = getActivity();
+        if (activity != null) {
+            activity.registerReceiver(mReceiver, filter);
+        }
     }
 
     @Override
@@ -207,37 +201,18 @@ public class BluetoothFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        Context context = getContext();
-        if (context != null) {
-            String mac_address = getLastConnectedDevice(getContext()).first;
-            if (mac_address != null && mBluetoothAdapter.isEnabled()) {
-                Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-                if (pairedDevices.size() > 0) {
-                    for (BluetoothDevice device : pairedDevices) {
-                        if (device.getAddress().equals(mac_address)) {
-                            Log.d(BluetoothService.BLUETOOTH_PAIR_TAG, "Detected paired device");
-                            if (mBluetoothService.getState() == ConnectionConstants.STATE_DISCONNECTED) {
-                                mBluetoothService.setDevice(device);
-                                accessBluetooth(REQUEST_CONNECT, getActivity());
-                            }
-                            return;
-                        }
-                    }
-                }
-
-                // device is unpaired
-                hideLastConnected();
-                saveLastConnectedDevice(context, null);
-                mBluetoothService.removeDevice();
-                accessBluetooth(REQUEST_SCAN, getActivity());
-            }
-        }
+        showLastConnected();
+        connectLastDevice();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mBluetoothService.stop(getActivity());
+        Activity activity = getActivity();
+        if (activity != null) {
+            activity.unregisterReceiver(mReceiver);
+            mBluetoothService.stop(activity);
+        }
     }
 
     // utility methods
@@ -249,13 +224,15 @@ public class BluetoothFragment extends Fragment {
     private void showLastConnected() {
         Activity activity = getActivity();
         if (activity != null) {
-            activity.findViewById(R.id.last_connected_device).setVisibility(View.VISIBLE);
             String display_text = getLastConnectedDevice(activity).first;
-            String device_name = getLastConnectedDevice(activity).second;
-            if (device_name != null) {
-                display_text = display_text + String.format(" (%s)", device_name);
+            if (display_text != null) {
+                activity.findViewById(R.id.last_connected_device).setVisibility(View.VISIBLE);
+                String device_name = getLastConnectedDevice(activity).second;
+                if (device_name != null) {
+                    display_text = display_text + String.format(" (%s)", device_name);
+                }
+                ((TextView) activity.findViewById(R.id.connected_device)).setText(display_text);
             }
-            ((TextView) activity.findViewById(R.id.connected_device)).setText(display_text);
         }
     }
 
@@ -352,8 +329,49 @@ public class BluetoothFragment extends Fragment {
         }
     }
 
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+
+            if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
+                int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.STATE_OFF);
+                if (state == BluetoothAdapter.STATE_ON) {
+                    connectLastDevice();
+                }
+            }
+        }
+    };
+
     static void sendMessage(String msg) {
         mBluetoothService.write(msg.getBytes());
+    }
+
+    private void connectLastDevice() {
+        Context context = getContext();
+        if (mBluetoothAdapter.isEnabled() && context != null) {
+            String mac_address = getLastConnectedDevice(context).first;
+            if (mac_address != null) {
+                Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+                if (pairedDevices.size() > 0) {
+                    for (BluetoothDevice device : pairedDevices) {
+                        if (device.getAddress().equals(mac_address)) {
+                            Log.d(BluetoothService.BLUETOOTH_PAIR_TAG, "Detected paired device");
+                            if (mBluetoothService.getState() == ConnectionConstants.STATE_DISCONNECTED) {
+                                mBluetoothService.setDevice(device);
+                                accessBluetooth(REQUEST_CONNECT, getActivity());
+                            }
+                            return;
+                        }
+                    }
+                }
+
+                // device is unpaired
+                hideLastConnected();
+                saveLastConnectedDevice(context, null);
+                mBluetoothService.removeDevice();
+                accessBluetooth(REQUEST_SCAN, getActivity());
+            }
+        }
     }
 
     // Manage shared preference
