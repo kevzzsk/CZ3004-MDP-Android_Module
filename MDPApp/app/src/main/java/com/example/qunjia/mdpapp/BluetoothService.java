@@ -330,7 +330,7 @@ public class BluetoothService {
             setName("ConnectThread" + mSocketType);
 
             // Always cancel discovery because it will slow down a connection
-            mAdapter.cancelDiscovery();
+//            mAdapter.cancelDiscovery();
 
             // Make a connection to the BluetoothSocket
             try {

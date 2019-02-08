@@ -128,12 +128,10 @@ public class BluetoothFragment extends Fragment {
                 case HandlerConstants.MESSAGE_FINISH_DISCOVERY:
                     Log.d(BluetoothService.BLUETOOTH_SCAN_TAG, "Finished Bluetooth scanning");
                     boolean reconnecting_ = (boolean) msg.obj;
-                    if (!reconnecting_) {
-                        View view_ = getView();
-                        if (view_ != null) {
-                            getView().findViewById(R.id.progressBar).setVisibility(View.GONE);
-                            getView().findViewById(R.id.bluetooth_scan_btn).setVisibility(View.VISIBLE);
-                        }
+                    View view_ = getView();
+                    if (view_ != null) {
+                        getView().findViewById(R.id.progressBar).setVisibility(View.GONE);
+                        getView().findViewById(R.id.bluetooth_scan_btn).setVisibility(View.VISIBLE);
                     }
                     break;
                 case HandlerConstants.MESSAGE_DEVICE_BONDED:
