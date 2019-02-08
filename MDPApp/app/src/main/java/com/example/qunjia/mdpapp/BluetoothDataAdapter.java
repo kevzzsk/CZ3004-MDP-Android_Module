@@ -49,6 +49,8 @@ public class BluetoothDataAdapter extends RecyclerView.Adapter<BluetoothDataAdap
         TextView textview = holder.view.findViewById(R.id.bluetooth_device_text);
         Button button = holder.view.findViewById(R.id.bluetooth_connect_btn);
         button.setTag(this.devices.get(position));
+        View progress_bar = holder.view.findViewById(R.id.bluetooth_progressBar_connect);
+        progress_bar.setTag(address);
         if (device_name != null) {
             textview.setText(String.format("%s (%s)", address, device_name));
         } else {

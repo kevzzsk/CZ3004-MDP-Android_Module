@@ -258,6 +258,9 @@ public class BluetoothFragment extends Fragment {
                 break;
             case R.id.bluetooth_connect_btn:
                 BluetoothDevice device = (BluetoothDevice) v.getTag();
+                v.setVisibility(View.GONE);
+                View progress_bar = getView().findViewWithTag((String) device.getAddress());
+                progress_bar.setVisibility(View.VISIBLE);
                 mBluetoothService.setDevice(device);
                 accessBluetooth(REQUEST_CONNECT, activity);
                 break;
@@ -277,7 +280,17 @@ public class BluetoothFragment extends Fragment {
      * Handle permissions and actions necessary for Bluetooth operations
      */
     private void accessBluetooth(int request_code, Activity activity) {
-        if (mBluetoothAdapter != null && mBluetoothAdapter.isEnabled()) {
+        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, request_code);
+            return;
+        } else if (mBluetoothAdapter != null && !mBluetoothAdapter.isEnabled()) {
+            Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(intent, request_code);
+            return;
+        }
+
+        if (mBluetoothAdapter != null) {
             switch (request_code) {
                 case REQUEST_SCAN:
                     mBluetoothService.scan();
@@ -286,16 +299,6 @@ public class BluetoothFragment extends Fragment {
                     this.connect();
                     break;
             }
-
-            return;
-        }
-
-        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, request_code);
-        } else if (mBluetoothAdapter != null && !mBluetoothAdapter.isEnabled()) {
-            Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(intent, request_code);
         }
     }
 
