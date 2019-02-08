@@ -251,23 +251,35 @@ public class BluetoothService {
     private void connectionFailed() {
         // Send a failure message back to the Activity
 //        mHandler.obtainMessage(HandlerConstants.MESSAGE_TOAST, "Unable to connect device").sendToTarget();
+        Log.d(BLUETOOTH_CONNECTION_TAG, "Connection failed");
         mState = ConnectionConstants.STATE_DISCONNECTED;
         reconnecting = true;
-        if (mReconnectThread == null) {
+        if (mReconnectThread == null && mAdapter.isEnabled()) {
             mReconnectThread = new ReconnectThread(current_device);
             mReconnectThread.start();
+        } else if (!mAdapter.isEnabled()){
+            if (mReconnectThread != null) {
+                mReconnectThread.cancel();
+            }
+            mReconnectThread = null;
         }
         updateUIStatus();
     }
 
     private void connectionLost() {
         // Send a failure message back to the Activity
+        Log.d(BLUETOOTH_CONNECTION_TAG, "Connection lost");
         mHandler.obtainMessage(HandlerConstants.MESSAGE_TOAST, "Device connection was lost").sendToTarget();
         mState = ConnectionConstants.STATE_DISCONNECTED;
         reconnecting = true;
-        if (mReconnectThread == null) {
+        if (mReconnectThread == null && mAdapter.isEnabled()) {
             mReconnectThread = new ReconnectThread(current_device);
             mReconnectThread.start();
+        } else if (!mAdapter.isEnabled()){
+            if (mReconnectThread != null) {
+                mReconnectThread.cancel();
+            }
+            mReconnectThread = null;
         }
         updateUIStatus();
     }
@@ -278,6 +290,7 @@ public class BluetoothService {
      */
     private class ReconnectThread extends Thread {
         private final BluetoothDevice mmDevice;
+        private boolean flag = true;
 
         ReconnectThread(BluetoothDevice device) {
             mmDevice = device;
@@ -285,7 +298,7 @@ public class BluetoothService {
 
         public void run() {
             Log.i(BLUETOOTH_CONNECTION_TAG, "Attempting to reconnect");
-            while (mState != ConnectionConstants.STATE_CONNECTED && mAdapter.isEnabled()) {
+            while (mState != ConnectionConstants.STATE_CONNECTED && mAdapter.isEnabled() && flag) {
                 if (reconnecting) {
                     connect(mmDevice, true);
                 }
@@ -296,6 +309,10 @@ public class BluetoothService {
                     e.printStackTrace();
                 }
             }
+        }
+
+        public void cancel() {
+            this.flag = false;
         }
     }
 
