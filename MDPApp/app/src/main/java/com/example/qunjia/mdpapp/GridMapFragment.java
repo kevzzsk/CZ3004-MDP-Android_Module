@@ -273,6 +273,10 @@ public class GridMapFragment extends Fragment {
             case R.id.extraBtn:
                 RobotMovingSimulator(v);
                 return;
+            case R.id.clearStatusWindowBtn:
+                TextView statusWindowTV = ((Activity) v.getContext()).findViewById(R.id.statusWindowTV);
+                statusWindowTV.setText("");
+                return;
            /* case R.id.
                 break;
             case R.id.

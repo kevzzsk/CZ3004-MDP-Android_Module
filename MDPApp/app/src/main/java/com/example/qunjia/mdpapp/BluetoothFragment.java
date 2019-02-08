@@ -2,6 +2,7 @@ package com.example.qunjia.mdpapp;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.*;
@@ -35,6 +36,7 @@ public class BluetoothFragment extends Fragment {
     // Intent request codes
     private static final int REQUEST_SCAN = 1;
     private static final int REQUEST_CONNECT = 2;
+    private static ProgressDialog progressDialog = null;
 
     // Widgets
     private BluetoothDataAdapter mDataAdapter;
@@ -137,6 +139,13 @@ public class BluetoothFragment extends Fragment {
                 case HandlerConstants.MESSAGE_DEVICE_BONDED:
                     BluetoothDevice bonded_device = (BluetoothDevice) msg.obj;
                     mDataAdapter.remove(bonded_device);
+
+                    if(progressDialog != null){
+                        progressDialog.dismiss();
+                        progressDialog = null;
+                    }
+
+
                     mBluetoothService.connect(bonded_device, true);
                     if (activity != null) {
                         saveLastConnectedDevice(activity, bonded_device);
@@ -257,8 +266,15 @@ public class BluetoothFragment extends Fragment {
             case R.id.bluetooth_connect_btn:
                 BluetoothDevice device = (BluetoothDevice) v.getTag();
                 v.setVisibility(View.GONE);
-                View progress_bar = getView().findViewWithTag((String) device.getAddress());
-                progress_bar.setVisibility(View.VISIBLE);
+
+                if (progressDialog == null){
+                    progressDialog = new ProgressDialog(v.getContext(), ProgressDialog.STYLE_SPINNER);
+                    progressDialog.setMessage("Loading");
+                    progressDialog.show();
+                }
+
+
+
                 mBluetoothService.setDevice(device);
                 accessBluetooth(REQUEST_CONNECT, activity);
                 break;
