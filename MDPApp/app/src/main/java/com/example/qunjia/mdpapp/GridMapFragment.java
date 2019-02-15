@@ -277,10 +277,12 @@ public class GridMapFragment extends Fragment {
                 TextView statusWindowTV = ((Activity) v.getContext()).findViewById(R.id.statusWindowTV);
                 statusWindowTV.setText("");
                 return;
-           /* case R.id.
-                break;
-            case R.id.
-                break;*/
+            case R.id.F1_btn:
+                ReconfigureFragment.F1BtnOnCLick(v.getContext());
+                return;
+            case R.id.F2_btn:
+                ReconfigureFragment.F2BtnOnCLick(v.getContext());
+                return;
         }
 
         Toast.makeText(v.getContext(), "to be updated", Toast.LENGTH_LONG).show();
