@@ -154,6 +154,12 @@ public class BluetoothFragment extends Fragment {
                 case HandlerConstants.MESSAGE_TOAST:
                     showToast((String) msg.obj, getContext());
                     break;
+                case HandlerConstants.MESSAGE_DEVICE_PAIR_CANCEL:
+                    if (progressDialog != null) {
+                        progressDialog.dismiss();
+                        progressDialog = null;
+                    }
+                    break;
             }
 
             return true;

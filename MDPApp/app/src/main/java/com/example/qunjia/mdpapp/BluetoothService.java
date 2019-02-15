@@ -38,6 +38,7 @@ interface HandlerConstants {
     int MESSAGE_FINISH_DISCOVERY = 7;
     int MESSAGE_DEVICE_BONDED = 8;
     int MESSAGE_TOAST = 9;
+    int MESSAGE_DEVICE_PAIR_CANCEL = 10;
 }
 
 interface ConnectionConstants {
@@ -85,6 +86,8 @@ public class BluetoothService {
                 if (bond_state == BOND_BONDED) {
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                     mHandler.obtainMessage(HandlerConstants.MESSAGE_DEVICE_BONDED, device).sendToTarget();
+                } else if (bond_state == BOND_NONE) {
+                    mHandler.obtainMessage(HandlerConstants.MESSAGE_DEVICE_PAIR_CANCEL).sendToTarget();
                 }
             }
         }
