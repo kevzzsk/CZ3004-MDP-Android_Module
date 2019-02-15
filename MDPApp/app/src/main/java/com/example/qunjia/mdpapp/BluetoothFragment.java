@@ -139,13 +139,7 @@ public class BluetoothFragment extends Fragment {
                 case HandlerConstants.MESSAGE_DEVICE_BONDED:
                     BluetoothDevice bonded_device = (BluetoothDevice) msg.obj;
                     mDataAdapter.remove(bonded_device);
-
-                    if(progressDialog != null){
-                        progressDialog.dismiss();
-                        progressDialog = null;
-                    }
-
-
+                    HideProgressDialog();
                     mBluetoothService.connect(bonded_device, true);
                     if (activity != null) {
                         saveLastConnectedDevice(activity, bonded_device);
@@ -272,14 +266,7 @@ public class BluetoothFragment extends Fragment {
             case R.id.bluetooth_connect_btn:
                 BluetoothDevice device = (BluetoothDevice) v.getTag();
                 v.setVisibility(View.GONE);
-
-                if (progressDialog == null){
-                    progressDialog = new ProgressDialog(v.getContext(), ProgressDialog.STYLE_SPINNER);
-                    progressDialog.setMessage("Loading");
-                    progressDialog.show();
-                }
-
-
+                ShowProgressDialog(v.getContext(), "Loading...");
 
                 mBluetoothService.setDevice(device);
                 accessBluetooth(REQUEST_CONNECT, activity);
@@ -415,5 +402,20 @@ public class BluetoothFragment extends Fragment {
         editor.putString("LAST_CONNECTED_NAME", name);
 
         editor.apply();
+    }
+
+    public static void ShowProgressDialog(Context context, String string){
+        if (progressDialog == null){
+            progressDialog = new ProgressDialog(context, ProgressDialog.STYLE_SPINNER);
+            progressDialog.setMessage(string);
+            progressDialog.show();
+        }
+    }
+
+    public static void HideProgressDialog(){
+        if(progressDialog != null){
+            progressDialog.dismiss();
+            progressDialog = null;
+        }
     }
 }

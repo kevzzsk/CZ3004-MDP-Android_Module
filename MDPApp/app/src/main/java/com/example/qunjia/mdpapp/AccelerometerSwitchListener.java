@@ -29,10 +29,19 @@ public class AccelerometerSwitchListener implements Switch.OnCheckedChangeListen
                     final int up_left = 225;
                     final int left = 270;
                     final int down_left = 315;
+                    String currentText;
+                    TextView statusWindow;
+                    ScrollView scrollView;
 
-                    TextView statusWindow = ((Activity) compoundButton.getContext()).findViewById(R.id.statusWindowTV);
-                    String currentText = statusWindow.getText().toString();
-                    ScrollView scrollView = ((Activity) compoundButton.getContext()).findViewById(R.id.scrollView);
+                    try {
+                        statusWindow = ((Activity) compoundButton.getContext()).findViewById(R.id.statusWindowTV);
+                        currentText = statusWindow.getText().toString();
+                        scrollView = ((Activity) compoundButton.getContext()).findViewById(R.id.scrollView);
+                    }
+                    catch (Exception e){
+                        //user switched fragment
+                        return;
+                    }
 
                     if((orientation < down + range || orientation > down_2 - range)&& currentOrientation != down){ 
                         statusWindow.setText(currentText + "\nDOWN");
@@ -41,43 +50,43 @@ public class AccelerometerSwitchListener implements Switch.OnCheckedChangeListen
                         scrollView.fullScroll(View.FOCUS_DOWN);
                     }
                     else if(orientation > left - range && orientation < left +range&& currentOrientation != left){
-                       statusWindow.setText(currentText + "\nLEFT");
+                        statusWindow.setText(currentText + "\nLEFT");
                         BluetoothFragment.sendMessage("LEFT");
                         currentOrientation = left;
                         scrollView.fullScroll(View.FOCUS_DOWN);
                     }
                     else if(orientation > right - range && orientation < right +range&& currentOrientation != right){
-                       statusWindow.setText(currentText + "\nRIGHT");
+                        statusWindow.setText(currentText + "\nRIGHT");
                         BluetoothFragment.sendMessage("RIGHT");
                         currentOrientation = right;
                         scrollView.fullScroll(View.FOCUS_DOWN);
                     }
                     else if(orientation > up - range && orientation < up +range&& currentOrientation != up){
-                       statusWindow.setText(currentText + "\nUP");
+                        statusWindow.setText(currentText + "\nUP");
                         BluetoothFragment.sendMessage("UP");
                         currentOrientation = up;
                         scrollView.fullScroll(View.FOCUS_DOWN);
                     }
-                    else if(orientation > down_left - range && orientation < down_left +range&& currentOrientation != down_left){
-                       statusWindow.setText(currentText + "\nDOWN_LEFT");
+                    else if(orientation > down_left - range && orientation < down_left +range&& currentOrientation != down_left){ 
+                        statusWindow.setText(currentText + "\nDOWN_LEFT");
                         BluetoothFragment.sendMessage("DOWN_LEFT");
                         currentOrientation = down_left;
                         scrollView.fullScroll(View.FOCUS_DOWN);
                     }
                     else if(orientation > up_left - range && orientation < up_left +range && currentOrientation != up_left){
-                       statusWindow.setText(currentText + "\nUP_LEFT");
+                        statusWindow.setText(currentText + "\nUP_LEFT");
                         BluetoothFragment.sendMessage("UP_LEFT");
                         currentOrientation = up_left;
                         scrollView.fullScroll(View.FOCUS_DOWN);
                     }
                     else if(orientation > down_right - range && orientation < down_right +range && currentOrientation != down_right){
-                       statusWindow.setText(currentText + "\nDOWN_RIGHT");
+                        statusWindow.setText(currentText + "\nDOWN_RIGHT");
                         BluetoothFragment.sendMessage("DOWN_RIGHT");
                         currentOrientation = down_right;
                         scrollView.fullScroll(View.FOCUS_DOWN);
                     }
                     else if(orientation > up_right - range && orientation < up_right +range&& currentOrientation != up_right){
-                       statusWindow.setText(currentText + "\nUP_RIGHT");
+                        statusWindow.setText(currentText + "\nUP_RIGHT");
                         BluetoothFragment.sendMessage("UP_RIGHT");
                         currentOrientation = up_right;
                         scrollView.fullScroll(View.FOCUS_DOWN);
