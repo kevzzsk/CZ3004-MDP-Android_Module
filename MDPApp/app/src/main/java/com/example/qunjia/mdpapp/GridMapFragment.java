@@ -21,13 +21,17 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.Switch;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.andretietz.android.controller.DirectionView;
 import com.andretietz.android.controller.InputView;
@@ -36,7 +40,12 @@ import java.io.InputStream;
 
 public class GridMapFragment extends Fragment {
 
-    private static int cellSize, robotCurrentRow = 18, robotCurrentColumn = 1;
+    public static final int MOVE_UP = 0, MOVE_DOWN = 1,
+            MOVE_LEFT = 2, MOVE_RIGHT = 3,
+            MOVE_UP_LEFT = 4, MOVE_UP_RIGHT = 5,
+            MOVE_DOWN_LEFT = 6, MOVE_DOWN_RIGHT = 7;
+
+    public static int cellSize, robotCurrentRow, robotCurrentColumn;
     private final static int cellMargin = 2, rowTotalNumber = 20, columnTotalNumber = 15;
 
     //temporary variables for testing
@@ -71,19 +80,24 @@ public class GridMapFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        SetupSwitchListener();
+        InitSwitchListener();
         CreateGridMap(getActivity());
         DirectionViewSetup(getActivity());
+        InitWaypointToggleBtnListener();
+        InitAutoManualToggleBtnListener();
         //
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                setRobotPosition(getActivity(), 1,18);
+                robotCurrentColumn = 1;
+                robotCurrentRow = 18;
+                setRobotPosition(getActivity(), false);
+
             }
         }, 200);
     }
 
-    private void SetupSwitchListener(){
+    private void InitSwitchListener(){
         Switch directionSwitch = (Switch) getActivity().findViewById(R.id.directionToggleBtn);
         directionSwitch.setOnCheckedChangeListener(new AccelerometerSwitchListener());
     }
@@ -127,7 +141,9 @@ public class GridMapFragment extends Fragment {
                                 int columnNumber = (int)view.getId()/1000;
                                 if(rowNumber>0 && rowNumber< rowTotalNumber-1 && columnNumber > 0 &&
                                         columnNumber < columnTotalNumber -1){
-                                    setRobotPosition(getActivity(),  columnNumber, rowNumber);
+                                    robotCurrentColumn = columnNumber;
+                                    robotCurrentRow = rowNumber;
+                                    setRobotPosition(getActivity(), true);
                                 }
 
                                 break;
@@ -150,61 +166,127 @@ public class GridMapFragment extends Fragment {
             @Override public void onInputEvent(View view, int buttons) {
                 switch (buttons&0xff) {
                     case DirectionView.DIRECTION_DOWN:
-                        Toast.makeText(context, "DOWN", Toast.LENGTH_LONG).show();
-                        BluetoothFragment.sendMessage("DOWN");
+                        MoveRobot(context, MOVE_DOWN);
                         break;
                     case DirectionView.DIRECTION_LEFT:
-                        Toast.makeText(context, "LEFT", Toast.LENGTH_LONG).show();
-                        BluetoothFragment.sendMessage("LEFT");
+                        MoveRobot(context, MOVE_LEFT);
                         break;
                     case DirectionView.DIRECTION_RIGHT:
-                        Toast.makeText(context, "RIGHT", Toast.LENGTH_LONG).show();
-                        BluetoothFragment.sendMessage("RIGHT");
+                        MoveRobot(context, MOVE_RIGHT);
                         break;
                     case DirectionView.DIRECTION_UP:
-                        Toast.makeText(context, "UP", Toast.LENGTH_LONG).show();
-                        BluetoothFragment.sendMessage("UP");
+                        MoveRobot(context, MOVE_UP);
                         break;
                     case DirectionView.DIRECTION_DOWN_LEFT:
-                        Toast.makeText(context, "DOWN_LEFT", Toast.LENGTH_LONG).show();
-                        BluetoothFragment.sendMessage("DOWN_LEFT");
+                        MoveRobot(context, MOVE_DOWN_LEFT);
                         break;
                     case DirectionView.DIRECTION_UP_LEFT:
-                        Toast.makeText(context, "UP_LEFT", Toast.LENGTH_LONG).show();
-                        BluetoothFragment.sendMessage("UP_LEFT");
+                        MoveRobot(context, MOVE_UP_LEFT);
                         break;
                     case DirectionView.DIRECTION_DOWN_RIGHT:
-                        Toast.makeText(context, "DOWN_RIGHT", Toast.LENGTH_LONG).show();
-                        BluetoothFragment.sendMessage("DOWN_RIGHT");
+                        MoveRobot(context, MOVE_DOWN_RIGHT);
                         break;
                     case DirectionView.DIRECTION_UP_RIGHT:
-                        Toast.makeText(context, "UP_RIGHT", Toast.LENGTH_LONG).show();
-                        BluetoothFragment.sendMessage("UP_RIGHT");
+                        MoveRobot(context, MOVE_UP_RIGHT);
                         break;
                 }
             }
         });
     }
 
-    @SuppressLint("ClickableViewAccessibility")
-    private static void setRobotPosition(Context context, int columnNumber, int rowNumber){
-        /*ChangeCellColor(context,Color.RED, rowNumber,columnNumber);
-        ChangeCellColor(context,Color.RED, rowNumber - 1,columnNumber);
-        ChangeCellColor(context,Color.RED, rowNumber + 1,columnNumber);
-        ChangeCellColor(context,Color.RED, rowNumber,columnNumber - 1);
-        ChangeCellColor(context,Color.RED, rowNumber,columnNumber + 1);
-        ChangeCellColor(context,Color.RED, rowNumber - 1,columnNumber - 1);
-        ChangeCellColor(context,Color.RED, rowNumber + 1,columnNumber + 1);
-        ChangeCellColor(context,Color.RED, rowNumber - 1,columnNumber + 1);
-        ChangeCellColor(context,Color.RED, rowNumber + 1,columnNumber - 1);*/
+    private void InitWaypointToggleBtnListener(){
+        ToggleButton toggleButton = getActivity().findViewById(R.id.waypointToggleBtn);
+        toggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                Activity activity = (Activity) compoundButton.getContext();
+                ToggleButton autoManualToggleBtn = activity.findViewById(R.id.autoManualToggleBtn);
+                Button updateBtn = activity.findViewById(R.id.updateBtn);
+                Button exploreBtn = activity.findViewById(R.id.exploreBtn);
+                Button fastestBtn = activity.findViewById(R.id.fastestBtn);
+                Button stopBtn = activity.findViewById(R.id.stopBtn);
 
+                if(compoundButton.isChecked()){
+                    setRobotPosition(compoundButton.getContext(), true);
+
+                    autoManualToggleBtn.setEnabled(false);
+                    DirectionViewSetEnabled(activity, false);
+                    updateBtn.setEnabled(false);
+                    exploreBtn.setEnabled(false);
+                    fastestBtn.setEnabled(false);
+                    stopBtn.setEnabled(false);
+
+                }else {
+                    setRobotPosition(compoundButton.getContext(), false);
+
+                    autoManualToggleBtn.setEnabled(true);
+                    DirectionViewSetEnabled(activity, true);
+                    updateBtn.setEnabled(true);
+                    exploreBtn.setEnabled(true);
+                    fastestBtn.setEnabled(true);
+                    stopBtn.setEnabled(true);
+                }
+            }
+        });
+    }
+
+    private void InitAutoManualToggleBtnListener(){
+        ToggleButton toggleButton = getActivity().findViewById(R.id.autoManualToggleBtn);
+        toggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                Activity activity = (Activity) compoundButton.getContext();
+                ToggleButton waypointToggleBtn = activity.findViewById(R.id.waypointToggleBtn);
+                Button updateBtn = activity.findViewById(R.id.updateBtn);
+                Button exploreBtn = activity.findViewById(R.id.exploreBtn);
+                Button fastestBtn = activity.findViewById(R.id.fastestBtn);
+                Button stopBtn = activity.findViewById(R.id.stopBtn);
+
+                if(compoundButton.isChecked()){
+                    setRobotPosition(compoundButton.getContext(), true);
+
+                    waypointToggleBtn.setEnabled(false);
+                    DirectionViewSetEnabled(activity, false);
+                    updateBtn.setEnabled(false);
+                    exploreBtn.setEnabled(false);
+                    fastestBtn.setEnabled(false);
+                    stopBtn.setEnabled(false);
+
+                }else {
+                    setRobotPosition(compoundButton.getContext(), false);
+
+                    waypointToggleBtn.setEnabled(true);
+                    DirectionViewSetEnabled(activity, true);
+                    updateBtn.setEnabled(true);
+                    exploreBtn.setEnabled(true);
+                    fastestBtn.setEnabled(true);
+                    stopBtn.setEnabled(true);
+                }
+            }
+        });
+    }
+
+    private static void DirectionViewSetEnabled(Activity activity, Boolean enabled){
+        DirectionView directionView = activity.findViewById(R.id.viewDirection);
+        DirectionView directionViewDisabled = activity.findViewById(R.id.viewDirectionDisabled);
+        if(enabled){
+            directionView.setVisibility(View.VISIBLE);
+            directionViewDisabled.setVisibility(View.GONE);
+        }else {
+            directionView.setVisibility(View.GONE);
+            directionViewDisabled.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private static void setRobotPosition(Context context, Boolean setRobotDragListener){
         RelativeLayout relativeLayout = ((Activity) context).findViewById(R.id.gridMapFragmentLayout);
         relativeLayout.removeAllViews();
 
         //create an transparent image view at robot new position
         final TextView textView = new TextView(((Activity) context));
         int[] location = new int[2];
-        ImageView robotCellPosition = ((Activity) context).findViewById(getImageViewID(columnNumber,rowNumber));
+        ImageView robotCellPosition = ((Activity) context).findViewById(getImageViewID(robotCurrentColumn,robotCurrentRow));
         robotCellPosition.getLocationOnScreen(location);
         int x = location[0] - cellSize - cellMargin;
         int y = location[1] - cellSize * 4 - (int) (cellMargin * 8.5);
@@ -216,16 +298,17 @@ public class GridMapFragment extends Fragment {
         textView.setText("ROBOT");
         textView.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
 
-        textView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                ClipData data = ClipData.newPlainText("","" );
-                View.DragShadowBuilder shadow = new View.DragShadowBuilder(textView);
-                view.startDrag(data,shadow,null, 0);
-                return false;
-            }
-        });
-
+        if(setRobotDragListener) {
+            textView.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View view, MotionEvent motionEvent) {
+                    ClipData data = ClipData.newPlainText("", "");
+                    View.DragShadowBuilder shadow = new View.DragShadowBuilder(textView);
+                    view.startDrag(data, shadow, null, 0);
+                    return false;
+                }
+            });
+        }
         relativeLayout.addView(textView);
 
 
@@ -318,7 +401,7 @@ public class GridMapFragment extends Fragment {
                         ChangeCellColor(v.getContext(), Color.WHITE, 2, robotCurrentColumn);
                     }
 
-                    setRobotPosition(v.getContext(), robotCurrentColumn,robotCurrentRow);
+                    setRobotPosition(v.getContext(), false);
 
                     handler.postDelayed(this, 100);
                 }
@@ -339,7 +422,7 @@ public class GridMapFragment extends Fragment {
                 ChangeCellColor(activity,Color.BLACK,5,5);
                 return;
             case "-1"://current position
-                setRobotPosition(activity,5, 5 );
+                setRobotPosition(activity, false);
                 return;
             case "-2"://start
                 //ChangeCellColor(activity,Color.RED,5,5);
@@ -351,5 +434,155 @@ public class GridMapFragment extends Fragment {
                 //ChangeCellColor(activity,Color.RED,5,5);
                 return;
         }
+    }
+
+    @SuppressLint("SetTextI18n")
+    public static void MoveRobot(Context context, int direction){
+
+        String currentText;
+        TextView statusWindow;
+        ScrollView scrollView;
+
+        try {
+            statusWindow = ((Activity) context).findViewById(R.id.statusWindowTV);
+            currentText = statusWindow.getText().toString();
+            scrollView = ((Activity) context).findViewById(R.id.scrollView);
+        }
+        catch (Exception e){
+            //user switched fragment
+            return;
+        }
+
+        switch (direction){
+            case MOVE_UP:
+                robotCurrentRow--;
+                if(CurrentOrientationInsideMap(context)){
+                    setRobotPosition(context, false);
+                    statusWindow.setText(currentText + "\nUP");
+                    BluetoothFragment.sendMessage("UP");
+                    scrollView.fullScroll(View.FOCUS_DOWN);
+                }
+                else {
+                    robotCurrentRow++;
+                }
+                break;
+            case MOVE_DOWN:
+                robotCurrentRow++;
+                if(CurrentOrientationInsideMap(context)){
+                    setRobotPosition(context, false);
+                    statusWindow.setText(currentText + "\nDOWN");
+                    BluetoothFragment.sendMessage("DOWN");
+                    scrollView.fullScroll(View.FOCUS_DOWN);
+                }
+                else {
+                    robotCurrentRow--;
+                }
+                break;
+            case MOVE_LEFT:
+                robotCurrentColumn--;
+                if(CurrentOrientationInsideMap(context)){
+                    setRobotPosition(context, false);
+                    statusWindow.setText(currentText + "\nLEFT");
+                    BluetoothFragment.sendMessage("LEFT");
+                    scrollView.fullScroll(View.FOCUS_DOWN);
+                }
+                else {
+                    robotCurrentColumn++;
+                }
+                break;
+            case MOVE_RIGHT:
+                statusWindow.setText(currentText + "\nRIGHT");
+                BluetoothFragment.sendMessage("RIGHT");
+                scrollView.fullScroll(View.FOCUS_DOWN);
+                robotCurrentColumn++;
+                if(CurrentOrientationInsideMap(context)){
+                    setRobotPosition(context, false);
+                }
+                else {
+                    robotCurrentColumn--;
+                }
+                break;
+            case MOVE_UP_LEFT:
+                robotCurrentColumn--;
+                robotCurrentRow--;
+                if(CurrentOrientationInsideMap(context)){
+                    setRobotPosition(context, false);
+                    statusWindow.setText(currentText + "\nUP_LEFT");
+                    BluetoothFragment.sendMessage("UP_LEFT");
+                    scrollView.fullScroll(View.FOCUS_DOWN);
+                }
+                else {
+                    robotCurrentColumn++;
+                    robotCurrentRow++;
+                }
+                break;
+            case MOVE_UP_RIGHT:
+                robotCurrentColumn++;
+                robotCurrentRow--;
+                if(CurrentOrientationInsideMap(context)){
+                    setRobotPosition(context, false);
+                    statusWindow.setText(currentText + "\nUP_RIGHT");
+                    BluetoothFragment.sendMessage("UP_RIGHT");
+                    scrollView.fullScroll(View.FOCUS_DOWN);
+                }
+                else {
+                    robotCurrentColumn--;
+                    robotCurrentRow++;
+                }
+                break;
+            case MOVE_DOWN_LEFT:
+                robotCurrentColumn--;
+                robotCurrentRow++;
+                if(CurrentOrientationInsideMap(context)){
+                    setRobotPosition(context, false);
+                    statusWindow.setText(currentText + "\nDOWN_LEFT");
+                    BluetoothFragment.sendMessage("DOWN_LEFT");
+                    scrollView.fullScroll(View.FOCUS_DOWN);
+                }
+                else {
+                    robotCurrentColumn++;
+                    robotCurrentRow--;
+                }
+                break;
+            case MOVE_DOWN_RIGHT:
+                robotCurrentColumn++;
+                robotCurrentRow++;
+                if(CurrentOrientationInsideMap(context)){
+                    setRobotPosition(context, false);
+                    statusWindow.setText(currentText + "\nDOWN_RIGHT");
+                    BluetoothFragment.sendMessage("DOWN_RIGHT");
+                    scrollView.fullScroll(View.FOCUS_DOWN);
+                }
+                else {
+                    robotCurrentColumn--;
+                    robotCurrentRow--;
+                }
+                break;
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private static Boolean CurrentOrientationInsideMap(Context context){
+        TextView statusWindow = ((Activity) context).findViewById(R.id.statusWindowTV);
+        String currentText = statusWindow.getText().toString();
+        ScrollView scrollView = ((Activity) context).findViewById(R.id.scrollView);
+        if(robotCurrentColumn == 0){
+            statusWindow.setText(currentText + "\nERROR: Robot cannot move left anymore");
+            scrollView.fullScroll(View.FOCUS_DOWN);
+            return false;
+        }else if(robotCurrentColumn == columnTotalNumber - 1){
+            statusWindow.setText(currentText + "\nERROR: Robot cannot move right anymore");
+            scrollView.fullScroll(View.FOCUS_DOWN);
+            return false;
+        }else if (robotCurrentRow == 0){
+            statusWindow.setText(currentText + "\nERROR: Robot cannot move up anymore");
+            scrollView.fullScroll(View.FOCUS_DOWN);
+            return false;
+        }else if(robotCurrentRow == rowTotalNumber - 1){
+            statusWindow.setText(currentText + "\nERROR: Robot cannot move down anymore");
+            scrollView.fullScroll(View.FOCUS_DOWN);
+            return false;
+        }
+        return true;
     }
 }
