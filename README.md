@@ -9,7 +9,7 @@
 | C.4  | Functional GUI that indicates the current status of the robot.                                                                     |:heavy_check_mark:|
 | C.5  | Functional GUI to enter Waypoint & Robot Start Coordinates.                                                                        |:heavy_check_mark:|
 | C.6  | 2D display of the maze environment and the robot’s location.                                                                       |:heavy_check_mark:|
-| C.7  | Functional GUI that provides the selection of Manual or Auto updating of graphical display of the maze environment.                ||
+| C.7  | Functional GUI that provides the selection of Manual or Auto updating of graphical display of the maze environment.                |:heavy_check_mark:|
 | C.8  | Functional GUI that provides two buttons that supports persistent user reconfigurable string commands to the robot.                |:heavy_check_mark:|
 | C.9  | Robust connectivity with Bluetooth device.                                                                                         |:heavy_check_mark:|
 | C.10 | Displaying Arrow Blocks in the Grid Map.                                                                                           |:heavy_check_mark:|
