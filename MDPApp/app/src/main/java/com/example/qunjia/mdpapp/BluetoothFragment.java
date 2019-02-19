@@ -265,7 +265,7 @@ public class BluetoothFragment extends Fragment {
             case R.id.bluetooth_connect_btn:
                 BluetoothDevice device = (BluetoothDevice) v.getTag();
                 ShowProgressDialog(v.getContext(), "Loading...");
-
+                mBluetoothAdapter.cancelDiscovery();
                 mBluetoothService.setDevice(device);
                 accessBluetooth(REQUEST_CONNECT, activity);
                 break;
