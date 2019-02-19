@@ -1,80 +1,98 @@
 package com.example.qunjia.mdpapp;
 
 import android.app.Activity;
+import android.content.Context;
 import android.view.OrientationEventListener;
+import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 
 import com.andretietz.android.controller.DirectionView;
 
 public class AccelerometerSwitchListener implements Switch.OnCheckedChangeListener {
-    
+
     private OrientationEventListener orientationEventListener = null;
     private static int currentOrientation;
-    
-    
-    
+
+
     @Override
     public void onCheckedChanged(final CompoundButton compoundButton, boolean b) {
-        if(orientationEventListener == null){
+        if (orientationEventListener == null) {
             orientationEventListener = new OrientationEventListener(compoundButton.getContext()) {
                 @Override
                 public void onOrientationChanged(int orientation) {
                     final int range = 20;
                     final int down = 0, down_2 = 360;
-                    final int down_right = 45;
                     final int right = 90;
-                    final int up_right = 135;
                     final int up = 180;
-                    final int up_left = 225;
                     final int left = 270;
-                    final int down_left = 315;
-                    
 
-                    if((orientation < down + range || orientation > down_2 - range)&& currentOrientation != down){
+                   
+
+                    if ((orientation < down + range || orientation > down_2 - range) && currentOrientation != down) {
                         GridMapFragment.MoveRobot(compoundButton.getContext(), GridMapFragment.MOVE_DOWN);
-                        currentOrientation =down;
-                    }
-                    else if(orientation > left - range && orientation < left +range&& currentOrientation != left){
+                        currentOrientation = down;
+                        SetVisibilityGone(((Activity) compoundButton.getContext()), GridMapFragment.MOVE_DOWN);
+                    } else if (orientation > left - range && orientation < left + range && currentOrientation != left) {
                         GridMapFragment.MoveRobot(compoundButton.getContext(), GridMapFragment.MOVE_LEFT);
                         currentOrientation = left;
-                    }
-                    else if(orientation > right - range && orientation < right +range&& currentOrientation != right){
+                        SetVisibilityGone(((Activity) compoundButton.getContext()), GridMapFragment.MOVE_LEFT);
+                    } else if (orientation > right - range && orientation < right + range && currentOrientation != right) {
                         GridMapFragment.MoveRobot(compoundButton.getContext(), GridMapFragment.MOVE_RIGHT);
                         currentOrientation = right;
-                    }
-                    else if(orientation > up - range && orientation < up +range&& currentOrientation != up){
+                        SetVisibilityGone(((Activity) compoundButton.getContext()), GridMapFragment.MOVE_RIGHT);
+                    } else if (orientation > up - range && orientation < up + range && currentOrientation != up) {
                         GridMapFragment.MoveRobot(compoundButton.getContext(), GridMapFragment.MOVE_UP);
                         currentOrientation = up;
-                    }
-                    else if(orientation > down_left - range && orientation < down_left +range&& currentOrientation != down_left){
-                        GridMapFragment.MoveRobot(compoundButton.getContext(), GridMapFragment.MOVE_DOWN_LEFT);
-                        currentOrientation = down_left;
-                    }
-                    else if(orientation > up_left - range && orientation < up_left +range && currentOrientation != up_left){
-                        GridMapFragment.MoveRobot(compoundButton.getContext(), GridMapFragment.MOVE_UP_LEFT);
-                        currentOrientation = up_left;
-                    }
-                    else if(orientation > down_right - range && orientation < down_right +range && currentOrientation != down_right){
-                        GridMapFragment.MoveRobot(compoundButton.getContext(), GridMapFragment.MOVE_DOWN_RIGHT);
-                        currentOrientation = down_right;
-                    }
-                    else if(orientation > up_right - range && orientation < up_right +range&& currentOrientation != up_right){
-                        GridMapFragment.MoveRobot(compoundButton.getContext(), GridMapFragment.MOVE_UP_RIGHT);
-                        currentOrientation = up_right;
+                        SetVisibilityGone(((Activity) compoundButton.getContext()), GridMapFragment.MOVE_UP);
+                    } else {
+                        //directionViewDisabled.setVisibility(View.VISIBLE);
                     }
                 }
             };
         }
 
-        if(compoundButton.isChecked()){
+        if (compoundButton.isChecked()) {
             orientationEventListener.enable();
-        }
-        else {
+            GridMapFragment.DirectionViewSetEnabled(((Activity) compoundButton.getContext()), false);
+        } else {
             orientationEventListener.disable();
             orientationEventListener = null;
+            SetVisibilityGone(((Activity) compoundButton.getContext()), 999);//set all visibility gone
+            GridMapFragment.DirectionViewSetEnabled(((Activity) compoundButton.getContext()), true);
         }
     }
     
-  
+    private void SetVisibilityGone(Activity activity, int DirectionVisible){
+        //DirectionView directionViewDisabled = activity.findViewById(R.id.viewDirectionDisabled);
+        DirectionView directionViewDisabledUp = activity.findViewById(R.id.viewDirectionDisabledUp);
+        DirectionView directionViewDisabledDown = activity.findViewById(R.id.viewDirectionDisabledDown);
+        DirectionView directionViewDisabledLeft = activity.findViewById(R.id.viewDirectionDisabledLeft);
+        DirectionView directionViewDisabledRight = activity.findViewById(R.id.viewDirectionDisabledRight);
+
+        //directionViewDisabled.setVisibility(View.GONE);
+        directionViewDisabledUp.setVisibility(View.GONE);
+        directionViewDisabledDown.setVisibility(View.GONE);
+        directionViewDisabledLeft.setVisibility(View.GONE);
+        directionViewDisabledRight.setVisibility(View.GONE);
+
+        switch (DirectionVisible){
+            case GridMapFragment.MOVE_DOWN:
+                directionViewDisabledDown.setVisibility(View.VISIBLE);
+                break;
+            case GridMapFragment.MOVE_UP:
+                directionViewDisabledUp.setVisibility(View.VISIBLE);
+                break;
+            case GridMapFragment.MOVE_LEFT:
+                directionViewDisabledLeft.setVisibility(View.VISIBLE);
+                break;
+            case GridMapFragment.MOVE_RIGHT:
+                directionViewDisabledRight.setVisibility(View.VISIBLE);
+                break;
+            default://set all gone
+                    break;
+        }
+    }
+
+
 }

@@ -41,9 +41,7 @@ import java.io.InputStream;
 public class GridMapFragment extends Fragment {
 
     public static final int MOVE_UP = 0, MOVE_DOWN = 1,
-            MOVE_LEFT = 2, MOVE_RIGHT = 3,
-            MOVE_UP_LEFT = 4, MOVE_UP_RIGHT = 5,
-            MOVE_DOWN_LEFT = 6, MOVE_DOWN_RIGHT = 7;
+            MOVE_LEFT = 2, MOVE_RIGHT = 3;
 
     public static int cellSize, robotCurrentRow, robotCurrentColumn;
     private final static int cellMargin = 2, rowTotalNumber = 20, columnTotalNumber = 15;
@@ -177,18 +175,6 @@ public class GridMapFragment extends Fragment {
                     case DirectionView.DIRECTION_UP:
                         MoveRobot(context, MOVE_UP);
                         break;
-                    case DirectionView.DIRECTION_DOWN_LEFT:
-                        MoveRobot(context, MOVE_DOWN_LEFT);
-                        break;
-                    case DirectionView.DIRECTION_UP_LEFT:
-                        MoveRobot(context, MOVE_UP_LEFT);
-                        break;
-                    case DirectionView.DIRECTION_DOWN_RIGHT:
-                        MoveRobot(context, MOVE_DOWN_RIGHT);
-                        break;
-                    case DirectionView.DIRECTION_UP_RIGHT:
-                        MoveRobot(context, MOVE_UP_RIGHT);
-                        break;
                 }
             }
         });
@@ -201,6 +187,7 @@ public class GridMapFragment extends Fragment {
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 Activity activity = (Activity) compoundButton.getContext();
                 ToggleButton autoManualToggleBtn = activity.findViewById(R.id.autoManualToggleBtn);
+                Switch accelerometerSwitch = activity.findViewById(R.id.directionToggleBtn);
                 Button updateBtn = activity.findViewById(R.id.updateBtn);
                 Button exploreBtn = activity.findViewById(R.id.exploreBtn);
                 Button fastestBtn = activity.findViewById(R.id.fastestBtn);
@@ -208,9 +195,10 @@ public class GridMapFragment extends Fragment {
 
                 if(compoundButton.isChecked()){
                     setRobotPosition(compoundButton.getContext(), true);
+                    DirectionViewSetEnabled(activity, false);
 
                     autoManualToggleBtn.setEnabled(false);
-                    DirectionViewSetEnabled(activity, false);
+                    accelerometerSwitch.setEnabled(false);
                     updateBtn.setEnabled(false);
                     exploreBtn.setEnabled(false);
                     fastestBtn.setEnabled(false);
@@ -218,9 +206,10 @@ public class GridMapFragment extends Fragment {
 
                 }else {
                     setRobotPosition(compoundButton.getContext(), false);
+                    DirectionViewSetEnabled(activity, true);
 
                     autoManualToggleBtn.setEnabled(true);
-                    DirectionViewSetEnabled(activity, true);
+                    accelerometerSwitch.setEnabled(true);
                     updateBtn.setEnabled(true);
                     exploreBtn.setEnabled(true);
                     fastestBtn.setEnabled(true);
@@ -236,45 +225,29 @@ public class GridMapFragment extends Fragment {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 Activity activity = (Activity) compoundButton.getContext();
-                ToggleButton waypointToggleBtn = activity.findViewById(R.id.waypointToggleBtn);
                 Button updateBtn = activity.findViewById(R.id.updateBtn);
-                Button exploreBtn = activity.findViewById(R.id.exploreBtn);
-                Button fastestBtn = activity.findViewById(R.id.fastestBtn);
-                Button stopBtn = activity.findViewById(R.id.stopBtn);
 
                 if(compoundButton.isChecked()){
-                    setRobotPosition(compoundButton.getContext(), true);
-
-                    waypointToggleBtn.setEnabled(false);
-                    DirectionViewSetEnabled(activity, false);
-                    updateBtn.setEnabled(false);
-                    exploreBtn.setEnabled(false);
-                    fastestBtn.setEnabled(false);
-                    stopBtn.setEnabled(false);
-
-                }else {
-                    setRobotPosition(compoundButton.getContext(), false);
-
-                    waypointToggleBtn.setEnabled(true);
-                    DirectionViewSetEnabled(activity, true);
                     updateBtn.setEnabled(true);
-                    exploreBtn.setEnabled(true);
-                    fastestBtn.setEnabled(true);
-                    stopBtn.setEnabled(true);
+                }else {
+                    updateBtn.setEnabled(false);
                 }
             }
         });
     }
 
-    private static void DirectionViewSetEnabled(Activity activity, Boolean enabled){
+    public static void DirectionViewSetEnabled(Activity activity, Boolean enabled){
         DirectionView directionView = activity.findViewById(R.id.viewDirection);
         DirectionView directionViewDisabled = activity.findViewById(R.id.viewDirectionDisabled);
+        View directionViewDisabledBlocker = activity.findViewById(R.id.viewDirectionDisabledBlocker);
         if(enabled){
             directionView.setVisibility(View.VISIBLE);
             directionViewDisabled.setVisibility(View.GONE);
+            directionViewDisabledBlocker.setVisibility(View.GONE);
         }else {
             directionView.setVisibility(View.GONE);
             directionViewDisabled.setVisibility(View.VISIBLE);
+            directionViewDisabledBlocker.setVisibility(View.VISIBLE);
         }
     }
 
@@ -353,18 +326,18 @@ public class GridMapFragment extends Fragment {
 
     public static void myClickMethod(final View v) {
         switch(v.getId()) {
-            case R.id.extraBtn:
-                RobotMovingSimulator(v);
-                return;
             case R.id.clearStatusWindowBtn:
                 TextView statusWindowTV = ((Activity) v.getContext()).findViewById(R.id.statusWindowTV);
                 statusWindowTV.setText("");
                 return;
+            case R.id.reconfigureBtn:
+                ReconfigureHandler.ReconfigBtnOnCLick(v.getContext());
+                return;
             case R.id.F1_btn:
-                ReconfigureFragment.F1BtnOnCLick(v.getContext());
+                ReconfigureHandler.F1BtnOnCLick(v.getContext());
                 return;
             case R.id.F2_btn:
-                ReconfigureFragment.F2BtnOnCLick(v.getContext());
+                ReconfigureHandler.F2BtnOnCLick(v.getContext());
                 return;
         }
 
@@ -500,62 +473,6 @@ public class GridMapFragment extends Fragment {
                 }
                 else {
                     robotCurrentColumn--;
-                }
-                break;
-            case MOVE_UP_LEFT:
-                robotCurrentColumn--;
-                robotCurrentRow--;
-                if(CurrentOrientationInsideMap(context)){
-                    setRobotPosition(context, false);
-                    statusWindow.setText(currentText + "\nUP_LEFT");
-                    BluetoothFragment.sendMessage("UP_LEFT");
-                    scrollView.fullScroll(View.FOCUS_DOWN);
-                }
-                else {
-                    robotCurrentColumn++;
-                    robotCurrentRow++;
-                }
-                break;
-            case MOVE_UP_RIGHT:
-                robotCurrentColumn++;
-                robotCurrentRow--;
-                if(CurrentOrientationInsideMap(context)){
-                    setRobotPosition(context, false);
-                    statusWindow.setText(currentText + "\nUP_RIGHT");
-                    BluetoothFragment.sendMessage("UP_RIGHT");
-                    scrollView.fullScroll(View.FOCUS_DOWN);
-                }
-                else {
-                    robotCurrentColumn--;
-                    robotCurrentRow++;
-                }
-                break;
-            case MOVE_DOWN_LEFT:
-                robotCurrentColumn--;
-                robotCurrentRow++;
-                if(CurrentOrientationInsideMap(context)){
-                    setRobotPosition(context, false);
-                    statusWindow.setText(currentText + "\nDOWN_LEFT");
-                    BluetoothFragment.sendMessage("DOWN_LEFT");
-                    scrollView.fullScroll(View.FOCUS_DOWN);
-                }
-                else {
-                    robotCurrentColumn++;
-                    robotCurrentRow--;
-                }
-                break;
-            case MOVE_DOWN_RIGHT:
-                robotCurrentColumn++;
-                robotCurrentRow++;
-                if(CurrentOrientationInsideMap(context)){
-                    setRobotPosition(context, false);
-                    statusWindow.setText(currentText + "\nDOWN_RIGHT");
-                    BluetoothFragment.sendMessage("DOWN_RIGHT");
-                    scrollView.fullScroll(View.FOCUS_DOWN);
-                }
-                else {
-                    robotCurrentColumn--;
-                    robotCurrentRow--;
                 }
                 break;
         }

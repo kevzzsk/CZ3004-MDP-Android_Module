@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
 
     public class MyPagerAdapter extends FragmentStatePagerAdapter {
 
-        private String[] TITLES = {"Grid Map", "Bluetooth", "Reconfigure"};
+        private String[] TITLES = {"Grid Map", "Bluetooth"};
 
         MyPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -58,14 +58,9 @@ public class MainActivity extends AppCompatActivity {
             switch (position){
                 case 0:  return GridMapFragment.newInstance(position);
                 case 1:  return BluetoothFragment.newInstance(position);
-                case 2:  return ReconfigureFragment.newInstance(position);
             }
             return null;
         }
-    }
-
-    public void ReconfigOnClickMethods(View v) {
-        ReconfigureFragment.myClickMethod(v);
     }
 
     public void GridMapOnClickMethods(View v) {

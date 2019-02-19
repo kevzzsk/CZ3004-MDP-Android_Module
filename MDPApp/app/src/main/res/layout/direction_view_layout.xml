@@ -5,20 +5,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <com.andretietz.android.controller.DirectionView
-        android:id="@+id/viewDirection"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        />
-
-    <com.andretietz.android.controller.DirectionView
         android:id="@+id/viewDirectionDisabled"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:button_d_normal="@drawable/direction_down_usual"
-        app:button_u_normal="@drawable/direction_up_usual"
-        app:button_l_normal="@drawable/direction_left_usual"
-        app:button_r_normal="@drawable/direction_right_usual"
+        app:button_d_normal="@drawable/direction_down_disabled"
+        app:button_u_normal="@drawable/direction_up_disabled"
+        app:button_l_normal="@drawable/direction_left_disabled"
+        app:button_r_normal="@drawable/direction_right_disabled"
+        app:inputBackground="@drawable/direction_background_disabled"
         />
 
     <com.andretietz.android.controller.DirectionView
@@ -27,79 +22,55 @@
         android:layout_height="wrap_content"
         android:visibility="gone"
         app:button_d_normal="@drawable/direction_down_pressed"
-        app:button_u_normal="@drawable/direction_up_usual"
-        app:button_l_normal="@drawable/direction_left_usual"
-        app:button_r_normal="@drawable/direction_right_usual"
+        app:button_u_normal="@drawable/direction_up_disabled"
+        app:button_l_normal="@drawable/direction_left_disabled"
+        app:button_r_normal="@drawable/direction_right_disabled"
+        app:inputBackground="@drawable/direction_background_disabled"
         />
     <com.andretietz.android.controller.DirectionView
         android:id="@+id/viewDirectionDisabledUp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:button_d_normal="@drawable/direction_down_usual"
+        app:button_d_normal="@drawable/direction_down_disabled"
         app:button_u_normal="@drawable/direction_up_pressed"
-        app:button_l_normal="@drawable/direction_left_usual"
-        app:button_r_normal="@drawable/direction_right_usual"
+        app:button_l_normal="@drawable/direction_left_disabled"
+        app:button_r_normal="@drawable/direction_right_disabled"
+        app:inputBackground="@drawable/direction_background_disabled"
         />
     <com.andretietz.android.controller.DirectionView
         android:id="@+id/viewDirectionDisabledLeft"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:button_d_normal="@drawable/direction_down_usual"
-        app:button_u_normal="@drawable/direction_up_usual"
+        app:button_d_normal="@drawable/direction_down_disabled"
+        app:button_u_normal="@drawable/direction_up_disabled"
         app:button_l_normal="@drawable/direction_left_pressed"
-        app:button_r_normal="@drawable/direction_right_usual"
+        app:button_r_normal="@drawable/direction_right_disabled"
+        app:inputBackground="@drawable/direction_background_disabled"
         />
     <com.andretietz.android.controller.DirectionView
         android:id="@+id/viewDirectionDisabledRight"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:button_d_normal="@drawable/direction_down_usual"
-        app:button_u_normal="@drawable/direction_up_usual"
-        app:button_l_normal="@drawable/direction_left_usual"
+        app:button_d_normal="@drawable/direction_down_disabled"
+        app:button_u_normal="@drawable/direction_up_disabled"
+        app:button_l_normal="@drawable/direction_left_disabled"
         app:button_r_normal="@drawable/direction_right_pressed"
-        />
-    <com.andretietz.android.controller.DirectionView
-        android:id="@+id/viewDirectionDisabledDownLeft"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:button_d_normal="@drawable/direction_down_pressed"
-        app:button_u_normal="@drawable/direction_up_usual"
-        app:button_l_normal="@drawable/direction_left_pressed"
-        app:button_r_normal="@drawable/direction_right_usual"
-        />
-    <com.andretietz.android.controller.DirectionView
-        android:id="@+id/viewDirectionDisabledDownRight"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:button_d_normal="@drawable/direction_down_pressed"
-        app:button_u_normal="@drawable/direction_up_usual"
-        app:button_l_normal="@drawable/direction_left_usual"
-        app:button_r_normal="@drawable/direction_right_pressed"
-        />
-    <com.andretietz.android.controller.DirectionView
-        android:id="@+id/viewDirectionDisabledUpLeft"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:button_d_normal="@drawable/direction_down_usual"
-        app:button_u_normal="@drawable/direction_up_pressed"
-        app:button_l_normal="@drawable/direction_left_pressed"
-        app:button_r_normal="@drawable/direction_right_usual"
-        />
-    <com.andretietz.android.controller.DirectionView
-        android:id="@+id/viewDirectionDisabledUpRight"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:button_d_normal="@drawable/direction_down_usual"
-        app:button_u_normal="@drawable/direction_up_pressed"
-        app:button_l_normal="@drawable/direction_left_usual"
-        app:button_r_normal="@drawable/direction_right_pressed"
+        app:inputBackground="@drawable/direction_background_disabled"
         />
 
+    <Button
+        android:id="@+id/viewDirectionDisabledBlocker"
+        android:visibility="gone"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:background="#00000000"/>
+
+    <com.andretietz.android.controller.DirectionView
+        android:id="@+id/viewDirection"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
 </RelativeLayout>

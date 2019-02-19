@@ -196,10 +196,10 @@
             android:onClick="GridMapOnClickMethods" />
 
         <Button
-            android:id="@+id/extraBtn"
+            android:id="@+id/reconfigureBtn"
             android:layout_width="120dp"
             android:layout_height="60dp"
-            android:text="extra"
+            android:text="reconfigure"
             android:onClick="GridMapOnClickMethods"
             android:layout_below="@+id/stopBtn"
             android:layout_toEndOf="@+id/F2_btn"
