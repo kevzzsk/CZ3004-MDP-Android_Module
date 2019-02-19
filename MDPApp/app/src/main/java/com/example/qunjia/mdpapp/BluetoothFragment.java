@@ -138,20 +138,17 @@ public class BluetoothFragment extends Fragment {
                 case HandlerConstants.MESSAGE_DEVICE_BONDED:
                     BluetoothDevice bonded_device = (BluetoothDevice) msg.obj;
                     mDataAdapter.remove(bonded_device);
-                    HideProgressDialog();
                     mBluetoothService.connect(bonded_device, true);
                     if (activity != null) {
                         saveLastConnectedDevice(activity, bonded_device);
                     }
+                    HideProgressDialog();
                     break;
                 case HandlerConstants.MESSAGE_TOAST:
                     showToast((String) msg.obj, getContext());
                     break;
                 case HandlerConstants.MESSAGE_DEVICE_PAIR_CANCEL:
-                    if (progressDialog != null) {
-                        progressDialog.dismiss();
-                        progressDialog = null;
-                    }
+                    HideProgressDialog();
                     break;
             }
 
@@ -264,7 +261,12 @@ public class BluetoothFragment extends Fragment {
                 break;
             case R.id.bluetooth_connect_btn:
                 BluetoothDevice device = (BluetoothDevice) v.getTag();
-                ShowProgressDialog(v.getContext(), "Loading...");
+                if (device.getBondState() != BOND_BONDED) {
+                    ShowProgressDialog(v.getContext(), "Loading...");
+                } else {
+                    mDataAdapter.remove(device);
+                    showToast("Switched to another device", getContext());
+                }
                 mBluetoothAdapter.cancelDiscovery();
                 mBluetoothService.setDevice(device);
                 accessBluetooth(REQUEST_CONNECT, activity);
@@ -277,7 +279,11 @@ public class BluetoothFragment extends Fragment {
         if (device.getBondState() != BOND_BONDED) {
             mBluetoothService.pair(device);
         } else {
-            mBluetoothService.connect(device, true);
+            Context context = getContext();
+            if (context != null) {
+                saveLastConnectedDevice(context, device);
+                mBluetoothService.connect(device, true);
+            }
         }
     }
 
