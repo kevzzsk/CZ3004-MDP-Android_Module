@@ -204,7 +204,8 @@
             android:layout_below="@+id/stopBtn"
             android:layout_toEndOf="@+id/F2_btn"
             android:layout_toRightOf="@+id/F2_btn"
-            android:layout_marginTop="3dp" />
+            android:layout_marginTop="3dp"
+            android:textSize="10sp" />
 
         <RelativeLayout
             android:id="@+id/directionSwitchLayout"
