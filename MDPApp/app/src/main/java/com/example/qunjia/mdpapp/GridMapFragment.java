@@ -95,13 +95,13 @@ public class GridMapFragment extends Fragment {
         }, 200);
     }
 
-    private void InitSwitchListener(){
+    private void InitSwitchListener() {
         Switch directionSwitch = (Switch) getActivity().findViewById(R.id.directionToggleBtn);
         directionSwitch.setOnCheckedChangeListener(new AccelerometerSwitchListener());
     }
 
-    private void CreateGridMap (final Context context){
-        TableLayout tbl= ((Activity) context).findViewById(R.id.gridMap);
+    private void CreateGridMap(final Context context) {
+        TableLayout tbl = ((Activity) context).findViewById(R.id.gridMap);
 
         //Get cell size
         Display display = ((Activity) context).getWindowManager().getDefaultDisplay();
@@ -111,34 +111,34 @@ public class GridMapFragment extends Fragment {
         int cellWidth = (int) (gridMapWidth / columnTotalNumber);
         float gridMapHeight = (float) (size.y * 0.65);
         int cellHeight = (int) (gridMapHeight / rowTotalNumber);
-        if(cellHeight<cellWidth) cellSize = cellHeight;
+        if (cellHeight < cellWidth) cellSize = cellHeight;
         else cellSize = cellWidth;
 
         //Create Grid Map
-        for(int i=0; i<rowTotalNumber; i++) {
+        for (int i = 0; i < rowTotalNumber; i++) {
             //create a new tableRow with imageViews and add into tableLayout
             final TableRow row = new TableRow(context);
             row.setBackgroundColor(Color.BLACK);
-            for(int j=0; j<columnTotalNumber; j++) {
+            for (int j = 0; j < columnTotalNumber; j++) {
                 //create new imageView and add into row
                 final ImageView imageView = new ImageView(context);
                 TableRow.LayoutParams layoutParams = new TableRow.LayoutParams(
                         cellSize, cellSize);
-                layoutParams.setMargins(0,0,cellMargin,cellMargin);
+                layoutParams.setMargins(0, 0, cellMargin, cellMargin);
                 imageView.setLayoutParams(layoutParams);
                 imageView.setBackgroundColor(Color.WHITE);
-                imageView.setId(getImageViewID(j,i));
+                imageView.setId(getImageViewID(j, i));
                 imageView.setOnDragListener(new View.OnDragListener() {
                     @Override
                     public boolean onDrag(View view, DragEvent dragEvent) {
                         final int action = dragEvent.getAction();
 
-                        switch (action){
+                        switch (action) {
                             case DragEvent.ACTION_DROP:
-                                int rowNumber = (int) view.getId() %1000;
-                                int columnNumber = (int)view.getId()/1000;
-                                if(rowNumber>0 && rowNumber< rowTotalNumber-1 && columnNumber > 0 &&
-                                        columnNumber < columnTotalNumber -1){
+                                int rowNumber = (int) view.getId() % 1000;
+                                int columnNumber = (int) view.getId() / 1000;
+                                if (rowNumber > 0 && rowNumber < rowTotalNumber - 1 && columnNumber > 0 &&
+                                        columnNumber < columnTotalNumber - 1) {
                                     robotCurrentColumn = columnNumber;
                                     robotCurrentRow = rowNumber;
                                     setRobotPosition(getActivity(), true);
@@ -158,11 +158,12 @@ public class GridMapFragment extends Fragment {
         }
     }
 
-    private void DirectionViewSetup(final Context context){
+    private void DirectionViewSetup(final Context context) {
         DirectionView directionView = (DirectionView) ((Activity) context).findViewById(R.id.viewDirection);
         directionView.setOnButtonListener(new InputView.InputEventListener() {
-            @Override public void onInputEvent(View view, int buttons) {
-                switch (buttons&0xff) {
+            @Override
+            public void onInputEvent(View view, int buttons) {
+                switch (buttons & 0xff) {
                     case DirectionView.DIRECTION_DOWN:
                         MoveRobot(context, MOVE_DOWN);
                         break;
@@ -180,7 +181,7 @@ public class GridMapFragment extends Fragment {
         });
     }
 
-    private void InitWaypointToggleBtnListener(){
+    private void InitWaypointToggleBtnListener() {
         ToggleButton toggleButton = getActivity().findViewById(R.id.waypointToggleBtn);
         toggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -193,7 +194,7 @@ public class GridMapFragment extends Fragment {
                 Button fastestBtn = activity.findViewById(R.id.fastestBtn);
                 Button stopBtn = activity.findViewById(R.id.stopBtn);
 
-                if(compoundButton.isChecked()){
+                if (compoundButton.isChecked()) {
                     setRobotPosition(compoundButton.getContext(), true);
                     DirectionViewSetEnabled(activity, false);
 
@@ -204,7 +205,7 @@ public class GridMapFragment extends Fragment {
                     fastestBtn.setEnabled(false);
                     stopBtn.setEnabled(false);
 
-                }else {
+                } else {
                     setRobotPosition(compoundButton.getContext(), false);
                     DirectionViewSetEnabled(activity, true);
 
@@ -219,7 +220,7 @@ public class GridMapFragment extends Fragment {
         });
     }
 
-    private void InitAutoManualToggleBtnListener(){
+    private void InitAutoManualToggleBtnListener() {
         ToggleButton toggleButton = getActivity().findViewById(R.id.autoManualToggleBtn);
         toggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -227,24 +228,24 @@ public class GridMapFragment extends Fragment {
                 Activity activity = (Activity) compoundButton.getContext();
                 Button updateBtn = activity.findViewById(R.id.updateBtn);
 
-                if(compoundButton.isChecked()){
+                if (compoundButton.isChecked()) {
                     updateBtn.setEnabled(true);
-                }else {
+                } else {
                     updateBtn.setEnabled(false);
                 }
             }
         });
     }
 
-    public static void DirectionViewSetEnabled(Activity activity, Boolean enabled){
+    public static void DirectionViewSetEnabled(Activity activity, Boolean enabled) {
         DirectionView directionView = activity.findViewById(R.id.viewDirection);
         DirectionView directionViewDisabled = activity.findViewById(R.id.viewDirectionDisabled);
         View directionViewDisabledBlocker = activity.findViewById(R.id.viewDirectionDisabledBlocker);
-        if(enabled){
+        if (enabled) {
             directionView.setVisibility(View.VISIBLE);
             directionViewDisabled.setVisibility(View.GONE);
             directionViewDisabledBlocker.setVisibility(View.GONE);
-        }else {
+        } else {
             directionView.setVisibility(View.GONE);
             directionViewDisabled.setVisibility(View.VISIBLE);
             directionViewDisabledBlocker.setVisibility(View.VISIBLE);
@@ -252,26 +253,26 @@ public class GridMapFragment extends Fragment {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private static void setRobotPosition(Context context, Boolean setRobotDragListener){
+    private static void setRobotPosition(Context context, Boolean setRobotDragListener) {
         RelativeLayout relativeLayout = ((Activity) context).findViewById(R.id.gridMapFragmentLayout);
         relativeLayout.removeAllViews();
 
         //create an transparent image view at robot new position
         final TextView textView = new TextView(((Activity) context));
         int[] location = new int[2];
-        ImageView robotCellPosition = ((Activity) context).findViewById(getImageViewID(robotCurrentColumn,robotCurrentRow));
+        ImageView robotCellPosition = ((Activity) context).findViewById(getImageViewID(robotCurrentColumn, robotCurrentRow));
         robotCellPosition.getLocationOnScreen(location);
         int x = location[0] - cellSize - cellMargin;
         int y = location[1] - cellSize * 4 - (int) (cellMargin * 8.5);
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
-                cellSize*3 + 2 * cellMargin, cellSize*3 + 3 * cellMargin);
-        params.setMargins(x, y,0,0);
+                cellSize * 3 + 2 * cellMargin, cellSize * 3 + 3 * cellMargin);
+        params.setMargins(x, y, 0, 0);
         textView.setLayoutParams(params);
         textView.setBackgroundColor(Color.BLUE);
         textView.setText("ROBOT");
         textView.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
 
-        if(setRobotDragListener) {
+        if (setRobotDragListener) {
             textView.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -287,21 +288,21 @@ public class GridMapFragment extends Fragment {
 
     }
 
-    private static int getImageViewID(int columnNumber, int rowNumber){
+    private static int getImageViewID(int columnNumber, int rowNumber) {
         return columnNumber * 1000 + rowNumber;
     }
 
-    public static void ChangeCellColor(Context context,int color, int rowNumber, int columnNumber){
-        try{
+    public static void ChangeCellColor(Context context, int color, int rowNumber, int columnNumber) {
+        try {
             ImageView imageView = ((Activity) context).findViewById(getImageViewID(columnNumber, rowNumber));
             imageView.setBackgroundColor(color);
-        }catch (Exception e){
+        } catch (Exception e) {
             Toast.makeText(context, "Change Cell Color Error at row " + rowNumber + " col " + columnNumber, Toast.LENGTH_LONG).show();
         }
     }
 
-    public static void SetArrowPicture(Context context, int rotationAngle,int rowNumber, int columnNumber){
-        try{
+    public static void SetArrowPicture(Context context, int rotationAngle, int rowNumber, int columnNumber) {
+        try {
             ImageView imageView = ((Activity) context).findViewById(getImageViewID(columnNumber, rowNumber));
             AssetManager assetManager = context.getAssets();
 
@@ -310,22 +311,22 @@ public class GridMapFragment extends Fragment {
             imageView.setImageBitmap(bitmap);
             imageView.setRotation(rotationAngle);
             istr.close();
-        }catch (Exception e){
+        } catch (Exception e) {
             Toast.makeText(context, "Set arrow Error at row " + rowNumber + " col " + columnNumber, Toast.LENGTH_LONG).show();
         }
     }
 
-    public static void RemoveArrowPicture(Context context, int rowNumber, int columnNumber){
-        try{
+    public static void RemoveArrowPicture(Context context, int rowNumber, int columnNumber) {
+        try {
             ImageView imageView = ((Activity) context).findViewById(getImageViewID(columnNumber, rowNumber));
             imageView.setImageBitmap(null);
-        }catch (Exception e){
+        } catch (Exception e) {
             Toast.makeText(context, "Set arrow Error at row " + rowNumber + " col " + columnNumber, Toast.LENGTH_LONG).show();
         }
     }
 
     public static void myClickMethod(final View v) {
-        switch(v.getId()) {
+        switch (v.getId()) {
             case R.id.clearStatusWindowBtn:
                 TextView statusWindowTV = ((Activity) v.getContext()).findViewById(R.id.statusWindowTV);
                 statusWindowTV.setText("");
@@ -344,32 +345,28 @@ public class GridMapFragment extends Fragment {
         Toast.makeText(v.getContext(), "to be updated", Toast.LENGTH_LONG).show();
     }
 
-    private static void RobotMovingSimulator(final View v){
-        if(handler.hasMessages(0)){
+    private static void RobotMovingSimulator(final View v) {
+        if (handler.hasMessages(0)) {
             handler.removeCallbacks(runnable);
-        }
-        else {
+        } else {
             runnable = new Runnable() {
                 @Override
                 public void run() {
                     timer++;
                     timer = timer % 40;
 
-                    if(timer<10){
+                    if (timer < 10) {
                         robotCurrentRow--;
-                        SetArrowPicture(v.getContext(), 0,robotCurrentRow,4);
-                        SetArrowPicture(v.getContext(), 90,robotCurrentRow,5);
-                    }
-                    else if(timer <20){
+                        SetArrowPicture(v.getContext(), 0, robotCurrentRow, 4);
+                        SetArrowPicture(v.getContext(), 90, robotCurrentRow, 5);
+                    } else if (timer < 20) {
                         robotCurrentColumn++;
                         ChangeCellColor(v.getContext(), Color.BLACK, 2, robotCurrentColumn);
-                    }
-                    else if(timer < 30){
+                    } else if (timer < 30) {
                         robotCurrentRow++;
-                        RemoveArrowPicture(v.getContext(), robotCurrentRow,4);
-                        RemoveArrowPicture(v.getContext(), robotCurrentRow,5);
-                    }
-                    else {
+                        RemoveArrowPicture(v.getContext(), robotCurrentRow, 4);
+                        RemoveArrowPicture(v.getContext(), robotCurrentRow, 5);
+                    } else {
                         robotCurrentColumn--;
                         ChangeCellColor(v.getContext(), Color.WHITE, 2, robotCurrentColumn);
                     }
@@ -383,16 +380,16 @@ public class GridMapFragment extends Fragment {
         }
     }
 
-    public static void GridMapBluetoothHandler(Activity activity, String readMessage){
-        switch (readMessage){
+    public static void GridMapBluetoothHandler(Activity activity, String readMessage) {
+        switch (readMessage) {
             case "2"://unexplored
-                ChangeCellColor(activity,Color.RED,5,5);
+                ChangeCellColor(activity, Color.RED, 5, 5);
                 return;
             case "1"://obstacles
-                ChangeCellColor(activity,Color.WHITE,5,5);
+                ChangeCellColor(activity, Color.WHITE, 5, 5);
                 return;
             case "0"://no obstacles
-                ChangeCellColor(activity,Color.BLACK,5,5);
+                ChangeCellColor(activity, Color.BLACK, 5, 5);
                 return;
             case "-1"://current position
                 setRobotPosition(activity, false);
@@ -410,68 +407,45 @@ public class GridMapFragment extends Fragment {
     }
 
     @SuppressLint("SetTextI18n")
-    public static void MoveRobot(Context context, int direction){
-
-        String currentText;
-        TextView statusWindow;
-        ScrollView scrollView;
-
-        try {
-            statusWindow = ((Activity) context).findViewById(R.id.statusWindowTV);
-            currentText = statusWindow.getText().toString();
-            scrollView = ((Activity) context).findViewById(R.id.scrollView);
-        }
-        catch (Exception e){
-            //user switched fragment
-            return;
-        }
-
-        switch (direction){
+    public static void MoveRobot(Context context, int direction) {
+        switch (direction) {
             case MOVE_UP:
                 robotCurrentRow--;
-                if(CurrentOrientationInsideMap(context)){
+                if (CurrentOrientationInsideMap(context)) {
                     setRobotPosition(context, false);
-                    statusWindow.setText(currentText + "\nUP");
+                    AddTextToStatusWindow((Activity) context, "UP");
                     BluetoothFragment.sendMessage("UP");
-                    scrollView.fullScroll(View.FOCUS_DOWN);
-                }
-                else {
+                } else {
                     robotCurrentRow++;
                 }
                 break;
             case MOVE_DOWN:
                 robotCurrentRow++;
-                if(CurrentOrientationInsideMap(context)){
+                if (CurrentOrientationInsideMap(context)) {
                     setRobotPosition(context, false);
-                    statusWindow.setText(currentText + "\nDOWN");
+                    AddTextToStatusWindow((Activity) context, "DOWN");
                     BluetoothFragment.sendMessage("DOWN");
-                    scrollView.fullScroll(View.FOCUS_DOWN);
-                }
-                else {
+                } else {
                     robotCurrentRow--;
                 }
                 break;
             case MOVE_LEFT:
                 robotCurrentColumn--;
-                if(CurrentOrientationInsideMap(context)){
+                if (CurrentOrientationInsideMap(context)) {
                     setRobotPosition(context, false);
-                    statusWindow.setText(currentText + "\nLEFT");
+                    AddTextToStatusWindow((Activity) context, "LEFT");
                     BluetoothFragment.sendMessage("LEFT");
-                    scrollView.fullScroll(View.FOCUS_DOWN);
-                }
-                else {
+                } else {
                     robotCurrentColumn++;
                 }
                 break;
             case MOVE_RIGHT:
-                statusWindow.setText(currentText + "\nRIGHT");
-                BluetoothFragment.sendMessage("RIGHT");
-                scrollView.fullScroll(View.FOCUS_DOWN);
                 robotCurrentColumn++;
-                if(CurrentOrientationInsideMap(context)){
+                if (CurrentOrientationInsideMap(context)) {
                     setRobotPosition(context, false);
-                }
-                else {
+                    AddTextToStatusWindow((Activity) context, "RIGHT");
+                    BluetoothFragment.sendMessage("RIGHT");
+                } else {
                     robotCurrentColumn--;
                 }
                 break;
@@ -479,27 +453,39 @@ public class GridMapFragment extends Fragment {
     }
 
     @SuppressLint("SetTextI18n")
-    private static Boolean CurrentOrientationInsideMap(Context context){
-        TextView statusWindow = ((Activity) context).findViewById(R.id.statusWindowTV);
-        String currentText = statusWindow.getText().toString();
-        ScrollView scrollView = ((Activity) context).findViewById(R.id.scrollView);
-        if(robotCurrentColumn == 0){
-            statusWindow.setText(currentText + "\nERROR: Robot cannot move left anymore");
-            scrollView.fullScroll(View.FOCUS_DOWN);
+    private static Boolean CurrentOrientationInsideMap(Context context) {
+        if (robotCurrentColumn == 0) {
+            AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move left anymore\n");
             return false;
-        }else if(robotCurrentColumn == columnTotalNumber - 1){
-            statusWindow.setText(currentText + "\nERROR: Robot cannot move right anymore");
-            scrollView.fullScroll(View.FOCUS_DOWN);
+        } else if (robotCurrentColumn == columnTotalNumber - 1) {
+            AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move right anymore\n");
             return false;
-        }else if (robotCurrentRow == 0){
-            statusWindow.setText(currentText + "\nERROR: Robot cannot move up anymore");
-            scrollView.fullScroll(View.FOCUS_DOWN);
+        } else if (robotCurrentRow == 0) {
+            AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move up anymore\n");
             return false;
-        }else if(robotCurrentRow == rowTotalNumber - 1){
-            statusWindow.setText(currentText + "\nERROR: Robot cannot move down anymore");
-            scrollView.fullScroll(View.FOCUS_DOWN);
+        } else if (robotCurrentRow == rowTotalNumber - 1) {
+            AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move up anymore\n");
             return false;
         }
         return true;
+    }
+
+    public static void AddTextToStatusWindow(Activity activity, String stringToAdd) {
+        String currentText;
+        TextView statusWindow;
+        ScrollView scrollView;
+
+        try {
+            scrollView = activity.findViewById(R.id.scrollView);
+            statusWindow = activity.findViewById(R.id.statusWindowTV);
+            currentText = statusWindow.getText().toString();
+            currentText = currentText.replace("\n\n", "\n");
+        } catch (Exception e) {
+            //user switched fragment
+            return;
+        }
+
+        statusWindow.setText(currentText + stringToAdd + "\n");
+        scrollView.fullScroll(View.FOCUS_DOWN);
     }
 }

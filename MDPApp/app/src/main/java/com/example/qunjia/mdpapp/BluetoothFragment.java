@@ -77,8 +77,7 @@ public class BluetoothFragment extends Fragment {
                     String readMessage = new String(readBuf, 0, msg.arg1);
                     Log.d("Message received", readMessage);
                     if (activity != null) {
-                        TextView status_view = (TextView) activity.findViewById(R.id.statusWindowTV);
-                        status_view.setText(status_view.getText() + readMessage + "\n");
+                        GridMapFragment.AddTextToStatusWindow(activity, readMessage);
 
                         try
                         {
