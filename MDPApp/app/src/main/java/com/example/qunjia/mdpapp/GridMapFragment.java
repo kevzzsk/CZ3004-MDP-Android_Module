@@ -40,8 +40,8 @@ import java.io.InputStream;
 
 public class GridMapFragment extends Fragment {
 
-    public static final int MOVE_UP = 0, MOVE_DOWN = 1,
-            MOVE_LEFT = 2, MOVE_RIGHT = 3;
+    public static final int MOVE_NONE = 0, MOVE_UP = 1, MOVE_DOWN = 2,
+            MOVE_LEFT = 3, MOVE_RIGHT = 4;
 
 
     public static GridMapFragment newInstance(int position) {

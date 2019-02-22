@@ -1,17 +1,23 @@
 package com.example.qunjia.mdpapp;
 
 import android.content.pm.ActivityInfo;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.astuetz.PagerSlidingTabStrip;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +34,6 @@ public class MainActivity extends AppCompatActivity {
         PagerSlidingTabStrip tabs = (PagerSlidingTabStrip) findViewById(R.id.topTabs);
         tabs.setViewPager(pager);
     }
-
 
     public class MyPagerAdapter extends FragmentStatePagerAdapter {
 
@@ -55,9 +60,11 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public Fragment getItem(int position) {
-            switch (position){
-                case 0:  return GridMapFragment.newInstance(position);
-                case 1:  return BluetoothFragment.newInstance(position);
+            switch (position) {
+                case 0:
+                    return GridMapFragment.newInstance(position);
+                case 1:
+                    return BluetoothFragment.newInstance(position);
             }
             return null;
         }
@@ -68,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void BluetoothOnclickMethods(View v) {
-        for (Fragment fragment: getSupportFragmentManager().getFragments()) {
+        for (Fragment fragment : getSupportFragmentManager().getFragments()) {
             if (fragment instanceof BluetoothFragment) {
                 BluetoothFragment bluetooth_fragment = (BluetoothFragment) fragment;
                 bluetooth_fragment.myClickMethod(v, this);

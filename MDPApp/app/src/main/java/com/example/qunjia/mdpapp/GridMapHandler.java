@@ -53,7 +53,7 @@ public class GridMapHandler {
         textView.setText("ROBOT");
         textView.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
         textView.setId(robotID);
-        textView.setBackgroundColor(Color.BLUE);
+        textView.setBackgroundColor(Color.parseColor("#1100ce"));//blue
 
         relativeLayout.addView(textView);
     }
@@ -209,10 +209,10 @@ public class GridMapHandler {
         //create new robot text view
         final TextView textView = new TextView(((Activity) context));
         textView.setLayoutParams(GetRobotLayoutParams((Activity) context,column, row));
-        textView.setText("COME TO ME");
+        textView.setText("ROBOT\nWAYPOINT");
         textView.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
         textView.setId(robotShadowID);
-        textView.setBackgroundColor(Color.CYAN);
+        textView.setBackgroundColor(Color.parseColor("#3281ff"));//light blue
         textView.setTextColor(Color.BLACK);
 
         relativeLayout.addView(textView);
