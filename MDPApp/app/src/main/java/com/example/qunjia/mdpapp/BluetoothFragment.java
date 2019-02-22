@@ -78,16 +78,6 @@ public class BluetoothFragment extends Fragment {
                     Log.d("Message received", readMessage);
                     if (activity != null) {
                         GridMapFragment.AddTextToStatusWindow(activity, readMessage);
-
-                        try
-                        {
-                            // checking valid integer using parseInt() method
-                            Integer.parseInt(readMessage);
-                            GridMapFragment.GridMapBluetoothHandler(activity, readMessage);
-                        }
-                        catch (NumberFormatException e)
-                        {/*do nothing*/}
-
                     }
                     break;
                 case HandlerConstants.MESSAGE_WRITE:

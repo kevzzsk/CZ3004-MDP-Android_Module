@@ -43,18 +43,6 @@ public class GridMapFragment extends Fragment {
     public static final int MOVE_UP = 0, MOVE_DOWN = 1,
             MOVE_LEFT = 2, MOVE_RIGHT = 3;
 
-    public static int cellSize, robotCurrentRow, robotCurrentColumn;
-    private final static int cellMargin = 2, rowTotalNumber = 20, columnTotalNumber = 15;
-
-    //temporary variables for testing
-    private static int timer = 39;
-    private static Handler handler = new Handler();
-    private static Runnable runnable;
-
-
-    public GridMapFragment() {
-
-    }
 
     public static GridMapFragment newInstance(int position) {
         GridMapFragment f = new GridMapFragment();
@@ -63,7 +51,6 @@ public class GridMapFragment extends Fragment {
         f.setArguments(b);
         return f;
     }
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -80,7 +67,7 @@ public class GridMapFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         InitSwitchListener();
-        CreateGridMap(getActivity());
+        GridMapHandler.CreateGridMap(getActivity());
         DirectionViewSetup(getActivity());
         InitWaypointToggleBtnListener();
         InitAutoManualToggleBtnListener();
@@ -88,17 +75,15 @@ public class GridMapFragment extends Fragment {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                robotCurrentColumn = 1;
-                robotCurrentRow = 18;
-                setRobotPosition(getActivity(), false);
-                SetArrowPicture(getActivity(), 0, 5,5);
-                ChangeCellColor(getActivity(), Color.BLACK, 5,6);
-                ChangeCellColor(getActivity(), Color.BLACK, 5,7);
-                ChangeCellColor(getActivity(), Color.BLACK, 5,8);
-                ChangeCellColor(getActivity(), Color.BLACK, 6,8);
-                ChangeCellColor(getActivity(), Color.BLACK, 7,8);
-                ChangeCellColor(getActivity(), Color.BLACK, 8,8);
-                SetArrowPicture(getActivity(), 90, 9,8);
+                GridMapHandler.SetRobotPosition(getActivity(), 1, 18);
+                GridMapHandler.SetArrowPicture(getActivity(), 0, 5, 5);
+                GridMapHandler.ChangeCellColor(getActivity(), Color.BLACK, 5, 6);
+                GridMapHandler.ChangeCellColor(getActivity(), Color.BLACK, 5, 7);
+                GridMapHandler.ChangeCellColor(getActivity(), Color.BLACK, 5, 8);
+                GridMapHandler.ChangeCellColor(getActivity(), Color.BLACK, 6, 8);
+                GridMapHandler.ChangeCellColor(getActivity(), Color.BLACK, 7, 8);
+                GridMapHandler.ChangeCellColor(getActivity(), Color.BLACK, 8, 8);
+                GridMapHandler.SetArrowPicture(getActivity(), 90, 9, 8);
             }
         }, 200);
     }
@@ -106,66 +91,6 @@ public class GridMapFragment extends Fragment {
     private void InitSwitchListener() {
         Switch directionSwitch = (Switch) getActivity().findViewById(R.id.directionToggleBtn);
         directionSwitch.setOnCheckedChangeListener(new AccelerometerSwitchListener());
-    }
-
-    private void CreateGridMap(final Context context) {
-        TableLayout tbl = ((Activity) context).findViewById(R.id.gridMap);
-
-        //Get cell size
-        Display display = ((Activity) context).getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        float gridMapWidth = (float) (size.x * 0.65);
-        int cellWidth = (int) (gridMapWidth / columnTotalNumber);
-        float gridMapHeight = (float) (size.y * 0.65);
-        int cellHeight = (int) (gridMapHeight / rowTotalNumber);
-        if (cellHeight < cellWidth) cellSize = cellHeight;
-        else cellSize = cellWidth;
-
-        //Create Grid Map
-        for (int i = 0; i < rowTotalNumber; i++) {
-            //create a new tableRow with imageViews and add into tableLayout
-            final TableRow row = new TableRow(context);
-            row.setBackgroundColor(Color.BLACK);
-            for (int j = 0; j < columnTotalNumber; j++) {
-                //create new imageView and add into row
-                final ImageView imageView = new ImageView(context);
-                TableRow.LayoutParams layoutParams = new TableRow.LayoutParams(
-                        cellSize, cellSize);
-                layoutParams.setMargins(0, 0, cellMargin, cellMargin);
-                imageView.setLayoutParams(layoutParams);
-                imageView.setBackgroundColor(Color.WHITE);
-                imageView.setId(getImageViewID(j, i));
-                imageView.setOnDragListener(new View.OnDragListener() {
-                    @Override
-                    public boolean onDrag(View view, DragEvent dragEvent) {
-                        final int action = dragEvent.getAction();
-
-                        switch (action) {
-                            case DragEvent.ACTION_DROP:
-                                int rowNumber = (int) view.getId() % 1000;
-                                int columnNumber = (int) view.getId() / 1000;
-                                if (rowNumber > 0 && rowNumber < rowTotalNumber - 1 && columnNumber > 0 &&
-                                        columnNumber < columnTotalNumber - 1) {
-                                    robotCurrentColumn = columnNumber;
-                                    robotCurrentRow = rowNumber;
-                                    setRobotPosition(getActivity(), true);
-                                    BluetoothFragment.sendMessage("C" + robotCurrentColumn + "r" + robotCurrentRow);
-                                    GridMapFragment.AddTextToStatusWindow((Activity) context,"C" + robotCurrentColumn + "r" + robotCurrentRow);
-                                }
-
-                                break;
-                            case DragEvent.ACTION_DRAG_LOCATION:
-                                break;
-                        }
-                        return true;
-                    }
-                });
-                row.addView(imageView);
-            }
-            row.setLayoutParams(new TableLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-            tbl.addView(row);
-        }
     }
 
     private void DirectionViewSetup(final Context context) {
@@ -205,7 +130,7 @@ public class GridMapFragment extends Fragment {
                 Button stopBtn = activity.findViewById(R.id.stopBtn);
 
                 if (compoundButton.isChecked()) {
-                    setRobotPosition(compoundButton.getContext(), true);
+                    GridMapHandler.SetRobotDragListener(compoundButton.getContext(), true);
                     DirectionViewSetEnabled(activity, false);
 
                     autoManualToggleBtn.setEnabled(false);
@@ -216,7 +141,7 @@ public class GridMapFragment extends Fragment {
                     stopBtn.setEnabled(false);
 
                 } else {
-                    setRobotPosition(compoundButton.getContext(), false);
+                    GridMapHandler.SetRobotDragListener(compoundButton.getContext(), false);
                     DirectionViewSetEnabled(activity, true);
 
                     autoManualToggleBtn.setEnabled(true);
@@ -262,78 +187,6 @@ public class GridMapFragment extends Fragment {
         }
     }
 
-    @SuppressLint("ClickableViewAccessibility")
-    private static void setRobotPosition(Context context, Boolean setRobotDragListener) {
-        RelativeLayout relativeLayout = ((Activity) context).findViewById(R.id.gridMapFragmentLayout);
-        relativeLayout.removeAllViews();
-
-        //create an transparent image view at robot new position
-        final TextView textView = new TextView(((Activity) context));
-        int[] location = new int[2];
-        ImageView robotCellPosition = ((Activity) context).findViewById(getImageViewID(robotCurrentColumn, robotCurrentRow));
-        robotCellPosition.getLocationOnScreen(location);
-        int x = location[0] - cellSize - cellMargin;
-        int y = location[1] - cellSize * 4 - (int) (cellMargin * 8.5);
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
-                cellSize * 3 + 2 * cellMargin, cellSize * 3 + 3 * cellMargin);
-        params.setMargins(x, y, 0, 0);
-        textView.setLayoutParams(params);
-        textView.setBackgroundColor(Color.BLUE);
-        textView.setText("ROBOT");
-        textView.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
-
-
-        if (setRobotDragListener) {
-            textView.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View view, MotionEvent motionEvent) {
-                    ClipData data = ClipData.newPlainText("", "");
-                    View.DragShadowBuilder shadow = new View.DragShadowBuilder(textView);
-                    view.startDrag(data, shadow, null, 0);
-                    return false;
-                }
-            });
-        }
-        relativeLayout.addView(textView);
-    }
-
-    private static int getImageViewID(int columnNumber, int rowNumber) {
-        return columnNumber * 1000 + rowNumber;
-    }
-
-    public static void ChangeCellColor(Context context, int color, int rowNumber, int columnNumber) {
-        try {
-            ImageView imageView = ((Activity) context).findViewById(getImageViewID(columnNumber, rowNumber));
-            imageView.setBackgroundColor(color);
-        } catch (Exception e) {
-            Toast.makeText(context, "Change Cell Color Error at row " + rowNumber + " col " + columnNumber, Toast.LENGTH_LONG).show();
-        }
-    }
-
-    public static void SetArrowPicture(Context context, int rotationAngle, int rowNumber, int columnNumber) {
-        try {
-            ImageView imageView = ((Activity) context).findViewById(getImageViewID(columnNumber, rowNumber));
-            AssetManager assetManager = context.getAssets();
-
-            InputStream istr = assetManager.open("arrow.webp");
-            Bitmap bitmap = BitmapFactory.decodeStream(istr);
-            imageView.setImageBitmap(bitmap);
-            imageView.setRotation(rotationAngle);
-            istr.close();
-        } catch (Exception e) {
-            Toast.makeText(context, "Set arrow Error at row " + rowNumber + " col " + columnNumber, Toast.LENGTH_LONG).show();
-        }
-    }
-
-    public static void RemoveArrowPicture(Context context, int rowNumber, int columnNumber) {
-        try {
-            ImageView imageView = ((Activity) context).findViewById(getImageViewID(columnNumber, rowNumber));
-            imageView.setImageBitmap(null);
-        } catch (Exception e) {
-            Toast.makeText(context, "Set arrow Error at row " + rowNumber + " col " + columnNumber, Toast.LENGTH_LONG).show();
-        }
-    }
-
     public static void myClickMethod(final View v) {
         switch (v.getId()) {
             case R.id.clearStatusWindowBtn:
@@ -357,129 +210,50 @@ public class GridMapFragment extends Fragment {
         Toast.makeText(v.getContext(), "to be updated", Toast.LENGTH_LONG).show();
     }
 
-    private static void RobotMovingSimulator(final View v) {
-        if (handler.hasMessages(0)) {
-            handler.removeCallbacks(runnable);
-        } else {
-            runnable = new Runnable() {
-                @Override
-                public void run() {
-                    timer++;
-                    timer = timer % 40;
-
-                    if (timer < 10) {
-                        robotCurrentRow--;
-                        SetArrowPicture(v.getContext(), 0, robotCurrentRow, 4);
-                        SetArrowPicture(v.getContext(), 90, robotCurrentRow, 5);
-                    } else if (timer < 20) {
-                        robotCurrentColumn++;
-                        ChangeCellColor(v.getContext(), Color.BLACK, 2, robotCurrentColumn);
-                    } else if (timer < 30) {
-                        robotCurrentRow++;
-                        RemoveArrowPicture(v.getContext(), robotCurrentRow, 4);
-                        RemoveArrowPicture(v.getContext(), robotCurrentRow, 5);
-                    } else {
-                        robotCurrentColumn--;
-                        ChangeCellColor(v.getContext(), Color.WHITE, 2, robotCurrentColumn);
-                    }
-
-                    setRobotPosition(v.getContext(), false);
-
-                    handler.postDelayed(this, 100);
-                }
-            };
-            handler.postDelayed(runnable, 100);
-        }
-    }
-
-    public static void GridMapBluetoothHandler(Activity activity, String readMessage) {
-        switch (readMessage) {
-            case "2"://unexplored
-                ChangeCellColor(activity, Color.RED, 5, 5);
-                return;
-            case "1"://obstacles
-                ChangeCellColor(activity, Color.WHITE, 5, 5);
-                return;
-            case "0"://no obstacles
-                ChangeCellColor(activity, Color.BLACK, 5, 5);
-                return;
-            case "-1"://current position
-                setRobotPosition(activity, false);
-                return;
-            case "-2"://start
-                //ChangeCellColor(activity,Color.RED,5,5);
-                return;
-            case "-3"://goal usually is top right)
-                //ChangeCellColor(activity,Color.RED,5,5);
-                return;
-            case "-4"://way point (android set this)
-                //ChangeCellColor(activity,Color.RED,5,5);
-                return;
-        }
-    }
-
     @SuppressLint("SetTextI18n")
     public static void MoveRobot(Context context, int direction) {
         switch (direction) {
             case MOVE_UP:
-                robotCurrentRow--;
-                if (CurrentOrientationInsideMap(context)) {
-                    //setRobotPosition(context, false);
+                if (GridMapHandler.robotCurrentRow + 1 == GridMapHandler.rowTotalNumber - 1) {
+                    //SetRobotPosition(context, false);
                     AddTextToStatusWindow((Activity) context, "UP");
                     BluetoothFragment.sendMessage("UP");
                 } else {
-                    robotCurrentRow++;
+                    GridMapFragment.AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move up anymore\n");
+
                 }
                 break;
             case MOVE_DOWN:
-                robotCurrentRow++;
-                if (CurrentOrientationInsideMap(context)) {
-                    //setRobotPosition(context, false);
+                if (GridMapHandler.robotCurrentRow - 1 == 0) {
+                    //SetRobotPosition(context, false);
                     AddTextToStatusWindow((Activity) context, "DOWN");
                     BluetoothFragment.sendMessage("DOWN");
                 } else {
-                    robotCurrentRow--;
+                    GridMapFragment.AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move down anymore\n");
+
                 }
                 break;
             case MOVE_LEFT:
-                robotCurrentColumn--;
-                if (CurrentOrientationInsideMap(context)) {
-                    //setRobotPosition(context, false);
+                if (GridMapHandler.robotCurrentColumn + 1 == GridMapHandler.columnTotalNumber - 1) {
+                    //SetRobotPosition(context, false);
                     AddTextToStatusWindow((Activity) context, "LEFT");
                     BluetoothFragment.sendMessage("LEFT");
                 } else {
-                    robotCurrentColumn++;
+                    GridMapFragment.AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move left anymore\n");
+
                 }
                 break;
             case MOVE_RIGHT:
-                robotCurrentColumn++;
-                if (CurrentOrientationInsideMap(context)) {
-                    //setRobotPosition(context, false);
+                if (GridMapHandler.robotCurrentColumn - 1 == 0) {
+                    //SetRobotPosition(context, false);
                     AddTextToStatusWindow((Activity) context, "RIGHT");
                     BluetoothFragment.sendMessage("RIGHT");
                 } else {
-                    robotCurrentColumn--;
+                    GridMapFragment.AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move right anymore\n");
+
                 }
                 break;
         }
-    }
-
-    @SuppressLint("SetTextI18n")
-    private static Boolean CurrentOrientationInsideMap(Context context) {
-        if (robotCurrentColumn == 0) {
-            AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move left anymore\n");
-            return false;
-        } else if (robotCurrentColumn == columnTotalNumber - 1) {
-            AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move right anymore\n");
-            return false;
-        } else if (robotCurrentRow == 0) {
-            AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move up anymore\n");
-            return false;
-        } else if (robotCurrentRow == rowTotalNumber - 1) {
-            AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move down anymore\n");
-            return false;
-        }
-        return true;
     }
 
     public static void AddTextToStatusWindow(Activity activity, String stringToAdd) {
@@ -500,4 +274,45 @@ public class GridMapFragment extends Fragment {
         statusWindow.setText(currentText + stringToAdd + "\n");
         scrollView.fullScroll(View.FOCUS_DOWN);
     }
+
+    /*
+    //temporary variables for testing
+    private static int timer = 39;
+    private static Handler handler = new Handler();
+    private static Runnable runnable;
+
+    private static void RobotMovingSimulator(final View v) {
+        if (handler.hasMessages(0)) {
+            handler.removeCallbacks(runnable);
+        } else {
+            runnable = new Runnable() {
+                @Override
+                public void run() {
+                    timer++;
+                    timer = timer % 40;
+
+                    if (timer < 10) {
+                        GridMapHandler.robotCurrentRow--;
+                        SetArrowPicture(v.getContext(), 0, GridMapHandler.robotCurrentRow, 4);
+                        SetArrowPicture(v.getContext(), 90, GridMapHandler.robotCurrentRow, 5);
+                    } else if (timer < 20) {
+                        GridMapHandler.robotCurrentColumn++;
+                        ChangeCellColor(v.getContext(), Color.BLACK, 2, GridMapHandler.robotCurrentColumn);
+                    } else if (timer < 30) {
+                        GridMapHandler.robotCurrentRow++;
+                        RemoveArrowPicture(v.getContext(), GridMapHandler.robotCurrentRow, 4);
+                        RemoveArrowPicture(v.getContext(), GridMapHandler.robotCurrentRow, 5);
+                    } else {
+                        GridMapHandler.robotCurrentColumn--;
+                        ChangeCellColor(v.getContext(), Color.WHITE, 2, GridMapHandler.robotCurrentColumn);
+                    }
+
+                    SetRobotPosition(v.getContext(), false);
+
+                    handler.postDelayed(this, 100);
+                }
+            };
+            handler.postDelayed(runnable, 100);
+        }
+    }*/
 }
