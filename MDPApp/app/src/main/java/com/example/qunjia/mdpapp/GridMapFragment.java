@@ -51,6 +51,7 @@ public class GridMapFragment extends Fragment {
     private static Handler handler = new Handler();
     private static Runnable runnable;
 
+
     public GridMapFragment() {
 
     }
@@ -90,7 +91,14 @@ public class GridMapFragment extends Fragment {
                 robotCurrentColumn = 1;
                 robotCurrentRow = 18;
                 setRobotPosition(getActivity(), false);
-
+                SetArrowPicture(getActivity(), 0, 5,5);
+                ChangeCellColor(getActivity(), Color.BLACK, 5,6);
+                ChangeCellColor(getActivity(), Color.BLACK, 5,7);
+                ChangeCellColor(getActivity(), Color.BLACK, 5,8);
+                ChangeCellColor(getActivity(), Color.BLACK, 6,8);
+                ChangeCellColor(getActivity(), Color.BLACK, 7,8);
+                ChangeCellColor(getActivity(), Color.BLACK, 8,8);
+                SetArrowPicture(getActivity(), 90, 9,8);
             }
         }, 200);
     }
@@ -142,6 +150,8 @@ public class GridMapFragment extends Fragment {
                                     robotCurrentColumn = columnNumber;
                                     robotCurrentRow = rowNumber;
                                     setRobotPosition(getActivity(), true);
+                                    BluetoothFragment.sendMessage("C" + robotCurrentColumn + "r" + robotCurrentRow);
+                                    GridMapFragment.AddTextToStatusWindow((Activity) context,"C" + robotCurrentColumn + "r" + robotCurrentRow);
                                 }
 
                                 break;
@@ -272,6 +282,7 @@ public class GridMapFragment extends Fragment {
         textView.setText("ROBOT");
         textView.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
 
+
         if (setRobotDragListener) {
             textView.setOnTouchListener(new View.OnTouchListener() {
                 @Override
@@ -284,8 +295,6 @@ public class GridMapFragment extends Fragment {
             });
         }
         relativeLayout.addView(textView);
-
-
     }
 
     private static int getImageViewID(int columnNumber, int rowNumber) {
@@ -339,6 +348,9 @@ public class GridMapFragment extends Fragment {
                 return;
             case R.id.F2_btn:
                 ReconfigureHandler.F2BtnOnCLick(v.getContext());
+                return;
+            case R.id.stopBtn:
+                //RobotMovingSimulator(v);
                 return;
         }
 
@@ -412,7 +424,7 @@ public class GridMapFragment extends Fragment {
             case MOVE_UP:
                 robotCurrentRow--;
                 if (CurrentOrientationInsideMap(context)) {
-                    setRobotPosition(context, false);
+                    //setRobotPosition(context, false);
                     AddTextToStatusWindow((Activity) context, "UP");
                     BluetoothFragment.sendMessage("UP");
                 } else {
@@ -422,7 +434,7 @@ public class GridMapFragment extends Fragment {
             case MOVE_DOWN:
                 robotCurrentRow++;
                 if (CurrentOrientationInsideMap(context)) {
-                    setRobotPosition(context, false);
+                    //setRobotPosition(context, false);
                     AddTextToStatusWindow((Activity) context, "DOWN");
                     BluetoothFragment.sendMessage("DOWN");
                 } else {
@@ -432,7 +444,7 @@ public class GridMapFragment extends Fragment {
             case MOVE_LEFT:
                 robotCurrentColumn--;
                 if (CurrentOrientationInsideMap(context)) {
-                    setRobotPosition(context, false);
+                    //setRobotPosition(context, false);
                     AddTextToStatusWindow((Activity) context, "LEFT");
                     BluetoothFragment.sendMessage("LEFT");
                 } else {
@@ -442,7 +454,7 @@ public class GridMapFragment extends Fragment {
             case MOVE_RIGHT:
                 robotCurrentColumn++;
                 if (CurrentOrientationInsideMap(context)) {
-                    setRobotPosition(context, false);
+                    //setRobotPosition(context, false);
                     AddTextToStatusWindow((Activity) context, "RIGHT");
                     BluetoothFragment.sendMessage("RIGHT");
                 } else {
@@ -464,7 +476,7 @@ public class GridMapFragment extends Fragment {
             AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move up anymore\n");
             return false;
         } else if (robotCurrentRow == rowTotalNumber - 1) {
-            AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move up anymore\n");
+            AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move down anymore\n");
             return false;
         }
         return true;

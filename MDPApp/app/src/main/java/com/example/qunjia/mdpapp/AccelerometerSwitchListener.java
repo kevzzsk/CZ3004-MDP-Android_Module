@@ -9,10 +9,14 @@ import android.widget.Switch;
 
 import com.andretietz.android.controller.DirectionView;
 
+import java.util.logging.Handler;
+
 public class AccelerometerSwitchListener implements Switch.OnCheckedChangeListener {
 
     private OrientationEventListener orientationEventListener = null;
     private static int currentOrientation;
+    private android.os.Handler handler = null;
+    private Runnable myRunnable;
 
 
     @Override
@@ -27,22 +31,20 @@ public class AccelerometerSwitchListener implements Switch.OnCheckedChangeListen
                     final int up = 180;
                     final int left = 270;
 
-                   
-
                     if ((orientation < down + range || orientation > down_2 - range) && currentOrientation != down) {
-                        GridMapFragment.MoveRobot(compoundButton.getContext(), GridMapFragment.MOVE_DOWN);
+                        AccelerometerMoveRobotHandler(compoundButton.getContext(),GridMapFragment.MOVE_DOWN);
                         currentOrientation = down;
                         SetVisibilityGone(((Activity) compoundButton.getContext()), GridMapFragment.MOVE_DOWN);
                     } else if (orientation > left - range && orientation < left + range && currentOrientation != left) {
-                        GridMapFragment.MoveRobot(compoundButton.getContext(), GridMapFragment.MOVE_LEFT);
+                        AccelerometerMoveRobotHandler(compoundButton.getContext(),GridMapFragment.MOVE_LEFT);
                         currentOrientation = left;
                         SetVisibilityGone(((Activity) compoundButton.getContext()), GridMapFragment.MOVE_LEFT);
                     } else if (orientation > right - range && orientation < right + range && currentOrientation != right) {
-                        GridMapFragment.MoveRobot(compoundButton.getContext(), GridMapFragment.MOVE_RIGHT);
+                        AccelerometerMoveRobotHandler(compoundButton.getContext(),GridMapFragment.MOVE_RIGHT);
                         currentOrientation = right;
                         SetVisibilityGone(((Activity) compoundButton.getContext()), GridMapFragment.MOVE_RIGHT);
                     } else if (orientation > up - range && orientation < up + range && currentOrientation != up) {
-                        GridMapFragment.MoveRobot(compoundButton.getContext(), GridMapFragment.MOVE_UP);
+                        AccelerometerMoveRobotHandler(compoundButton.getContext(),GridMapFragment.MOVE_UP);
                         currentOrientation = up;
                         SetVisibilityGone(((Activity) compoundButton.getContext()), GridMapFragment.MOVE_UP);
                     } else {
@@ -60,7 +62,32 @@ public class AccelerometerSwitchListener implements Switch.OnCheckedChangeListen
             orientationEventListener = null;
             SetVisibilityGone(((Activity) compoundButton.getContext()), 999);//set all visibility gone
             GridMapFragment.DirectionViewSetEnabled(((Activity) compoundButton.getContext()), true);
+
+            if (handler != null) {
+                handler.removeCallbacks(myRunnable);
+                handler.removeMessages(0);
+            }
         }
+    }
+    
+    private void AccelerometerMoveRobotHandler(final Context context, final int direction){
+        final int delay = 300; //milliseconds
+
+        if (handler != null) {
+            handler.removeCallbacks(myRunnable);
+            handler.removeMessages(0);
+        }
+
+        handler = new android.os.Handler();
+
+        myRunnable = new Runnable() {
+            public void run(){
+                GridMapFragment.MoveRobot(context,direction);
+                        handler.postDelayed(this, delay);
+            }
+        };
+
+        handler.postDelayed(myRunnable, delay);
     }
     
     private void SetVisibilityGone(Activity activity, int DirectionVisible){

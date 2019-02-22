@@ -1,5 +1,6 @@
 package com.example.qunjia.mdpapp;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -11,12 +12,14 @@ import android.widget.Toast;
 public class ReconfigureHandler {
     public static void F1BtnOnCLick (Context context){
         String savedString = GetSharedPreferencesStr(context, "F1");
-        Toast.makeText(context, savedString, Toast.LENGTH_LONG).show();
+        GridMapFragment.AddTextToStatusWindow((Activity) context, savedString);
+        BluetoothFragment.sendMessage(savedString);
     }
 
     public static void F2BtnOnCLick (Context context){
         String savedString = GetSharedPreferencesStr(context, "F2");
-        Toast.makeText(context, savedString, Toast.LENGTH_LONG).show();
+        GridMapFragment.AddTextToStatusWindow((Activity) context, savedString);
+        BluetoothFragment.sendMessage(savedString);
     }
 
     public static void ReconfigBtnOnCLick (final Context context){
