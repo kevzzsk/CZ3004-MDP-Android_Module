@@ -18,6 +18,7 @@ import android.widget.Toast;
 import com.astuetz.PagerSlidingTabStrip;
 
 public class MainActivity extends AppCompatActivity{
+    private GridMapUpdateManager gridMapUpdateManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +34,8 @@ public class MainActivity extends AppCompatActivity{
         // Bind the tabs to the ViewPager
         PagerSlidingTabStrip tabs = (PagerSlidingTabStrip) findViewById(R.id.topTabs);
         tabs.setViewPager(pager);
+
+        gridMapUpdateManager = new GridMapUpdateManager();
     }
 
     public class MyPagerAdapter extends FragmentStatePagerAdapter {
@@ -62,9 +65,13 @@ public class MainActivity extends AppCompatActivity{
         public Fragment getItem(int position) {
             switch (position) {
                 case 0:
-                    return GridMapFragment.newInstance(position);
+                    GridMapFragment gridMapFragment = GridMapFragment.newInstance(position);
+                    GridMapFragment.mapUpdateManager = gridMapUpdateManager;
+                    return gridMapFragment;
                 case 1:
-                    return BluetoothFragment.newInstance(position);
+                    BluetoothFragment bluetoothFragment = BluetoothFragment.newInstance(position);
+                    BluetoothFragment.mapUpdateManager = gridMapUpdateManager;
+                    return bluetoothFragment;
             }
             return null;
         }

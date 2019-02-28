@@ -45,6 +45,8 @@ public class BluetoothFragment extends Fragment {
     private BluetoothAdapter mBluetoothAdapter;
     private static BluetoothService mBluetoothService;
 
+    static GridMapUpdateManager mapUpdateManager;
+
     // Connection handler
     private final Handler mHandler = new Handler(new Handler.Callback() {
         @Override
@@ -79,6 +81,7 @@ public class BluetoothFragment extends Fragment {
                     if (activity != null) {
                         GridMapFragment.AddTextToStatusWindow(activity, readMessage);
                     }
+                    mapUpdateManager.decodeMessage(getContext(), readMessage);
                     break;
                 case HandlerConstants.MESSAGE_WRITE:
                     byte[] writeBuf = (byte[]) msg.obj;
@@ -118,7 +121,6 @@ public class BluetoothFragment extends Fragment {
                     break;
                 case HandlerConstants.MESSAGE_FINISH_DISCOVERY:
                     Log.d(BluetoothService.BLUETOOTH_SCAN_TAG, "Finished Bluetooth scanning");
-                    boolean reconnecting_ = (boolean) msg.obj;
                     View view_ = getView();
                     if (view_ != null) {
                         getView().findViewById(R.id.progressBar).setVisibility(View.GONE);
@@ -161,8 +163,8 @@ public class BluetoothFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         mBluetoothService = new BluetoothService(getContext(), mBluetoothAdapter, mHandler);
 
         // Register for bluetooth scanning broadcast

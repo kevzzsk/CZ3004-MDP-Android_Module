@@ -2,33 +2,20 @@ package com.example.qunjia.mdpapp;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.ClipData;
 import android.content.Context;
-import android.content.res.AssetManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.view.Display;
-import android.view.DragEvent;
-import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Switch;
-import android.widget.TableLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -36,7 +23,6 @@ import android.widget.ToggleButton;
 import com.andretietz.android.controller.DirectionView;
 import com.andretietz.android.controller.InputView;
 
-import java.io.InputStream;
 
 public class GridMapFragment extends Fragment {
 
@@ -51,6 +37,8 @@ public class GridMapFragment extends Fragment {
         f.setArguments(b);
         return f;
     }
+
+    static GridMapUpdateManager mapUpdateManager;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -162,6 +150,7 @@ public class GridMapFragment extends Fragment {
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 Activity activity = (Activity) compoundButton.getContext();
                 Button updateBtn = activity.findViewById(R.id.updateBtn);
+                mapUpdateManager.toggleDisplayMode();
 
                 if (compoundButton.isChecked()) {
                     updateBtn.setEnabled(true);
@@ -204,6 +193,9 @@ public class GridMapFragment extends Fragment {
                 return;
             case R.id.stopBtn:
                 //RobotMovingSimulator(v);
+                return;
+            case R.id.updateBtn:
+                mapUpdateManager.updateAll(v.getContext());
                 return;
         }
 
