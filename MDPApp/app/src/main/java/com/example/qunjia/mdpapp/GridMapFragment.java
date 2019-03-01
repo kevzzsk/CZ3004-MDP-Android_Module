@@ -34,7 +34,6 @@ public class GridMapFragment extends Fragment {
             MOVE_LEFT = 3, MOVE_RIGHT = 4;
 
     public static Boolean is3Dmode = false;
-    private static Boolean usingFirstLayout = true;//boolean vars for 3d map
     private static String statusWindowTxt = "";
 
 
@@ -74,7 +73,7 @@ public class GridMapFragment extends Fragment {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                GridMapHandler2D.SetRobotPosition(getActivity(), 1, 18);
+                /*GridMapHandler2D.SetRobotPosition(getActivity(), 18, 1);
                 GridMapHandler2D.SetArrowPicture(getActivity(), 0, 5, 5);
                 GridMapHandler2D.ChangeCellColor(getActivity(), Color.BLACK, 5, 6);
                 GridMapHandler2D.ChangeCellColor(getActivity(), Color.BLACK, 5, 7);
@@ -82,7 +81,7 @@ public class GridMapFragment extends Fragment {
                 GridMapHandler2D.ChangeCellColor(getActivity(), Color.BLACK, 6, 8);
                 GridMapHandler2D.ChangeCellColor(getActivity(), Color.BLACK, 7, 8);
                 GridMapHandler2D.ChangeCellColor(getActivity(), Color.BLACK, 8, 8);
-                GridMapHandler2D.SetArrowPicture(getActivity(), 90, 9, 8);
+                GridMapHandler2D.SetArrowPicture(getActivity(), 90, 9, 8);*/
             }
         }, 200);
     }
@@ -183,20 +182,20 @@ public class GridMapFragment extends Fragment {
                 ConstraintLayout constraintLayout3D = getActivity().findViewById(R.id.constraintLayout3D);
 
                 if (compoundButton.isChecked()) {
+                    is3Dmode = true;
                     GridMapHandler2D.SetRobotPosition(getContext(), -1,-1);//hide robot
                     constraintLayout2D.setVisibility(View.GONE);
                     constraintLayout3D.setVisibility(View.VISIBLE);
-                    is3Dmode = true;
                     AddTextToStatusWindow(getActivity(), null);
 
                     Robot3DMapSimulator(true);
 
 
                 } else {
+                    is3Dmode = false;
                     GridMapHandler2D.SetRobotPosition(getContext(), 100,100);//show robot
                     constraintLayout2D.setVisibility(View.VISIBLE);
                     constraintLayout3D.setVisibility(View.GONE);
-                    is3Dmode = false;
                     AddTextToStatusWindow(getActivity(), null);
                 }
             }
@@ -208,7 +207,7 @@ public class GridMapFragment extends Fragment {
     private int simulatorInt = 0;//for 3d map simulator
     private Boolean forward = true;
     private void Robot3DMapSimulator(Boolean moving){
-        final float[] gridMap = new float[300];
+       /* final int[] gridMap = new int[300];
         for(int i = 0; i < 300; i++){
             double rand = Math.random();
             if(i % 15 == 14 || i % 15 == 13 ) gridMap[i] = 0;
@@ -281,7 +280,7 @@ public class GridMapFragment extends Fragment {
                     }
                 }, 100);
             }
-        }, 500);
+        }, 500);*/
     }
 
     public static void DirectionViewSetEnabled(Activity activity, Boolean enabled) {
@@ -319,6 +318,8 @@ public class GridMapFragment extends Fragment {
                 ReconfigureHandler.F2BtnOnCLick(v.getContext());
                 return;
             case R.id.stopBtn:
+                String msg = "MDF|F8007800F001F003F807F00FE01F800000000000000000000000000000000000000000000003|000000000700|N|13|4";
+                mapUpdateManager.decodeMessage(v.getContext(), msg);
                 //RobotMovingSimulator(v);
                 return;
             case R.id.updateBtn:
@@ -350,47 +351,40 @@ public class GridMapFragment extends Fragment {
 
         switch (direction) {
             case MOVE_UP:myRenderer.setZ(myRenderer.getZ() - 1);
-                if (GridMapHandler2D.robotCurrentRow + 1 == GridMapHandler2D.rowTotalNumber - 1) {
+                if (GridMapUpdateManager.RobotDescriptor.getRowNumber() - 1 == 0) {
+                    AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move up anymore\n");
+                } else {
                     //SetRobotPosition(context, false);
-
                     AddTextToStatusWindow((Activity) context, "UP");
                     BluetoothFragment.sendMessage("UP");
-                } else {
-                    AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move up anymore\n");
-
                 }
                 break;
             case MOVE_DOWN:myRenderer.setZ(myRenderer.getZ()+1);
-                if (GridMapHandler2D.robotCurrentRow - 1 == 0) {
+                if (GridMapUpdateManager.RobotDescriptor.getRowNumber() + 1 == GridMapHandler2D.rowTotalNumber - 1) {
+                    AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move down anymore\n");
+                } else {
                     //SetRobotPosition(context, false);
-
                     AddTextToStatusWindow((Activity) context, "DOWN");
                     BluetoothFragment.sendMessage("DOWN");
-                } else {
-                    AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move down anymore\n");
 
                 }
                 break;
             case MOVE_LEFT:myRenderer.setX(myRenderer.getX() - 1);
-                if (GridMapHandler2D.robotCurrentColumn + 1 == GridMapHandler2D.columnTotalNumber - 1) {
+                if (GridMapUpdateManager.RobotDescriptor.getColumnNumber() - 1 == 0) {
+                    AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move left anymore\n");
+                } else {
                     //SetRobotPosition(context, false);
-
                     AddTextToStatusWindow((Activity) context, "LEFT");
                     BluetoothFragment.sendMessage("LEFT");
-                } else {
-                    AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move left anymore\n");
-
                 }
                 break;
             case MOVE_RIGHT:myRenderer.setX(myRenderer.getX() + 1);
-                if (GridMapHandler2D.robotCurrentColumn - 1 == 0) {
+                if (GridMapUpdateManager.RobotDescriptor.getColumnNumber() + 1 == GridMapHandler2D.columnTotalNumber - 1) {
+                    AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move right anymore\n");
+                } else {
                     //SetRobotPosition(context, false);
-
                     AddTextToStatusWindow((Activity) context, "RIGHT");
                     BluetoothFragment.sendMessage("RIGHT");
-                } else {
-                    AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move right anymore\n");
-
                 }
                 break;
         }
