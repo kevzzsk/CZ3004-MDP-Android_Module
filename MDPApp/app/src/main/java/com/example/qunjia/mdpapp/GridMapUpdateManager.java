@@ -5,6 +5,7 @@ import android.content.Context;
 
 
 import static com.example.qunjia.mdpapp.GridMapHandler2D.*;
+import static java.lang.Integer.parseInt;
 
 /**
  * This class handles decoding of incoming messages from Raspberry Pi,
@@ -36,27 +37,18 @@ class GridMapUpdateManager {
         }
     }
 
-    private static int convertRow(int rowCoordinate) {
-        int rowNumber = rowCoordinate;
-
-        return rowNumber;
-    }
-
-    private static int convertColumn(int columnCoordinate) {
-        int columnNumber = columnCoordinate;
-
-        return columnNumber;
-    }
-
     private static class MapDescriptor {
-        int[] exploredRows;
-        int[] exploredColumns;
+        int[] exploredRows = new int[20];
+        int[] exploredColumns = new int[15];
 
-        int[] obstaclesRows;
-        int[] getObstaclesColumns;
+        int[] obstaclesRows = new int[20];
+        int[] getObstaclesColumns = new int[15];
 
-        MapDescriptor(String msg) {
-            // TODO: parse MDF String
+        MapDescriptor(String full_map, String explored) {
+            // TODO: (full map) convert hex to binary
+
+            // TODO: (explored region) convert hex to binary
+
         }
 
         void update(Context context) {
@@ -74,10 +66,9 @@ class GridMapUpdateManager {
             this.columnNumber = columnNumber;
         }
 
-        void update(String msg) {
-            // TODO: decode message
-            this.rowNumber = convertRow(5);
-            this.columnNumber = convertColumn(5);
+        void update(String rowString, String columnString) {
+            this.rowNumber = parseInt(rowString);
+            this.columnNumber = parseInt(columnString);
         }
     }
 
@@ -90,20 +81,34 @@ class GridMapUpdateManager {
             // TODO: decode message
 
             this.rotationAngle = 90;
-            this.rowNumber = convertRow(5);
-            this.columnNumber = convertColumn(5);
+            this.rowNumber = 5;
+            this.columnNumber = 5;
         }
     }
 
     void decodeMessage(Context context, String message) {
-        // TODO: decode the header to determine next action
+        String[] decoded = message.split("|");
+        if (decoded.length > 0) {
+            String header = decoded[0];
 
-        map = new MapDescriptor(message);
-        robot.update(message);
-        arrow = new ArrowDescriptor(message);
+            switch (header) {
+                case "MDF":
+                    map = new MapDescriptor(decoded[1], decoded[2]);
 
-        if (this.isAutoMode) {
-            this.updateAll(context);
+                    // robot position
+                    robot.update(decoded[4], decoded[5]);
+
+                    break;
+                case "ARW":
+                    // TODO: decode arrow message
+                    arrow = new ArrowDescriptor(message);
+
+                    break;
+            }
+
+            if (this.isAutoMode) {
+                this.updateAll(context);
+            }
         }
     }
 }
