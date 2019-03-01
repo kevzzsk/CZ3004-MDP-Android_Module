@@ -25,26 +25,38 @@ import android.widget.ToggleButton;
 
 import java.io.InputStream;
 
-public class GridMapHandler {
+public class GridMapHandler2D {
     //robot IDs
-    private final static int robotID = 3141592, robotShadowID = 2951413;
+    private final static int robotID = 3141592, robotWaypointID = 2951413;
     //Grid map Variables
     private static int cellSize;
     private final static int cellMargin = 2;
     public final static int rowTotalNumber = 20, columnTotalNumber = 15;
+
     //robot current position. For checking if robot is insideMap for MoveRobot() only
     public static int robotCurrentColumn, robotCurrentRow;
+    private static int robotWaypointColumn, robotWaypointRow;
 
     public static void SetRobotPosition(Context context, int column, int row) {
-        robotCurrentRow = row;
-        robotCurrentColumn = column;
-
         RelativeLayout relativeLayout = ((Activity) context).findViewById(R.id.gridMapFragmentLayout);
 
         //remove old robot text view
         TextView oldTV = ((Activity) context).findViewById(robotID);
         if(oldTV != null){
             relativeLayout.removeViewInLayout(oldTV);
+        }
+
+        if(row == -1 && column == -1){
+            //remove both robot TV & waypoint TV
+            SetRobotWaypointPosition(context, -1, -1);
+            return;
+        }
+        else if(row > 19 && column > 14){
+            row = robotCurrentRow;
+            column = robotCurrentColumn;
+        }
+        else if(row == robotWaypointRow && column == robotWaypointColumn){
+            SetRobotWaypointPosition(context, -1, -1);//remove robot waypoint
         }
 
         //create new robot text view
@@ -56,6 +68,9 @@ public class GridMapHandler {
         textView.setBackgroundColor(Color.parseColor("#1100ce"));//blue
 
         relativeLayout.addView(textView);
+
+        robotCurrentRow = row;
+        robotCurrentColumn = column;
     }
 
     public static void ChangeCellColor(Context context, int color, int rowNumber, int columnNumber) {
@@ -116,7 +131,7 @@ public class GridMapHandler {
     }
 
     public static void CreateGridMap(final Context context) {
-        TableLayout tbl = ((Activity) context).findViewById(R.id.gridMap);
+        TableLayout tbl = ((Activity) context).findViewById(R.id.gridMap2D);
 
         //Get cell size
         Display display = ((Activity) context).getWindowManager().getDefaultDisplay();
@@ -154,8 +169,8 @@ public class GridMapHandler {
                                 int columnNumber = (int) view.getId() / 1000;
                                 if (rowNumber > 0 && rowNumber < rowTotalNumber - 1 && columnNumber > 0 &&
                                         columnNumber < columnTotalNumber - 1) {
-                                    //display robot shadow
-                                    SetRobotShadowPosition(context, columnNumber, rowNumber);
+                                    //display robot waypoint
+                                    SetRobotWaypointPosition(context, columnNumber, rowNumber);
 
                                     //send string to bluetooth
                                     BluetoothFragment.sendMessage("C" + columnNumber + " R" + rowNumber);
@@ -197,21 +212,28 @@ public class GridMapHandler {
     }
 
     //for waypoint only
-    private static void SetRobotShadowPosition(Context context, int column, int row) {
+    private static void SetRobotWaypointPosition(Context context, int column, int row) {
         RelativeLayout relativeLayout = ((Activity) context).findViewById(R.id.gridMapFragmentLayout);
 
         //remove old robot text view
-        TextView oldTV = ((Activity) context).findViewById(robotShadowID);
+        TextView oldTV = ((Activity) context).findViewById(robotWaypointID);
         if(oldTV != null){
             relativeLayout.removeViewInLayout(oldTV);
         }
+
+        //return if robot reached the waypoint
+        if(row == -1 && column == -1){
+            return;
+        }
+        robotWaypointRow = row;
+        robotWaypointColumn = column;
 
         //create new robot text view
         final TextView textView = new TextView(((Activity) context));
         textView.setLayoutParams(GetRobotLayoutParams((Activity) context,column, row));
         textView.setText("ROBOT\nWAYPOINT");
         textView.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
-        textView.setId(robotShadowID);
+        textView.setId(robotWaypointID);
         textView.setBackgroundColor(Color.parseColor("#3281ff"));//light blue
         textView.setTextColor(Color.BLACK);
 

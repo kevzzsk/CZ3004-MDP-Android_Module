@@ -30,11 +30,13 @@ public class AccelerometerSwitchListener implements Switch.OnCheckedChangeListen
     public void onCheckedChanged(final CompoundButton compoundButton, boolean b) {
 
         if (compoundButton.isChecked()) {
-            sensorListener = new SensorListener(((Activity) compoundButton.getContext()));
+            sensorListener = new SensorListener((Activity) compoundButton.getContext());
+            GridMapFragment.DirectionViewSetEnabled(((Activity) compoundButton.getContext()), false);
         } else {
             sensorListener.disable();
             sensorListener = null;
             SetVisibilityGone(((Activity) compoundButton.getContext()), 999);//set all visibility gone
+            GridMapFragment.DirectionViewSetEnabled(((Activity) compoundButton.getContext()), true);
             GridMapFragment.DirectionViewSetEnabled(((Activity) compoundButton.getContext()), true);
 
             if (handler != null) {
@@ -96,7 +98,7 @@ public class AccelerometerSwitchListener implements Switch.OnCheckedChangeListen
     }
 
     private class SensorListener implements SensorEventListener {
-        Activity activity;
+        private Activity activity;
 
         SensorListener(Activity activity) {
             this.activity = activity;
@@ -105,7 +107,7 @@ public class AccelerometerSwitchListener implements Switch.OnCheckedChangeListen
             mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         }
 
-        public void disable(){
+        void disable(){
             mSensorManager.unregisterListener(this);
         }
 

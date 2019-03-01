@@ -4,7 +4,7 @@ package com.example.qunjia.mdpapp;
 import android.content.Context;
 
 
-import static com.example.qunjia.mdpapp.GridMapHandler.*;
+import static com.example.qunjia.mdpapp.GridMapHandler2D.*;
 
 /**
  * This class handles decoding of incoming messages from Raspberry Pi,

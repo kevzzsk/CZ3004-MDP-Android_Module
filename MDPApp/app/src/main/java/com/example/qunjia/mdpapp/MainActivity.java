@@ -67,11 +67,11 @@ public class MainActivity extends AppCompatActivity{
                 case 0:
                     GridMapFragment gridMapFragment = GridMapFragment.newInstance(position);
                     GridMapFragment.mapUpdateManager = gridMapUpdateManager;
-                    return gridMapFragment;
+                return gridMapFragment;
                 case 1:
                     BluetoothFragment bluetoothFragment = BluetoothFragment.newInstance(position);
                     BluetoothFragment.mapUpdateManager = gridMapUpdateManager;
-                    return bluetoothFragment;
+                return bluetoothFragment;
             }
             return null;
         }

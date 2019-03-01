@@ -163,8 +163,9 @@ public class BluetoothFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
         mBluetoothService = new BluetoothService(getContext(), mBluetoothAdapter, mHandler);
 
         // Register for bluetooth scanning broadcast

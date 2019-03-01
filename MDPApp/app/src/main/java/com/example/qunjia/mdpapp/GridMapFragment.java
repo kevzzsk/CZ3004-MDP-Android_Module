@@ -8,12 +8,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -22,12 +24,18 @@ import android.widget.ToggleButton;
 
 import com.andretietz.android.controller.DirectionView;
 import com.andretietz.android.controller.InputView;
+import com.example.qunjia.mdpapp.OpenGL.myGlSurfaceView;
+import com.example.qunjia.mdpapp.OpenGL.myRenderer;
 
 
 public class GridMapFragment extends Fragment {
 
     public static final int MOVE_NONE = 0, MOVE_UP = 1, MOVE_DOWN = 2,
             MOVE_LEFT = 3, MOVE_RIGHT = 4;
+
+    public static Boolean is3Dmode = false;
+    private static Boolean usingFirstLayout = true;//boolean vars for 3d map
+    private static String statusWindowTxt = "";
 
 
     public static GridMapFragment newInstance(int position) {
@@ -55,23 +63,26 @@ public class GridMapFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         InitSwitchListener();
-        GridMapHandler.CreateGridMap(getActivity());
+        GridMapHandler2D.CreateGridMap(getActivity());
         DirectionViewSetup(getActivity());
         InitWaypointToggleBtnListener();
         InitAutoManualToggleBtnListener();
+        Init3DToggleBtnListener();
+        getActivity().findViewById(R.id.updateBtn).setEnabled(false);
+
         //
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                GridMapHandler.SetRobotPosition(getActivity(), 1, 18);
-                GridMapHandler.SetArrowPicture(getActivity(), 0, 5, 5);
-                GridMapHandler.ChangeCellColor(getActivity(), Color.BLACK, 5, 6);
-                GridMapHandler.ChangeCellColor(getActivity(), Color.BLACK, 5, 7);
-                GridMapHandler.ChangeCellColor(getActivity(), Color.BLACK, 5, 8);
-                GridMapHandler.ChangeCellColor(getActivity(), Color.BLACK, 6, 8);
-                GridMapHandler.ChangeCellColor(getActivity(), Color.BLACK, 7, 8);
-                GridMapHandler.ChangeCellColor(getActivity(), Color.BLACK, 8, 8);
-                GridMapHandler.SetArrowPicture(getActivity(), 90, 9, 8);
+                GridMapHandler2D.SetRobotPosition(getActivity(), 1, 18);
+                GridMapHandler2D.SetArrowPicture(getActivity(), 0, 5, 5);
+                GridMapHandler2D.ChangeCellColor(getActivity(), Color.BLACK, 5, 6);
+                GridMapHandler2D.ChangeCellColor(getActivity(), Color.BLACK, 5, 7);
+                GridMapHandler2D.ChangeCellColor(getActivity(), Color.BLACK, 5, 8);
+                GridMapHandler2D.ChangeCellColor(getActivity(), Color.BLACK, 6, 8);
+                GridMapHandler2D.ChangeCellColor(getActivity(), Color.BLACK, 7, 8);
+                GridMapHandler2D.ChangeCellColor(getActivity(), Color.BLACK, 8, 8);
+                GridMapHandler2D.SetArrowPicture(getActivity(), 90, 9, 8);
             }
         }, 200);
     }
@@ -86,18 +97,20 @@ public class GridMapFragment extends Fragment {
         directionView.setOnButtonListener(new InputView.InputEventListener() {
             @Override
             public void onInputEvent(View view, int buttons) {
+
+
                 switch (buttons & 0xff) {
+                    case DirectionView.DIRECTION_UP:
+                        MoveRobot(context, MOVE_UP);
+                        break;
                     case DirectionView.DIRECTION_DOWN:
-                        MoveRobot(context, MOVE_DOWN);
+                        MoveRobot(context,MOVE_DOWN);
                         break;
                     case DirectionView.DIRECTION_LEFT:
                         MoveRobot(context, MOVE_LEFT);
                         break;
                     case DirectionView.DIRECTION_RIGHT:
                         MoveRobot(context, MOVE_RIGHT);
-                        break;
-                    case DirectionView.DIRECTION_UP:
-                        MoveRobot(context, MOVE_UP);
                         break;
                 }
             }
@@ -116,9 +129,10 @@ public class GridMapFragment extends Fragment {
                 Button exploreBtn = activity.findViewById(R.id.exploreBtn);
                 Button fastestBtn = activity.findViewById(R.id.fastestBtn);
                 Button stopBtn = activity.findViewById(R.id.stopBtn);
+                mapUpdateManager.toggleDisplayMode();
 
                 if (compoundButton.isChecked()) {
-                    GridMapHandler.SetRobotDragListener(compoundButton.getContext(), true);
+                    GridMapHandler2D.SetRobotDragListener(compoundButton.getContext(), true);
                     DirectionViewSetEnabled(activity, false);
 
                     autoManualToggleBtn.setEnabled(false);
@@ -129,7 +143,7 @@ public class GridMapFragment extends Fragment {
                     stopBtn.setEnabled(false);
 
                 } else {
-                    GridMapHandler.SetRobotDragListener(compoundButton.getContext(), false);
+                    GridMapHandler2D.SetRobotDragListener(compoundButton.getContext(), false);
                     DirectionViewSetEnabled(activity, true);
 
                     autoManualToggleBtn.setEnabled(true);
@@ -150,7 +164,6 @@ public class GridMapFragment extends Fragment {
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 Activity activity = (Activity) compoundButton.getContext();
                 Button updateBtn = activity.findViewById(R.id.updateBtn);
-                mapUpdateManager.toggleDisplayMode();
 
                 if (compoundButton.isChecked()) {
                     updateBtn.setEnabled(true);
@@ -159,6 +172,116 @@ public class GridMapFragment extends Fragment {
                 }
             }
         });
+    }
+
+    private void Init3DToggleBtnListener() {
+        ToggleButton toggleButton = getActivity().findViewById(R.id.DToggleBtn);
+        toggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                ConstraintLayout constraintLayout2D = getActivity().findViewById(R.id.constraintLayout2D);
+                ConstraintLayout constraintLayout3D = getActivity().findViewById(R.id.constraintLayout3D);
+
+                if (compoundButton.isChecked()) {
+                    GridMapHandler2D.SetRobotPosition(getContext(), -1,-1);//hide robot
+                    constraintLayout2D.setVisibility(View.GONE);
+                    constraintLayout3D.setVisibility(View.VISIBLE);
+                    is3Dmode = true;
+                    AddTextToStatusWindow(getActivity(), null);
+
+                    Robot3DMapSimulator(true);
+
+
+                } else {
+                    GridMapHandler2D.SetRobotPosition(getContext(), 100,100);//show robot
+                    constraintLayout2D.setVisibility(View.VISIBLE);
+                    constraintLayout3D.setVisibility(View.GONE);
+                    is3Dmode = false;
+                    AddTextToStatusWindow(getActivity(), null);
+                }
+            }
+        });
+    }
+
+
+
+    private int simulatorInt = 0;//for 3d map simulator
+    private Boolean forward = true;
+    private void Robot3DMapSimulator(Boolean moving){
+        final float[] gridMap = new float[300];
+        for(int i = 0; i < 300; i++){
+            double rand = Math.random();
+            if(i % 15 == 14 || i % 15 == 13 ) gridMap[i] = 0;
+            else if(rand < 0.8) {
+                gridMap[i] = 0;
+            }
+            else {
+                gridMap[i] = 1;
+            }
+        }
+
+        if(!moving){
+            gridMap[14] = -1;
+            RelativeLayout relativeLayout = getActivity().findViewById(R.id.gridMap3DOne);
+            myGlSurfaceView openGLView = new myGlSurfaceView(getContext(), gridMap);
+            relativeLayout.removeAllViews();
+            relativeLayout.addView(openGLView);
+            return;
+        }
+
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable(){
+            public void run(){
+                //do something
+                handler.postDelayed(this, 500);
+
+                if(forward){
+                    gridMap[14 + 15 * simulatorInt] = -1;
+                    if(simulatorInt != 0){
+                        gridMap[14 + 15 * (simulatorInt - 1)] = 0;
+                    }
+                    simulatorInt++;
+                }else {
+                    gridMap[14 + 15 * simulatorInt] = -1;
+                    if(simulatorInt != 0){
+                        gridMap[14 + 15 * (simulatorInt + 1)] = 0;
+                    }
+                    simulatorInt--;
+                }
+
+                if(simulatorInt == 18 || simulatorInt == 0) forward = !forward;
+
+                if(usingFirstLayout){
+                    RelativeLayout relativeLayout = getActivity().findViewById(R.id.gridMap3DOne);
+                    myGlSurfaceView openGLView = new myGlSurfaceView(getContext(), gridMap);
+                    relativeLayout.removeAllViews();
+                    relativeLayout.addView(openGLView);
+                } else {
+                    RelativeLayout relativeLayout = getActivity().findViewById(R.id.gridMap3DTwo);
+                    myGlSurfaceView openGLView = new myGlSurfaceView(getContext(), gridMap);
+                    relativeLayout.removeAllViews();
+                    relativeLayout.addView(openGLView);
+                }
+
+                Handler handler2 = new Handler();
+                handler2.postDelayed(new Runnable(){
+                    public void run(){
+                        RelativeLayout relativeLayoutOne = getActivity().findViewById(R.id.gridMap3DOne);
+                        RelativeLayout relativeLayoutTwo = getActivity().findViewById(R.id.gridMap3DTwo);
+
+                        if(usingFirstLayout){
+                            relativeLayoutOne.setVisibility(View.VISIBLE);
+                            relativeLayoutTwo.setVisibility(View.GONE);
+                        }
+                        else {
+                            relativeLayoutOne.setVisibility(View.GONE);
+                            relativeLayoutTwo.setVisibility(View.VISIBLE);
+                        }
+                        usingFirstLayout = !usingFirstLayout;
+                    }
+                }, 100);
+            }
+        }, 500);
     }
 
     public static void DirectionViewSetEnabled(Activity activity, Boolean enabled) {
@@ -178,9 +301,13 @@ public class GridMapFragment extends Fragment {
 
     public static void myClickMethod(final View v) {
         switch (v.getId()) {
-            case R.id.clearStatusWindowBtn:
-                TextView statusWindowTV = ((Activity) v.getContext()).findViewById(R.id.statusWindowTV);
-                statusWindowTV.setText("");
+            case R.id.clearStatusWindowBtn2D:
+            case R.id.clearStatusWindowBtn3D:
+                statusWindowTxt = "";
+                TextView statusWindowTV2D = ((Activity) v.getContext()).findViewById(R.id.statusWindowTV2D);
+                statusWindowTV2D.setText("");
+                TextView statusWindowTV3D = ((Activity) v.getContext()).findViewById(R.id.statusWindowTV3D);
+                statusWindowTV3D.setText("");
                 return;
             case R.id.reconfigureBtn:
                 ReconfigureHandler.ReconfigBtnOnCLick(v.getContext());
@@ -197,74 +324,152 @@ public class GridMapFragment extends Fragment {
             case R.id.updateBtn:
                 mapUpdateManager.updateAll(v.getContext());
                 return;
+            case R.id.fastestBtn:
+                //GridMapHandler2D.SetRobotPosition(v.getContext(), 5, 5);
+                return;
+            case R.id.rotateRightBtn:
+                myRenderer.rotateRight();
+                return;
+            case R.id.rotateLeftBtn:
+                myRenderer.rotateLeft();
+                return;
         }
 
         Toast.makeText(v.getContext(), "to be updated", Toast.LENGTH_LONG).show();
     }
 
+
+
     @SuppressLint("SetTextI18n")
     public static void MoveRobot(Context context, int direction) {
+
+        if(is3Dmode){
+            direction = RotateDirection(direction);
+            if(direction == MOVE_NONE) return;
+        }
+
         switch (direction) {
-            case MOVE_UP:
-                if (GridMapHandler.robotCurrentRow + 1 == GridMapHandler.rowTotalNumber - 1) {
+            case MOVE_UP:myRenderer.setZ(myRenderer.getZ() - 1);
+                if (GridMapHandler2D.robotCurrentRow + 1 == GridMapHandler2D.rowTotalNumber - 1) {
                     //SetRobotPosition(context, false);
+
                     AddTextToStatusWindow((Activity) context, "UP");
                     BluetoothFragment.sendMessage("UP");
                 } else {
-                    GridMapFragment.AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move up anymore\n");
+                    AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move up anymore\n");
 
                 }
                 break;
-            case MOVE_DOWN:
-                if (GridMapHandler.robotCurrentRow - 1 == 0) {
+            case MOVE_DOWN:myRenderer.setZ(myRenderer.getZ()+1);
+                if (GridMapHandler2D.robotCurrentRow - 1 == 0) {
                     //SetRobotPosition(context, false);
+
                     AddTextToStatusWindow((Activity) context, "DOWN");
                     BluetoothFragment.sendMessage("DOWN");
                 } else {
-                    GridMapFragment.AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move down anymore\n");
+                    AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move down anymore\n");
 
                 }
                 break;
-            case MOVE_LEFT:
-                if (GridMapHandler.robotCurrentColumn + 1 == GridMapHandler.columnTotalNumber - 1) {
+            case MOVE_LEFT:myRenderer.setX(myRenderer.getX() - 1);
+                if (GridMapHandler2D.robotCurrentColumn + 1 == GridMapHandler2D.columnTotalNumber - 1) {
                     //SetRobotPosition(context, false);
+
                     AddTextToStatusWindow((Activity) context, "LEFT");
                     BluetoothFragment.sendMessage("LEFT");
                 } else {
-                    GridMapFragment.AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move left anymore\n");
+                    AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move left anymore\n");
 
                 }
                 break;
-            case MOVE_RIGHT:
-                if (GridMapHandler.robotCurrentColumn - 1 == 0) {
+            case MOVE_RIGHT:myRenderer.setX(myRenderer.getX() + 1);
+                if (GridMapHandler2D.robotCurrentColumn - 1 == 0) {
                     //SetRobotPosition(context, false);
+
                     AddTextToStatusWindow((Activity) context, "RIGHT");
                     BluetoothFragment.sendMessage("RIGHT");
                 } else {
-                    GridMapFragment.AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move right anymore\n");
+                    AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move right anymore\n");
 
                 }
                 break;
         }
     }
 
-    public static void AddTextToStatusWindow(Activity activity, String stringToAdd) {
-        String currentText;
-        TextView statusWindow;
-        ScrollView scrollView;
+    public static int RotateDirection(int direction){
+        int[] d = new int[4];
+        int facing = (int)myRenderer.getRotation()%360;
+        switch (facing){
+            case 0://face north
+                d[0] = MOVE_UP;
+                d[1] = MOVE_DOWN;
+                d[2] = MOVE_LEFT;
+                d[3] = MOVE_RIGHT;
+                break;
+            case 90://face east
+            case -270:
+                d[0] = MOVE_RIGHT;
+                d[1] = MOVE_LEFT;
+                d[2] = MOVE_UP;
+                d[3] = MOVE_DOWN;
+                break;
+            case 180://face south
+            case -180:
+                d[0] = MOVE_DOWN;
+                d[1] = MOVE_UP;
+                d[2] = MOVE_RIGHT;
+                d[3] = MOVE_LEFT;
+                break;
+            case 270://face west
+            case -90:
+                d[0] = MOVE_LEFT;
+                d[1] = MOVE_RIGHT;
+                d[2] = MOVE_DOWN;
+                d[3]= MOVE_UP;
+                break;
+            default: return MOVE_NONE; //error
+        }
 
+        switch (direction){
+            case MOVE_UP:
+                direction = d[0];
+                break;
+            case MOVE_DOWN:
+                direction = d[1];
+                break;
+            case MOVE_LEFT:
+                direction = d[2];
+                break;
+            case MOVE_RIGHT:
+                direction = d[3];
+                break;
+        }
+        return direction;
+    }
+
+    public static void AddTextToStatusWindow(Activity activity, String stringToAdd) {
         try {
-            scrollView = activity.findViewById(R.id.scrollView);
-            statusWindow = activity.findViewById(R.id.statusWindowTV);
-            currentText = statusWindow.getText().toString();
-            currentText = currentText.replace("\n\n", "\n");
+            TextView statusWindow;
+            ScrollView scrollView;
+            if(is3Dmode) {
+                scrollView = activity.findViewById(R.id.scrollView3D);
+                statusWindow = activity.findViewById(R.id.statusWindowTV3D);
+            }
+            else {
+                scrollView = activity.findViewById(R.id.scrollView2D);
+                statusWindow = activity.findViewById(R.id.statusWindowTV2D);
+            }
+            if(stringToAdd != null) {
+                statusWindowTxt = statusWindowTxt + stringToAdd + "\n";
+                statusWindowTxt = statusWindowTxt.replace("\n\n", "\n");
+            }
+            statusWindow.setText(statusWindowTxt);
+            scrollView.fullScroll(View.FOCUS_DOWN);
         } catch (Exception e) {
             //user switched fragment
             return;
         }
 
-        statusWindow.setText(currentText + stringToAdd + "\n");
-        scrollView.fullScroll(View.FOCUS_DOWN);
     }
 
     /*
@@ -284,19 +489,19 @@ public class GridMapFragment extends Fragment {
                     timer = timer % 40;
 
                     if (timer < 10) {
-                        GridMapHandler.robotCurrentRow--;
-                        SetArrowPicture(v.getContext(), 0, GridMapHandler.robotCurrentRow, 4);
-                        SetArrowPicture(v.getContext(), 90, GridMapHandler.robotCurrentRow, 5);
+                        GridMapHandler2D.robotCurrentRow--;
+                        SetArrowPicture(v.getContext(), 0, GridMapHandler2D.robotCurrentRow, 4);
+                        SetArrowPicture(v.getContext(), 90, GridMapHandler2D.robotCurrentRow, 5);
                     } else if (timer < 20) {
-                        GridMapHandler.robotCurrentColumn++;
-                        ChangeCellColor(v.getContext(), Color.BLACK, 2, GridMapHandler.robotCurrentColumn);
+                        GridMapHandler2D.robotCurrentColumn++;
+                        ChangeCellColor(v.getContext(), Color.BLACK, 2, GridMapHandler2D.robotCurrentColumn);
                     } else if (timer < 30) {
-                        GridMapHandler.robotCurrentRow++;
-                        RemoveArrowPicture(v.getContext(), GridMapHandler.robotCurrentRow, 4);
-                        RemoveArrowPicture(v.getContext(), GridMapHandler.robotCurrentRow, 5);
+                        GridMapHandler2D.robotCurrentRow++;
+                        RemoveArrowPicture(v.getContext(), GridMapHandler2D.robotCurrentRow, 4);
+                        RemoveArrowPicture(v.getContext(), GridMapHandler2D.robotCurrentRow, 5);
                     } else {
-                        GridMapHandler.robotCurrentColumn--;
-                        ChangeCellColor(v.getContext(), Color.WHITE, 2, GridMapHandler.robotCurrentColumn);
+                        GridMapHandler2D.robotCurrentColumn--;
+                        ChangeCellColor(v.getContext(), Color.WHITE, 2, GridMapHandler2D.robotCurrentColumn);
                     }
 
                     SetRobotPosition(v.getContext(), false);
