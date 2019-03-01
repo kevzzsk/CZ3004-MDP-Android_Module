@@ -51,12 +51,11 @@ class GridMapUpdateManager {
             obstacles = new BigInteger(obstacles, 16).toString(2);
 
             int row = 0;
-            for(int col = 0; col < full_map.length(); col++){
-                obstaclesArr[row][col] = obstacles.charAt(col);
-                if(col % 15 == 14) row++;
+            for(int col = 2; col < full_map.length() -2 ; col++){
+                exploredArr[row][(col-2)%15] = Character.getNumericValue(full_map.charAt(col));
+                if((col-2) % 15 == 14)
+                    row++;
             }
-
-            int y;
 
             // TODO: (explored region) convert hex to binary
 
