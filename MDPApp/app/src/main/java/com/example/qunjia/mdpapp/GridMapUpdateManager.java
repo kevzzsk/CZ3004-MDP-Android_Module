@@ -4,6 +4,8 @@ package com.example.qunjia.mdpapp;
 import android.content.Context;
 
 
+import java.math.BigInteger;
+
 import static com.example.qunjia.mdpapp.GridMapHandler2D.*;
 import static java.lang.Integer.parseInt;
 
@@ -38,14 +40,23 @@ class GridMapUpdateManager {
     }
 
     private static class MapDescriptor {
-        int[] exploredRows = new int[20];
-        int[] exploredColumns = new int[15];
+        int[][] exploredArr = new int[20][15];
 
-        int[] obstaclesRows = new int[20];
-        int[] getObstaclesColumns = new int[15];
+        int[][] obstaclesArr = new int[20][15];
 
-        MapDescriptor(String full_map, String explored) {
+        MapDescriptor(String full_map, String obstacles) {
+
             // TODO: (full map) convert hex to binary
+            full_map = new BigInteger(full_map, 16).toString(2);
+            obstacles = new BigInteger(obstacles, 16).toString(2);
+
+            int row = 0;
+            for(int col = 0; col < full_map.length(); col++){
+                obstaclesArr[row][col] = obstacles.charAt(col);
+                if(col % 15 == 14) row++;
+            }
+
+            int y;
 
             // TODO: (explored region) convert hex to binary
 
@@ -87,7 +98,7 @@ class GridMapUpdateManager {
     }
 
     void decodeMessage(Context context, String message) {
-        String[] decoded = message.split("|");
+        String[] decoded = message.split("\\|");
         if (decoded.length > 0) {
             String header = decoded[0];
 
