@@ -40,8 +40,6 @@ class GridMapUpdateManager {
     }
 
     private static class MapDescriptor {
-        int[][] exploredArr = new int[20][15];
-
         int[][] obstaclesArr = new int[20][15];
 
         MapDescriptor(String full_map, String obstacles) {
@@ -64,15 +62,14 @@ class GridMapUpdateManager {
 
         void update(Context context) {
             // Color cell according to obstacles and explored
-            for (int row=0; row < exploredArr.length; row++) {
-                for (int col=0; col < exploredArr[0].length; col++) {
-                    if (exploredArr[row][col] == 1) {
-                        ChangeCellColor(context, R.color.explored, row, col);
-                    } else {
+            for (int row=0; row < obstaclesArr.length; row++) {
+                for (int col=0; col < obstaclesArr[0].length; col++) {
+                    int code = obstaclesArr[row][col];
+                    if (code == 0) {
                         ChangeCellColor(context, R.color.unexplored, row, col);
-                    }
-
-                    if (obstaclesArr[row][col] == 1) {
+                    } else if (code == 1) {
+                        ChangeCellColor(context, R.color.explored, row, col);
+                    } else  if (code == 2) {
                         ChangeCellColor(context, R.color.obstacle, row, col);
                     }
                 }
