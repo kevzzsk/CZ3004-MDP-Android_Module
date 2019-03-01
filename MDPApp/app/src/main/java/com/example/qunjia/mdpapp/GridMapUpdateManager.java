@@ -22,7 +22,7 @@ class GridMapUpdateManager {
     private ArrowDescriptor arrow;
 
     GridMapUpdateManager () {
-        robot = new RobotDescriptor(0, 0);
+        robot = new RobotDescriptor(18, 1);
     }
 
     void toggleDisplayMode() {
@@ -64,7 +64,19 @@ class GridMapUpdateManager {
 
         void update(Context context) {
             // Color cell according to obstacles and explored
-            ChangeCellColor(context, 255,  5, 5);
+            for (int row=0; row < exploredArr.length; row++) {
+                for (int col=0; col < exploredArr[0].length; col++) {
+                    if (exploredArr[row][col] == 1) {
+                        ChangeCellColor(context, R.color.explored, row, col);
+                    } else {
+                        ChangeCellColor(context, R.color.unexplored, row, col);
+                    }
+
+                    if (obstaclesArr[row][col] == 1) {
+                        ChangeCellColor(context, R.color.obstacle, row, col);
+                    }
+                }
+            }
         }
     }
 
