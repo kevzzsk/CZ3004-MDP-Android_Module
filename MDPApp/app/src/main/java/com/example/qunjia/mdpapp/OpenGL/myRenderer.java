@@ -39,10 +39,12 @@ public class myRenderer implements GLSurfaceView.Renderer {
     private final float[] mViewMatrix = new float[16];
     private final float[] mRotationMatrix = new float[16];
 
-    private static float[] gridMap;
+    private static int[][] gridMap;
+    private Context context;
     //
-    myRenderer(Context context, float[] gridMap) {
+    myRenderer(Context c, int[][] gridMap) {
         myRenderer.gridMap = gridMap;
+        context = c;
     }
     ///
     // Create a shader object, load the shader source, and
@@ -96,7 +98,7 @@ public class myRenderer implements GLSurfaceView.Renderer {
         GLES30.glClearColor(0.9f, .9f, 0.9f, 0.9f);
         //initialize the gridMap code for drawing.
 
-        gridMap3D = new GridMap3D(gridMap);
+        gridMap3D = new GridMap3D(context, gridMap);
         //if we had other objects setup them up here as well.
     }
 

@@ -33,11 +33,9 @@ public class GridMapHandler2D {
     private final static int cellMargin = 2;
     public final static int rowTotalNumber = 20, columnTotalNumber = 15;
 
-    //robot current position. For checking if robot is insideMap for MoveRobot() only
-    public static int robotCurrentColumn, robotCurrentRow;
     private static int robotWaypointColumn, robotWaypointRow;
 
-    public static void SetRobotPosition(Context context, int column, int row) {
+    public static void SetRobotPosition(Context context, int row, int column) {
         RelativeLayout relativeLayout = ((Activity) context).findViewById(R.id.gridMapFragmentLayout);
 
         //remove old robot text view
@@ -52,11 +50,17 @@ public class GridMapHandler2D {
             return;
         }
         else if(row > 19 && column > 14){
-            row = robotCurrentRow;
-            column = robotCurrentColumn;
+            row = GridMapUpdateManager.RobotDescriptor.getRowNumber();
+            column = GridMapUpdateManager.RobotDescriptor.getColumnNumber();
+            if(robotWaypointColumn != 0 && robotWaypointRow != 0){
+                SetRobotWaypointPosition(context, robotWaypointColumn, robotWaypointRow);
+            }
         }
-        else if(row == robotWaypointRow && column == robotWaypointColumn){
+        if(row == robotWaypointRow && column == robotWaypointColumn){
             SetRobotWaypointPosition(context, -1, -1);//remove robot waypoint
+        }
+        else if(GridMapFragment.is3Dmode){
+            return;
         }
 
         //create new robot text view
@@ -68,9 +72,6 @@ public class GridMapHandler2D {
         textView.setBackgroundColor(Color.parseColor("#1100ce"));//blue
 
         relativeLayout.addView(textView);
-
-        robotCurrentRow = row;
-        robotCurrentColumn = column;
     }
 
     public static void ChangeCellColor(Context context, int color, int rowNumber, int columnNumber) {

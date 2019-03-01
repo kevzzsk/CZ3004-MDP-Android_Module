@@ -1,6 +1,5 @@
 package com.example.qunjia.mdpapp.OpenGL;
 
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -8,15 +7,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import android.content.Context;
-import android.content.res.AssetManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.opengl.GLES30;
-import android.opengl.GLES30;
-import android.opengl.GLES30;
-import android.opengl.GLUtils;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
+
+import com.example.qunjia.mdpapp.R;
 
 public class GridMap3D {
     private int mProgramObject;
@@ -28,9 +24,10 @@ public class GridMap3D {
 
     //this is the initial data, which will need to translated into the mVertices variable in the consturctor.
     private float[] mVerticesData;
-    private float[] gridMap;
+    private int[][] gridMap;
+    private Context context;
 
-    private final int noObstacles = 0, obstacles = 1, currentPosition = -1, arrow = -20;
+    private final int explored = 0, unexplored = 1, obstacles = 2,  arrow = -20;
 
 
     //vertex shader code
@@ -58,7 +55,8 @@ public class GridMap3D {
 
     //finally some methods
     //constructor
-    GridMap3D(float[] gridMap) {
+    GridMap3D(Context c, int[][] gridMap) {
+        context = c;
         mVerticesData = CreateVerticesData(gridMap);
         //first setup the mVertices correctly.
         mVertices = ByteBuffer
@@ -138,53 +136,54 @@ public class GridMap3D {
         GLES30.glEnableVertexAttribArray(VERTEX_POS_INDX);
 
         //grid map color
-        for(int i = 0, j = 0; j < gridMap.length; j++) {
-            if(gridMap[j] == noObstacles ) {
-                GLES30.glUniform4fv(mColorHandle, 1, getFloatArrayFromARGB("#FFFFFF"), 0);//white
-                GLES30.glDrawArrays(GLES30.GL_TRIANGLES, i, 6);
-                GLES30.glUniform4fv(mColorHandle, 1, getFloatArrayFromARGB("#000000"), 0);//black
-                GLES30.glDrawArrays(GLES30.GL_LINES, i, 6);
-                GLES30.glLineWidth(2);
-                i+=6;
-            }
-            else if(gridMap[j] == obstacles){
-                GLES30.glUniform4fv(mColorHandle, 1, getFloatArrayFromARGB("#000000"), 0);//black
-                GLES30.glDrawArrays(GLES30.GL_TRIANGLES, i, 36);
-                GLES30.glUniform4fv(mColorHandle, 1, getFloatArrayFromARGB("#FFFFFF"), 0);//white
-                GLES30.glDrawArrays(GLES30.GL_LINES, i, 36);
-                GLES30.glLineWidth(2);
-                i+=36;
-            }
-            else if(gridMap[j] == currentPosition ) {
-                GLES30.glUniform4fv(mColorHandle, 1, getFloatArrayFromARGB("#FFFFFF"), 0);//white
-                GLES30.glDrawArrays(GLES30.GL_TRIANGLES, i, 6);
-                GLES30.glUniform4fv(mColorHandle, 1, getFloatArrayFromARGB("#000000"), 0);//black
-                GLES30.glDrawArrays(GLES30.GL_LINES, i, 6);
-                GLES30.glLineWidth(2);
-                i+=6;
+        int i = 0;
+        for(int r = 0; r < gridMap.length; r++) {
+            for (int c = 0; c < gridMap[r].length; c++){
+                if(gridMap[r][c] == explored ) {
+                    float[] exploredColor =  getFloatArrayFromARGB(ContextCompat.getColor(context, R.color.explored));
+                    GLES30.glUniform4fv(mColorHandle, 1,exploredColor, 0);
+                    GLES30.glDrawArrays(GLES30.GL_TRIANGLES, i, 6);
+                    GLES30.glUniform4fv(mColorHandle, 1, getFloatArrayFromARGB(Color.parseColor("#000000")), 0);//black
+                    GLES30.glDrawArrays(GLES30.GL_LINES, i, 6);
+                    GLES30.glLineWidth(2);
+                    i+=6;
+                }
+                else if(gridMap[r][c] == unexplored) {
+                    float[] unexploredColor =  getFloatArrayFromARGB(ContextCompat.getColor(context, R.color.unexplored));
+                    GLES30.glUniform4fv(mColorHandle, 1,unexploredColor, 0);
+                    GLES30.glDrawArrays(GLES30.GL_TRIANGLES, i, 6);
+                    GLES30.glUniform4fv(mColorHandle, 1, getFloatArrayFromARGB(Color.parseColor("#000000")), 0);//black
+                    GLES30.glDrawArrays(GLES30.GL_LINES, i, 6);
+                    GLES30.glLineWidth(2);
+                    i+=6;
+                }
+                else if(gridMap[r][c] == obstacles){
+                    float[] obstaclesColor =  getFloatArrayFromARGB(ContextCompat.getColor(context, R.color.obstacle));
+                    GLES30.glUniform4fv(mColorHandle, 1,obstaclesColor ,0);
+                    GLES30.glDrawArrays(GLES30.GL_TRIANGLES, i, 36);
+                    GLES30.glUniform4fv(mColorHandle, 1, getFloatArrayFromARGB(Color.parseColor("#FFFFFF")), 0);//white
+                    GLES30.glDrawArrays(GLES30.GL_LINES, i, 36);
+                    GLES30.glLineWidth(2);
+                    i+=36;
+                }
             }
         }
     }
 
-    private float[] CreateVerticesData(float[] gridMap) {
+    private float[] CreateVerticesData(int[][] gridMap) {
         this.gridMap = gridMap;
         ArrayList<Float> arrayList = new ArrayList();
-        for (int i = 0; i < gridMap.length; i++) {
-            int rowNo = i / 15;
-            int colNo = i % 15;
-
-            if (gridMap[i] == noObstacles) {
-                arrayList.addAll(Arrays.asList(getFlatGroundVertices(colNo, rowNo)));
-            }
-            //obstacle
-            else if (gridMap[i] == obstacles) {
-                arrayList.addAll(Arrays.asList(getObstacleVertices(colNo, rowNo)));
-            }
-            //robot
-            else if (gridMap[i] == currentPosition) {
-                myRenderer.setX(-colNo);
-                myRenderer.setZ(-rowNo);
-                arrayList.addAll(Arrays.asList(getFlatGroundVertices(colNo, rowNo)));
+        for (int r = 0; r < gridMap.length; r++) {
+            for (int c = 0; c< gridMap[r].length; c++){
+                if (gridMap[r][c] == explored) {
+                    arrayList.addAll(Arrays.asList(getFlatGroundVertices(c, r)));
+                }
+                else if (gridMap[r][c] == unexplored) {
+                    arrayList.addAll(Arrays.asList(getFlatGroundVertices(c, r)));
+                }
+                else if (gridMap[r][c] == obstacles) {
+                    arrayList.addAll(Arrays.asList(getObstacleVertices(c, r)));
+                }
             }
         }
 
@@ -196,8 +195,8 @@ public class GridMap3D {
         return result;
     }
 
-    private float[] getFloatArrayFromARGB(String argb){
-        int color_base = Color.parseColor(argb);
+    private float[] getFloatArrayFromARGB(int color_base){
+        //int color_base = Color.parseColor(color_str);
         int red = Color.red(color_base);
         int green = Color.green(color_base);
         int blue = Color.blue(color_base);

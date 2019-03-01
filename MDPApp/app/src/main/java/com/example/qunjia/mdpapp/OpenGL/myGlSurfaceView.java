@@ -15,7 +15,7 @@ public class myGlSurfaceView extends GLSurfaceView {
 
     myRenderer myRender;
 
-    public myGlSurfaceView(Context context, float[] gridMap) {
+    public myGlSurfaceView(Context context, int[][] gridMap) {
         super(context);
         // Create an OpenGL ES 3.0 context.
         setEGLContextClientVersion(3);

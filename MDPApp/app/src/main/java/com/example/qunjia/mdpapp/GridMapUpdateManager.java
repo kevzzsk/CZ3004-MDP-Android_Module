@@ -1,8 +1,17 @@
 package com.example.qunjia.mdpapp;
 
 
+import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
+import android.os.Handler;
+import android.support.v4.content.ContextCompat;
+import android.view.View;
+import android.widget.RelativeLayout;
 
+
+import com.example.qunjia.mdpapp.OpenGL.myGlSurfaceView;
+import com.example.qunjia.mdpapp.OpenGL.myRenderer;
 
 import java.math.BigInteger;
 
@@ -22,7 +31,7 @@ class GridMapUpdateManager {
     private ArrowDescriptor arrow;
 
     GridMapUpdateManager () {
-        robot = new RobotDescriptor(18, 1);
+        robot = new RobotDescriptor(18, 1/*, 180*/);
     }
 
     void toggleDisplayMode() {
@@ -33,62 +42,123 @@ class GridMapUpdateManager {
         if (map != null) {
             map.update(context);
         }
-        SetRobotPosition(context, robot.columnNumber, robot.rowNumber);
+        SetRobotPosition(context, RobotDescriptor.rowNumber, RobotDescriptor.columnNumber);
+        myRenderer.setX(-RobotDescriptor.columnNumber);
+        myRenderer.setZ(-RobotDescriptor.rowNumber);
         if (arrow != null) {
             SetArrowPicture(context, arrow.rotationAngle, arrow.rowNumber, arrow.columnNumber);
         }
     }
 
     private static class MapDescriptor {
-        int[][] obstaclesArr = new int[20][15];
+        int[][] MapArr = new int[20][15];
+        Boolean usingFirstLayout = true; //for 3D map
 
         MapDescriptor(String full_map, String obstacles) {
-
             // TODO: (full map) convert hex to binary
+
             full_map = new BigInteger(full_map, 16).toString(2);
+            full_map = full_map.substring(2, full_map.length()-2);
+
+            obstacles = "F" + obstacles;//prevent BigInteger from removing 0s from the front of binary string.
             obstacles = new BigInteger(obstacles, 16).toString(2);
+            obstacles = obstacles.substring(4);
 
             int row = 0;
-            for(int col = 2; col < full_map.length() -2 ; col++){
-                exploredArr[row][(col-2)%15] = Character.getNumericValue(full_map.charAt(col));
-                if((col-2) % 15 == 14)
+            for(int col = 0; col < full_map.length(); col++){
+                MapArr[row][(col)%15] = Character.getNumericValue(full_map.charAt(col));
+                if((col) % 15 == 14)
                     row++;
+            }
+
+            int o = 0;
+            for (int r = 0; r < MapArr.length; r++) {
+                for (int c = 0; c < MapArr[r].length; c++) {
+                    if (MapArr[r][c] == 1) {
+                        if (Character.getNumericValue(obstacles.charAt(o)) == 1) {
+                            MapArr[r][c]++;
+                        }
+                        o++;
+                    }
+                }
             }
 
             // TODO: (explored region) convert hex to binary
 
         }
 
-        void update(Context context) {
+        void update(final Context context) {
             // Color cell according to obstacles and explored
-            for (int row=0; row < obstaclesArr.length; row++) {
-                for (int col=0; col < obstaclesArr[0].length; col++) {
-                    int code = obstaclesArr[row][col];
+            for (int row=0; row < MapArr.length; row++) {
+                for (int col=0; col < MapArr[0].length; col++) {
+                    int code = MapArr[row][col];
                     if (code == 0) {
-                        ChangeCellColor(context, R.color.unexplored, row, col);
+                        ChangeCellColor(context, ContextCompat.getColor(context, R.color.unexplored), row, col);
                     } else if (code == 1) {
-                        ChangeCellColor(context, R.color.explored, row, col);
+                        ChangeCellColor(context, ContextCompat.getColor(context, R.color.explored), row, col);
                     } else  if (code == 2) {
-                        ChangeCellColor(context, R.color.obstacle, row, col);
+                        ChangeCellColor(context, ContextCompat.getColor(context, R.color.obstacle), row, col);
                     }
                 }
             }
+
+            if(usingFirstLayout){
+                RelativeLayout relativeLayout = ((Activity) context).findViewById(R.id.gridMap3DOne);
+                myGlSurfaceView openGLView = new myGlSurfaceView(context, MapArr);
+                relativeLayout.removeAllViews();
+                relativeLayout.addView(openGLView);
+            } else {
+                RelativeLayout relativeLayout = ((Activity) context).findViewById(R.id.gridMap3DTwo);
+                myGlSurfaceView openGLView = new myGlSurfaceView(context, MapArr);
+                relativeLayout.removeAllViews();
+                relativeLayout.addView(openGLView);
+            }
+
+            Handler handler2 = new Handler();
+            handler2.postDelayed(new Runnable(){
+                public void run(){
+                    RelativeLayout relativeLayoutOne = ((Activity) context).findViewById(R.id.gridMap3DOne);
+                    RelativeLayout relativeLayoutTwo = ((Activity) context).findViewById(R.id.gridMap3DTwo);
+
+                    if(usingFirstLayout){
+                        relativeLayoutOne.setVisibility(View.VISIBLE);
+                        relativeLayoutTwo.setVisibility(View.GONE);
+                    }
+                    else {
+                        relativeLayoutOne.setVisibility(View.GONE);
+                        relativeLayoutTwo.setVisibility(View.VISIBLE);
+                    }
+                    usingFirstLayout = !usingFirstLayout;
+                }
+            }, 100);
         }
     }
 
-    private static class RobotDescriptor {
-        int rowNumber;
-        int columnNumber;
+    public static class RobotDescriptor {
+        private static int rowNumber;
+        private static int columnNumber;
+        //private static int faceAngle;
 
-        RobotDescriptor(int rowNumber, int columnNumber) {
-            this.rowNumber = rowNumber;
-            this.columnNumber = columnNumber;
+        RobotDescriptor(int rowNumber, int columnNumber/*, int faceAngleNumber*/) {
+            RobotDescriptor.rowNumber = rowNumber;
+            RobotDescriptor.columnNumber = columnNumber;
+            //RobotDescriptor.faceAngle = faceAngleNumber;
         }
 
-        void update(String rowString, String columnString) {
-            this.rowNumber = parseInt(rowString);
-            this.columnNumber = parseInt(columnString);
+        void update(String rowString, String columnString /*,String faceAngleString*/) {
+            rowNumber = parseInt(rowString);
+            columnNumber = parseInt(columnString);
+            //faceAngle = parseInt(faceAngleString);
         }
+
+        public static int getRowNumber() {
+            return rowNumber;
+        }
+
+        public static int getColumnNumber() {
+            return columnNumber;
+        }
+
     }
 
     private static class ArrowDescriptor {
@@ -116,6 +186,7 @@ class GridMapUpdateManager {
 
                     // robot position
                     robot.update(decoded[4], decoded[5]);
+                    //robot.update(decoded[4], decoded[5], "180");
 
                     break;
                 case "ARW":
