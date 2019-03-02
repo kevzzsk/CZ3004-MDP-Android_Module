@@ -32,6 +32,8 @@ class GridMapUpdateManager {
 
     GridMapUpdateManager () {
         robot = new RobotDescriptor(18, 1/*, 180*/);
+        map = new MapDescriptor();
+        arrow = new ArrowDescriptor();
     }
 
     void toggleDisplayMode() {
@@ -51,10 +53,15 @@ class GridMapUpdateManager {
     }
 
     private static class MapDescriptor {
-        int[][] MapArr = new int[20][15];
-        Boolean usingFirstLayout = true; //for 3D map
+        int[][] MapArr;
+        Boolean usingFirstLayout; //for 3D map
 
-        MapDescriptor(String full_map, String obstacles) {
+        MapDescriptor() {
+            MapArr = new int[20][15];
+            usingFirstLayout = true;
+        }
+
+        void setMapArr(String full_map, String obstacles){
             // TODO: (full map) convert hex to binary
 
             full_map = new BigInteger(full_map, 16).toString(2);
@@ -87,7 +94,7 @@ class GridMapUpdateManager {
 
         }
 
-        void update(final Context context) {
+        void update(Context context) {
             // Color cell according to obstacles and explored
             for (int row=0; row < MapArr.length; row++) {
                 for (int col=0; col < MapArr[0].length; col++) {
@@ -102,24 +109,21 @@ class GridMapUpdateManager {
                 }
             }
 
+            final RelativeLayout relativeLayoutOne = ((Activity) context).findViewById(R.id.gridMap3DOne);
+            final RelativeLayout relativeLayoutTwo = ((Activity) context).findViewById(R.id.gridMap3DTwo);
             if(usingFirstLayout){
-                RelativeLayout relativeLayout = ((Activity) context).findViewById(R.id.gridMap3DOne);
                 myGlSurfaceView openGLView = new myGlSurfaceView(context, MapArr);
-                relativeLayout.removeAllViews();
-                relativeLayout.addView(openGLView);
+                relativeLayoutOne.removeAllViews();
+                relativeLayoutOne.addView(openGLView);
             } else {
-                RelativeLayout relativeLayout = ((Activity) context).findViewById(R.id.gridMap3DTwo);
                 myGlSurfaceView openGLView = new myGlSurfaceView(context, MapArr);
-                relativeLayout.removeAllViews();
-                relativeLayout.addView(openGLView);
+                relativeLayoutTwo.removeAllViews();
+                relativeLayoutTwo.addView(openGLView);
             }
 
             Handler handler2 = new Handler();
             handler2.postDelayed(new Runnable(){
                 public void run(){
-                    RelativeLayout relativeLayoutOne = ((Activity) context).findViewById(R.id.gridMap3DOne);
-                    RelativeLayout relativeLayoutTwo = ((Activity) context).findViewById(R.id.gridMap3DTwo);
-
                     if(usingFirstLayout){
                         relativeLayoutOne.setVisibility(View.VISIBLE);
                         relativeLayoutTwo.setVisibility(View.GONE);
@@ -166,12 +170,14 @@ class GridMapUpdateManager {
         int rowNumber;
         int columnNumber;
 
-        ArrowDescriptor(String message) {
-            // TODO: decode message
-
+        ArrowDescriptor() {
             this.rotationAngle = 90;
             this.rowNumber = 5;
             this.columnNumber = 5;
+        }
+
+        void setMessage(String message){
+            // TODO: decode message
         }
     }
 
@@ -182,8 +188,7 @@ class GridMapUpdateManager {
 
             switch (header) {
                 case "MDF":
-                    map = new MapDescriptor(decoded[1], decoded[2]);
-
+                    map.setMapArr(decoded[1],decoded[2]);
                     // robot position
                     robot.update(decoded[4], decoded[5]);
                     //robot.update(decoded[4], decoded[5], "180");
@@ -191,7 +196,7 @@ class GridMapUpdateManager {
                     break;
                 case "ARW":
                     // TODO: decode arrow message
-                    arrow = new ArrowDescriptor(message);
+                    arrow.setMessage(message);
 
                     break;
             }
