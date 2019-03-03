@@ -30,9 +30,9 @@ class GridMapUpdateManager {
     private RobotDescriptor robot;
     private ArrowDescriptor arrow;
 
-    GridMapUpdateManager () {
+    GridMapUpdateManager (Context context) {
         robot = new RobotDescriptor(18, 1/*, 180*/);
-        map = new MapDescriptor();
+        map = new MapDescriptor(context);
         arrow = new ArrowDescriptor();
     }
 
@@ -42,23 +42,29 @@ class GridMapUpdateManager {
 
     void updateAll(Context context) {
         if (map != null) {
-            map.update(context);
+            map.update();
         }
         SetRobotPosition(context, RobotDescriptor.rowNumber, RobotDescriptor.columnNumber);
         myRenderer.setX(-RobotDescriptor.columnNumber);
         myRenderer.setZ(-RobotDescriptor.rowNumber);
         if (arrow != null) {
-            SetArrowPicture(context, arrow.rotationAngle, arrow.rowNumber, arrow.columnNumber);
+            //SetArrowPicture(context, arrow.rotationAngle, arrow.rowNumber, arrow.columnNumber);
         }
     }
 
     private static class MapDescriptor {
         int[][] MapArr;
         Boolean usingFirstLayout; //for 3D map
+        int exploredNo, unexploredNo, obstaclesNo;
+        Context context;
 
-        MapDescriptor() {
+        MapDescriptor(Context c) {
             MapArr = new int[20][15];
             usingFirstLayout = true;
+            context = c;
+            exploredNo = Integer.parseInt(context.getResources().getString(R.string.exploredNo));
+            unexploredNo = Integer.parseInt(context.getResources().getString(R.string.unexploredNo));
+            obstaclesNo = Integer.parseInt(context.getResources().getString(R.string.obstaclesNo));
         }
 
         void setMapArr(String full_map, String obstacles){
@@ -67,7 +73,7 @@ class GridMapUpdateManager {
             full_map = new BigInteger(full_map, 16).toString(2);
             full_map = full_map.substring(2, full_map.length()-2);
 
-            obstacles = "F" + obstacles;//prevent BigInteger from removing 0s from the front of binary string.
+            obstacles = "F" + obstacles;//add "F" to prevent BigInteger from removing 0s from the front of binary string.
             obstacles = new BigInteger(obstacles, 16).toString(2);
             obstacles = obstacles.substring(4);
 
@@ -78,32 +84,32 @@ class GridMapUpdateManager {
                     row++;
             }
 
+
+            // TODO: (explored region) convert hex to binary
             int o = 0;
             for (int r = 0; r < MapArr.length; r++) {
                 for (int c = 0; c < MapArr[r].length; c++) {
                     if (MapArr[r][c] == 1) {
                         if (Character.getNumericValue(obstacles.charAt(o)) == 1) {
-                            MapArr[r][c]++;
+                            MapArr[r][c] = obstaclesNo;
                         }
                         o++;
                     }
                 }
             }
-
-            // TODO: (explored region) convert hex to binary
-
         }
 
-        void update(Context context) {
+
+        void update() {
             // Color cell according to obstacles and explored
             for (int row=0; row < MapArr.length; row++) {
                 for (int col=0; col < MapArr[0].length; col++) {
                     int code = MapArr[row][col];
-                    if (code == 0) {
+                    if (code == unexploredNo) {
                         ChangeCellColor(context, ContextCompat.getColor(context, R.color.unexplored), row, col);
-                    } else if (code == 1) {
+                    } else if (code == exploredNo) {
                         ChangeCellColor(context, ContextCompat.getColor(context, R.color.explored), row, col);
-                    } else  if (code == 2) {
+                    } else  if (code == obstaclesNo) {
                         ChangeCellColor(context, ContextCompat.getColor(context, R.color.obstacle), row, col);
                     }
                 }

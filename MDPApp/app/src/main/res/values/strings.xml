@@ -6,4 +6,8 @@
     <string name="bluetooth_scan_btn">Scan</string>
     <string name="bluetooth_connect_btn">Connect</string>
     <string name="last_paried_device">Last paried device</string>
+
+    <string name="unexploredNo">0</string>
+    <string name="exploredNo">1</string>
+    <string name="obstaclesNo">2</string>
 </resources>

@@ -92,8 +92,6 @@ public class myRenderer implements GLSurfaceView.Renderer {
     // Initialize the shader and program object
     //
     public void onSurfaceCreated(GL10 glUnused, EGLConfig config) {
-
-
         //set the clear buffer color to light gray.
         GLES30.glClearColor(0.9f, .9f, 0.9f, 0.9f);
         //initialize the gridMap code for drawing.

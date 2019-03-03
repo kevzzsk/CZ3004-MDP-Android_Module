@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity{
         PagerSlidingTabStrip tabs = (PagerSlidingTabStrip) findViewById(R.id.topTabs);
         tabs.setViewPager(pager);
 
-        gridMapUpdateManager = new GridMapUpdateManager();
+        gridMapUpdateManager = new GridMapUpdateManager(this);
     }
 
     public class MyPagerAdapter extends FragmentStatePagerAdapter {

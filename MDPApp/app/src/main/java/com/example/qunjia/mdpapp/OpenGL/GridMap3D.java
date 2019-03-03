@@ -16,22 +16,13 @@ import com.example.qunjia.mdpapp.R;
 
 public class GridMap3D {
     private int mProgramObject;
-    private int mMVPMatrixHandle;
-    private int mColorHandle;
     private FloatBuffer mVertices;
-    //initial size
-    float size = 0.5f;
-
-    //this is the initial data, which will need to translated into the mVertices variable in the consturctor.
-    private float[] mVerticesData;
+    private float size = 0.5f;//initial size
     private int[][] gridMap;
     private Context context;
-
-    private final int explored = 0, unexplored = 1, obstacles = 2,  arrow = -20;
-
-
+    private int exploredNo, unexploredNo, obstaclesNo;
     //vertex shader code
-    String vShaderStr =
+    private String vShaderStr =
             "#version 300 es 			  \n"
                     + "uniform mat4 uMVPMatrix;     \n"
                     + "in vec4 vPosition;           \n"
@@ -40,7 +31,7 @@ public class GridMap3D {
                     + "   gl_Position = uMVPMatrix * vPosition;  \n"
                     + "}                            \n";
     //fragment shader code.
-    String fShaderStr =
+    private String fShaderStr =
             "#version 300 es		 			          	\n"
                     + "precision mediump float;					  	\n"
                     + "uniform vec4 vColor;	 			 		  	\n"
@@ -57,7 +48,10 @@ public class GridMap3D {
     //constructor
     GridMap3D(Context c, int[][] gridMap) {
         context = c;
-        mVerticesData = CreateVerticesData(gridMap);
+        exploredNo = Integer.parseInt(context.getResources().getString(R.string.exploredNo));
+        unexploredNo = Integer.parseInt(context.getResources().getString(R.string.unexploredNo));
+        obstaclesNo = Integer.parseInt(context.getResources().getString(R.string.obstaclesNo));
+        float[] mVerticesData = CreateVerticesData(gridMap);
         //first setup the mVertices correctly.
         mVertices = ByteBuffer
                 .allocateDirect(mVerticesData.length * 4)
@@ -115,11 +109,11 @@ public class GridMap3D {
         GLES30.glUseProgram(mProgramObject);
 
         // get handle to shape's transformation matrix
-        mMVPMatrixHandle = GLES30.glGetUniformLocation(mProgramObject, "uMVPMatrix");
+        int mMVPMatrixHandle = GLES30.glGetUniformLocation(mProgramObject, "uMVPMatrix");
         myRenderer.checkGlError("glGetUniformLocation");
 
         // get handle to fragment shader's vColor member
-        mColorHandle = GLES30.glGetUniformLocation(mProgramObject, "vColor");
+        int mColorHandle = GLES30.glGetUniformLocation(mProgramObject, "vColor");
 
 
         // Apply the projection and view transformation
@@ -139,16 +133,7 @@ public class GridMap3D {
         int i = 0;
         for(int r = 0; r < gridMap.length; r++) {
             for (int c = 0; c < gridMap[r].length; c++){
-                if(gridMap[r][c] == explored ) {
-                    float[] exploredColor =  getFloatArrayFromARGB(ContextCompat.getColor(context, R.color.explored));
-                    GLES30.glUniform4fv(mColorHandle, 1,exploredColor, 0);
-                    GLES30.glDrawArrays(GLES30.GL_TRIANGLES, i, 6);
-                    GLES30.glUniform4fv(mColorHandle, 1, getFloatArrayFromARGB(Color.parseColor("#000000")), 0);//black
-                    GLES30.glDrawArrays(GLES30.GL_LINES, i, 6);
-                    GLES30.glLineWidth(2);
-                    i+=6;
-                }
-                else if(gridMap[r][c] == unexplored) {
+                if(gridMap[r][c] == unexploredNo) {
                     float[] unexploredColor =  getFloatArrayFromARGB(ContextCompat.getColor(context, R.color.unexplored));
                     GLES30.glUniform4fv(mColorHandle, 1,unexploredColor, 0);
                     GLES30.glDrawArrays(GLES30.GL_TRIANGLES, i, 6);
@@ -156,8 +141,15 @@ public class GridMap3D {
                     GLES30.glDrawArrays(GLES30.GL_LINES, i, 6);
                     GLES30.glLineWidth(2);
                     i+=6;
-                }
-                else if(gridMap[r][c] == obstacles){
+                } else if(gridMap[r][c] == exploredNo) {
+                    float[] exploredColor =  getFloatArrayFromARGB(ContextCompat.getColor(context, R.color.explored));
+                    GLES30.glUniform4fv(mColorHandle, 1,exploredColor, 0);
+                    GLES30.glDrawArrays(GLES30.GL_TRIANGLES, i, 6);
+                    GLES30.glUniform4fv(mColorHandle, 1, getFloatArrayFromARGB(Color.parseColor("#000000")), 0);//black
+                    GLES30.glDrawArrays(GLES30.GL_LINES, i, 6);
+                    GLES30.glLineWidth(2);
+                    i+=6;
+                } else if(gridMap[r][c] == obstaclesNo){
                     float[] obstaclesColor =  getFloatArrayFromARGB(ContextCompat.getColor(context, R.color.obstacle));
                     GLES30.glUniform4fv(mColorHandle, 1,obstaclesColor ,0);
                     GLES30.glDrawArrays(GLES30.GL_TRIANGLES, i, 36);
@@ -175,13 +167,13 @@ public class GridMap3D {
         ArrayList<Float> arrayList = new ArrayList();
         for (int r = 0; r < gridMap.length; r++) {
             for (int c = 0; c< gridMap[r].length; c++){
-                if (gridMap[r][c] == explored) {
+                if (gridMap[r][c] == exploredNo) {
                     arrayList.addAll(Arrays.asList(getFlatGroundVertices(c, r)));
                 }
-                else if (gridMap[r][c] == unexplored) {
+                else if (gridMap[r][c] == unexploredNo) {
                     arrayList.addAll(Arrays.asList(getFlatGroundVertices(c, r)));
                 }
-                else if (gridMap[r][c] == obstacles) {
+                else if (gridMap[r][c] == obstaclesNo) {
                     arrayList.addAll(Arrays.asList(getObstacleVertices(c, r)));
                 }
             }
@@ -290,6 +282,18 @@ public class GridMap3D {
                 (2 * colNo + 2) * size, -size, size * (2 * rowNo + 2), // bottom-right
                 (2 * colNo + 2) * size,  size, size * (2 * rowNo + 2), // top-right
                 (2 * colNo + 2) * size,  size, size * (2 * rowNo), // top-left
+        };
+    }
+
+    private Float[] getArrowVertices(int colNo, int rowNo){
+        return new Float[]{
+                (2 * colNo)     * size  , -size, size * (2 * rowNo), // top-left
+                (2 * colNo)     * size  , -size, size * (2 * rowNo + 2), // bottom-left
+                (2 * colNo + 2) * size  , -size, size * (2 * rowNo + 2), // bottom-right
+                // Triangle 2
+                (2 * colNo + 2) * size  , -size, size * (2 * rowNo + 2), // bottom-right
+                (2 * colNo + 2) * size  , -size, size * (2 * rowNo), // top-right
+                (2 * colNo)     * size  , -size, size * (2 * rowNo), // top-left
         };
     }
 }
