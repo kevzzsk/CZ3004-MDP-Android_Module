@@ -17,7 +17,8 @@ import com.example.qunjia.mdpapp.R;
 public class GridMap3D {
     private int mProgramObject;
     private FloatBuffer mVertices;
-    private float size = 0.5f;//initial size
+    private final float size = 0.5f;//initial size
+    private  final float aSize = 0.33f;
     private int[][] gridMap;
     private Context context;
     private int exploredNo, unexploredNo, obstaclesNo;
@@ -151,13 +152,37 @@ public class GridMap3D {
                     i+=6;
                 } else if(gridMap[r][c] == obstaclesNo){
                     float[] obstaclesColor =  getFloatArrayFromARGB(ContextCompat.getColor(context, R.color.obstacle));
+                    //white part of arrow (1st face)
+                    GLES30.glUniform4fv(mColorHandle, 1,getFloatArrayFromARGB(Color.parseColor("#FFFFFF")) ,0);
+                    GLES30.glDrawArrays(GLES30.GL_TRIANGLES, i, 18);
+                    GLES30.glUniform4fv(mColorHandle, 1, getFloatArrayFromARGB(Color.parseColor("#FFFFFF")), 0);//white
+                    GLES30.glDrawArrays(GLES30.GL_LINES, i, 18);
+                    GLES30.glLineWidth(2);
+                    i+=18;
+                    //black part of arrow (1st face)
+                    GLES30.glUniform4fv(mColorHandle, 1,obstaclesColor ,0);
+                    GLES30.glDrawArrays(GLES30.GL_TRIANGLES, i, 9);
+                    GLES30.glUniform4fv(mColorHandle, 1, getFloatArrayFromARGB(Color.parseColor("#FFFFFF")), 0);//white
+                    GLES30.glDrawArrays(GLES30.GL_LINES, i, 9);
+                    GLES30.glLineWidth(2);
+                    i+=9;
+                    //2nd,3rd,4th,5th,6th face
+                    GLES30.glUniform4fv(mColorHandle, 1,obstaclesColor ,0);
+                    GLES30.glDrawArrays(GLES30.GL_TRIANGLES, i, 30);
+                    GLES30.glUniform4fv(mColorHandle, 1, getFloatArrayFromARGB(Color.parseColor("#FFFFFF")), 0);//white
+                    GLES30.glDrawArrays(GLES30.GL_LINES, i, 30);
+                    GLES30.glLineWidth(2);
+                    i+= 30;
+                }
+                /*else if(gridMap[r][c] == obstaclesNo){
+                    float[] obstaclesColor =  getFloatArrayFromARGB(ContextCompat.getColor(context, R.color.obstacle));
                     GLES30.glUniform4fv(mColorHandle, 1,obstaclesColor ,0);
                     GLES30.glDrawArrays(GLES30.GL_TRIANGLES, i, 36);
                     GLES30.glUniform4fv(mColorHandle, 1, getFloatArrayFromARGB(Color.parseColor("#FFFFFF")), 0);//white
                     GLES30.glDrawArrays(GLES30.GL_LINES, i, 36);
                     GLES30.glLineWidth(2);
                     i+=36;
-                }
+                }*/
             }
         }
     }
@@ -174,7 +199,8 @@ public class GridMap3D {
                     arrayList.addAll(Arrays.asList(getFlatGroundVertices(c, r)));
                 }
                 else if (gridMap[r][c] == obstaclesNo) {
-                    arrayList.addAll(Arrays.asList(getObstacleVertices(c, r)));
+                    //arrayList.addAll(Arrays.asList(getObstacleVertices(c, r)));
+                    arrayList.addAll(Arrays.asList(getRightArrowVertices(c, r)));
                 }
             }
         }
@@ -285,15 +311,407 @@ public class GridMap3D {
         };
     }
 
-    private Float[] getArrowVertices(int colNo, int rowNo){
+    private Float[] getFrontArrowVertices(int colNo, int rowNo){
         return new Float[]{
-                (2 * colNo)     * size  , -size, size * (2 * rowNo), // top-left
-                (2 * colNo)     * size  , -size, size * (2 * rowNo + 2), // bottom-left
-                (2 * colNo + 2) * size  , -size, size * (2 * rowNo + 2), // bottom-right
+                ////////////////////////////////////////////////////////////////////
+                // FRONT
+                ////////////////////////////////////////////////////////////////////
+                //White
+                (2 * colNo)     * size,  size         , size * (2 * rowNo + 2), // top-left
+                (2 * colNo)     * size,  aSize * size , size * (2 * rowNo + 2), // arrow-left
+                (2 * colNo + 1) * size,  size         , size * (2 * rowNo + 2), // arrow-top
+
+                (2 * colNo + 2) * size,  size         , size * (2 * rowNo + 2), // top-right
+                (2 * colNo + 2) * size,  aSize *size  , size * (2 * rowNo + 2), // arrow-right
+                (2 * colNo + 1) * size,  size         , size * (2 * rowNo + 2), // arrow-top
+
+                (2 * colNo)     * size, -size         , size * (2 * rowNo + 2), // bottom-left
+                (2 * colNo)     * size, aSize * size  , size * (2 * rowNo + 2), // arrow-left
+                (2 * colNo+0.5f)* size, -size         , size * (2 * rowNo + 2), // arrow-bottom-left
+
+                (2 * colNo+0.5f)* size, -size         , size * (2 * rowNo + 2), // arrow-bottom-left
+                (2 * colNo+0.5f)* size, aSize * size  , size * (2 * rowNo + 2), // arrow-middle-left
+                (2 * colNo)     * size,  aSize *size  , size * (2 * rowNo + 2), // arrow-left
+
+                (2 * colNo + 2) * size, -size         , size * (2 * rowNo + 2), // bottom-right
+                (2 * colNo + 2) * size,  aSize *size  , size * (2 * rowNo + 2), // arrow-right
+                (2 * colNo+1.5f)* size, -size         , size * (2 * rowNo + 2), // arrow-bottom-right
+
+                (2 * colNo+1.5f)* size, -size         , size * (2 * rowNo + 2), // arrow-bottom-right
+                (2 * colNo+1.5f)* size,  aSize *size  , size * (2 * rowNo + 2), // arrow-middle-right
+                (2 * colNo+2)   * size,  aSize *size  , size * (2 * rowNo + 2), // arrow-right
+
+                // black
+                (2 * colNo)     * size,  aSize *size  , size * (2 * rowNo + 2), // arrow-left
+                (2 * colNo + 2) * size,  aSize *size  , size * (2 * rowNo + 2), // arrow-right
+                (2 * colNo + 1) * size,  size         , size * (2 * rowNo + 2), // arrow-top
+
+                (2 * colNo+0.5f)* size,  aSize *size  , size * (2 * rowNo + 2), // arrow-middle-left
+                (2 * colNo+0.5f)* size, -size         , size * (2 * rowNo + 2), // arrow-bottom-left
+                (2 * colNo+1.5f)* size, -size         , size * (2 * rowNo + 2), // arrow-bottom-right
+
+                (2 * colNo+1.5f)* size, -size         , size * (2 * rowNo + 2), // arrow-bottom-right
+                (2 * colNo+1.5f)* size,  aSize *size  , size * (2 * rowNo + 2), // arrow-middle-right
+                (2 * colNo+0.5f)* size,  aSize *size  , size * (2 * rowNo + 2), // arrow-middle-left
+                ////////////////////////////////////////////////////////////////////
+                // right
+                ////////////////////////////////////////////////////////////////////
+                // Triangle 1
+                (2 * colNo)     * size,  size, size * (2 * rowNo), // top-left
+                (2 * colNo)     * size, -size, size * (2 * rowNo), // bottom-left
+                (2 * colNo)     * size, -size, size * (2 * rowNo + 2), // bottom-right
                 // Triangle 2
-                (2 * colNo + 2) * size  , -size, size * (2 * rowNo + 2), // bottom-right
-                (2 * colNo + 2) * size  , -size, size * (2 * rowNo), // top-right
-                (2 * colNo)     * size  , -size, size * (2 * rowNo), // top-left
+                (2 * colNo)     * size, -size, size * (2 * rowNo + 2), // bottom-right
+                (2 * colNo)     * size,  size, size * (2 * rowNo + 2), // top-right
+                (2 * colNo)     * size,  size, size * (2 * rowNo), // top-left
+                ////////////////////////////////////////////////////////////////////
+                // BACK
+                ////////////////////////////////////////////////////////////////////
+                // Triangle 1
+                (2 * colNo)     * size,  size, size * (2 * rowNo), // top-left
+                (2 * colNo)     * size, -size, size * (2 * rowNo), // bottom-left
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo), // bottom-right
+                // Triangle 2
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo), // bottom-right
+                (2 * colNo + 2) * size,  size, size * (2 * rowNo), // top-right
+                (2 * colNo)     * size,  size, size * (2 * rowNo), // top-left
+
+                ////////////////////////////////////////////////////////////////////
+                // TOP
+                ////////////////////////////////////////////////////////////////////
+                // Triangle 1
+                (2 * colNo)     * size,  size, size * (2 * rowNo), // top-left
+                (2 * colNo)     * size,  size, size * (2 * rowNo + 2), // bottom-left
+                (2 * colNo + 2) * size,  size, size * (2 * rowNo + 2), // bottom-right
+                // Triangle 2
+                (2 * colNo + 2) * size,  size, size * (2 * rowNo + 2), // bottom-right
+                (2 * colNo + 2) * size,  size, size * (2 * rowNo), // top-right
+                (2 * colNo)     * size,  size, size * (2 * rowNo), // top-left
+                ////////////////////////////////////////////////////////////////////
+                // BOTTOM
+                ////////////////////////////////////////////////////////////////////
+                // Triangle 1
+                (2 * colNo)     * size, -size, size * (2 * rowNo), // top-left
+                (2 * colNo)     * size, -size, size * (2 * rowNo + 2), // bottom-left
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo + 2), // bottom-right
+                // Triangle 2
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo + 2), // bottom-right
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo), // top-right
+                (2 * colNo)     * size, -size, size * (2 * rowNo), // top-left
+                ////////////////////////////////////////////////////////////////////
+                // left
+                ////////////////////////////////////////////////////////////////////
+                // Triangle 1
+                (2 * colNo + 2) * size,  size, size * (2 * rowNo), // top-left
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo), // bottom-left
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo + 2), // bottom-right
+                // Triangle 2
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo + 2), // bottom-right
+                (2 * colNo + 2) * size,  size, size * (2 * rowNo + 2), // top-right
+                (2 * colNo + 2) * size,  size, size * (2 * rowNo), // top-left
+        };
+    }
+
+    private Float[] getBackArrowVertices(int colNo, int rowNo){
+        return new Float[]{
+                ////////////////////////////////////////////////////////////////////
+                // BACK
+                ////////////////////////////////////////////////////////////////////
+                //White
+                (2 * colNo)     * size,  size         , size * (2 * rowNo), // top-left
+                (2 * colNo)     * size,  aSize * size , size * (2 * rowNo), // arrow-left
+                (2 * colNo + 1) * size,  size         , size * (2 * rowNo), // arrow-top
+
+                (2 * colNo + 2) * size,  size         , size * (2 * rowNo), // top-right
+                (2 * colNo + 2) * size,  aSize *size  , size * (2 * rowNo), // arrow-right
+                (2 * colNo + 1) * size,  size         , size * (2 * rowNo), // arrow-top
+
+                (2 * colNo)     * size, -size         , size * (2 * rowNo), // bottom-left
+                (2 * colNo)     * size, aSize * size  , size * (2 * rowNo), // arrow-left
+                (2 * colNo+0.5f)* size, -size         , size * (2 * rowNo), // arrow-bottom-left
+
+                (2 * colNo+0.5f)* size, -size         , size * (2 * rowNo), // arrow-bottom-left
+                (2 * colNo+0.5f)* size, aSize * size  , size * (2 * rowNo), // arrow-middle-left
+                (2 * colNo)     * size,  aSize *size  , size * (2 * rowNo), // arrow-left
+
+                (2 * colNo + 2) * size, -size         , size * (2 * rowNo), // bottom-right
+                (2 * colNo + 2) * size,  aSize *size  , size * (2 * rowNo), // arrow-right
+                (2 * colNo+1.5f)* size, -size         , size * (2 * rowNo), // arrow-bottom-right
+
+                (2 * colNo+1.5f)* size, -size         , size * (2 * rowNo), // arrow-bottom-right
+                (2 * colNo+1.5f)* size,  aSize *size  , size * (2 * rowNo), // arrow-middle-right
+                (2 * colNo+2)   * size,  aSize *size  , size * (2 * rowNo), // arrow-right
+
+                // black
+                (2 * colNo)     * size,  aSize *size  , size * (2 * rowNo), // arrow-left
+                (2 * colNo + 2) * size,  aSize *size  , size * (2 * rowNo), // arrow-right
+                (2 * colNo + 1) * size,  size         , size * (2 * rowNo), // arrow-top
+
+                (2 * colNo+0.5f)* size,  aSize *size  , size * (2 * rowNo), // arrow-middle-left
+                (2 * colNo+0.5f)* size, -size         , size * (2 * rowNo), // arrow-bottom-left
+                (2 * colNo+1.5f)* size, -size         , size * (2 * rowNo), // arrow-bottom-right
+
+                (2 * colNo+1.5f)* size, -size         , size * (2 * rowNo), // arrow-bottom-right
+                (2 * colNo+1.5f)* size,  aSize *size  , size * (2 * rowNo), // arrow-middle-right
+                (2 * colNo+0.5f)* size,  aSize *size  , size * (2 * rowNo), // arrow-middle-left
+                ////////////////////////////////////////////////////////////////////
+                // right
+                ////////////////////////////////////////////////////////////////////
+                // Triangle 1
+                (2 * colNo)     * size,  size, size * (2 * rowNo), // top-left
+                (2 * colNo)     * size, -size, size * (2 * rowNo), // bottom-left
+                (2 * colNo)     * size, -size, size * (2 * rowNo + 2), // bottom-right
+                // Triangle 2
+                (2 * colNo)     * size, -size, size * (2 * rowNo + 2), // bottom-right
+                (2 * colNo)     * size,  size, size * (2 * rowNo + 2), // top-right
+                (2 * colNo)     * size,  size, size * (2 * rowNo), // top-left
+                ////////////////////////////////////////////////////////////////////
+                // FRONT
+                ////////////////////////////////////////////////////////////////////
+                // Triangle 1
+                (2 * colNo)     * size,  size, size * (2 * rowNo + 2), // top-left
+                (2 * colNo)     * size, -size, size * (2 * rowNo + 2), // bottom-left
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo + 2), // bottom-right
+                // Triangle 2
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo + 2), // bottom-right
+                (2 * colNo + 2) * size,  size, size * (2 * rowNo + 2), // top-right
+                (2 * colNo)     * size,  size, size * (2 * rowNo + 2), // top-left
+                ////////////////////////////////////////////////////////////////////
+                // TOP
+                ////////////////////////////////////////////////////////////////////
+                // Triangle 1
+                (2 * colNo)     * size,  size, size * (2 * rowNo), // top-left
+                (2 * colNo)     * size,  size, size * (2 * rowNo + 2), // bottom-left
+                (2 * colNo + 2) * size,  size, size * (2 * rowNo + 2), // bottom-right
+                // Triangle 2
+                (2 * colNo + 2) * size,  size, size * (2 * rowNo + 2), // bottom-right
+                (2 * colNo + 2) * size,  size, size * (2 * rowNo), // top-right
+                (2 * colNo)     * size,  size, size * (2 * rowNo), // top-left
+                ////////////////////////////////////////////////////////////////////
+                // BOTTOM
+                ////////////////////////////////////////////////////////////////////
+                // Triangle 1
+                (2 * colNo)     * size, -size, size * (2 * rowNo), // top-left
+                (2 * colNo)     * size, -size, size * (2 * rowNo + 2), // bottom-left
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo + 2), // bottom-right
+                // Triangle 2
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo + 2), // bottom-right
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo), // top-right
+                (2 * colNo)     * size, -size, size * (2 * rowNo), // top-left
+                ////////////////////////////////////////////////////////////////////
+                // left
+                ////////////////////////////////////////////////////////////////////
+                // Triangle 1
+                (2 * colNo + 2) * size,  size, size * (2 * rowNo), // top-left
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo), // bottom-left
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo + 2), // bottom-right
+                // Triangle 2
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo + 2), // bottom-right
+                (2 * colNo + 2) * size,  size, size * (2 * rowNo + 2), // top-right
+                (2 * colNo + 2) * size,  size, size * (2 * rowNo), // top-left
+        };
+    }
+
+    private Float[] getRightArrowVertices(int colNo, int rowNo){
+        return new Float[]{
+                ////////////////////////////////////////////////////////////////////
+                // right
+                ////////////////////////////////////////////////////////////////////
+                // Triangle 1
+                //White
+                (2 * colNo)     * size,  size         , size * (2 * rowNo), // top-left
+                (2 * colNo)     * size,  aSize * size , size * (2 * rowNo), // arrow-left
+                (2 * colNo) * size,  size         , size * (2 * rowNo + 1), // arrow-top
+
+                (2 * colNo) * size,  size         , size * (2 * rowNo + 2), // top-right
+                (2 * colNo) * size,  aSize *size  , size * (2 * rowNo + 2), // arrow-right
+                (2 * colNo) * size,  size         , size * (2 * rowNo + 1), // arrow-top
+
+                (2 * colNo)     * size, -size         , size * (2 * rowNo), // bottom-left
+                (2 * colNo)     * size, aSize * size  , size * (2 * rowNo), // arrow-left
+                (2 * colNo)* size, -size         , size * (2 * rowNo+0.5f), // arrow-bottom-left
+
+                (2 * colNo)* size, -size         , size * (2 * rowNo+0.5f), // arrow-bottom-left
+                (2 * colNo)* size, aSize * size  , size * (2 * rowNo+0.5f), // arrow-middle-left
+                (2 * colNo)     * size,  aSize *size  , size * (2 * rowNo), // arrow-left
+
+                (2 * colNo) * size, -size         , size * (2 * rowNo + 2), // bottom-right
+                (2 * colNo) * size,  aSize *size  , size * (2 * rowNo + 2), // arrow-right
+                (2 * colNo)* size, -size         , size * (2 * rowNo+1.5f), // arrow-bottom-right
+
+                (2 * colNo)* size, -size         , size * (2 * rowNo+1.5f), // arrow-bottom-right
+                (2 * colNo)* size,  aSize *size  , size * (2 * rowNo+1.5f), // arrow-middle-right
+                (2 * colNo)   * size,  aSize *size  , size * (2 * rowNo + 2 ), // arrow-right
+
+                // black
+                (2 * colNo)     * size,  aSize *size  , size * (2 * rowNo), // arrow-left
+                (2 * colNo) * size,  aSize *size  , size * (2 * rowNo + 2), // arrow-right
+                (2 * colNo) * size,  size         , size * (2 * rowNo + 1), // arrow-top
+
+                (2 * colNo)* size,  aSize *size  , size * (2 * rowNo+0.5f), // arrow-middle-left
+                (2 * colNo)* size, -size         , size * (2 * rowNo+0.5f), // arrow-bottom-left
+                (2 * colNo)* size, -size         , size * (2 * rowNo+1.5f), // arrow-bottom-right
+
+                (2 * colNo)* size, -size         , size * (2 * rowNo+1.5f), // arrow-bottom-right
+                (2 * colNo)* size,  aSize *size  , size * (2 * rowNo+1.5f), // arrow-middle-right
+                (2 * colNo)* size,  aSize *size  , size * (2 * rowNo+0.5f), // arrow-middle-left
+                ////////////////////////////////////////////////////////////////////
+                // FRONT
+                ////////////////////////////////////////////////////////////////////
+                // Triangle 1
+                (2 * colNo)     * size,  size, size * (2 * rowNo + 2), // top-left
+                (2 * colNo)     * size, -size, size * (2 * rowNo + 2), // bottom-left
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo + 2), // bottom-right
+                // Triangle 2
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo + 2), // bottom-right
+                (2 * colNo + 2) * size,  size, size * (2 * rowNo + 2), // top-right
+                (2 * colNo)     * size,  size, size * (2 * rowNo + 2), // top-left
+                ////////////////////////////////////////////////////////////////////
+                // BACK
+                ////////////////////////////////////////////////////////////////////
+                // Triangle 1
+                (2 * colNo)     * size,  size, size * (2 * rowNo), // top-left
+                (2 * colNo)     * size, -size, size * (2 * rowNo), // bottom-left
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo), // bottom-right
+                // Triangle 2
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo), // bottom-right
+                (2 * colNo + 2) * size,  size, size * (2 * rowNo), // top-right
+                (2 * colNo)     * size,  size, size * (2 * rowNo), // top-left
+
+                ////////////////////////////////////////////////////////////////////
+                // TOP
+                ////////////////////////////////////////////////////////////////////
+                // Triangle 1
+                (2 * colNo)     * size,  size, size * (2 * rowNo), // top-left
+                (2 * colNo)     * size,  size, size * (2 * rowNo + 2), // bottom-left
+                (2 * colNo + 2) * size,  size, size * (2 * rowNo + 2), // bottom-right
+                // Triangle 2
+                (2 * colNo + 2) * size,  size, size * (2 * rowNo + 2), // bottom-right
+                (2 * colNo + 2) * size,  size, size * (2 * rowNo), // top-right
+                (2 * colNo)     * size,  size, size * (2 * rowNo), // top-left
+                ////////////////////////////////////////////////////////////////////
+                // BOTTOM
+                ////////////////////////////////////////////////////////////////////
+                // Triangle 1
+                (2 * colNo)     * size, -size, size * (2 * rowNo), // top-left
+                (2 * colNo)     * size, -size, size * (2 * rowNo + 2), // bottom-left
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo + 2), // bottom-right
+                // Triangle 2
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo + 2), // bottom-right
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo), // top-right
+                (2 * colNo)     * size, -size, size * (2 * rowNo), // top-left
+                ////////////////////////////////////////////////////////////////////
+                // left
+                ////////////////////////////////////////////////////////////////////
+                // Triangle 1
+                (2 * colNo + 2) * size,  size, size * (2 * rowNo), // top-left
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo), // bottom-left
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo + 2), // bottom-right
+                // Triangle 2
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo + 2), // bottom-right
+                (2 * colNo + 2) * size,  size, size * (2 * rowNo + 2), // top-right
+                (2 * colNo + 2) * size,  size, size * (2 * rowNo), // top-left
+        };
+    }
+    
+    private Float[] getLeftArrowVertices(int colNo, int rowNo){
+        return new Float[]{
+                ////////////////////////////////////////////////////////////////////
+                // left
+                ////////////////////////////////////////////////////////////////////
+                //White
+                (2 * colNo + 2)     * size,  size         , size * (2 * rowNo), // top-left
+                (2 * colNo + 2)     * size,  aSize * size , size * (2 * rowNo), // arrow-left
+                (2 * colNo + 2) * size,  size         , size * (2 * rowNo + 1), // arrow-top
+
+                (2 * colNo + 2) * size,  size         , size * (2 * rowNo + 2), // top-right
+                (2 * colNo + 2) * size,  aSize *size  , size * (2 * rowNo + 2), // arrow-right
+                (2 * colNo + 2) * size,  size         , size * (2 * rowNo + 1), // arrow-top
+
+                (2 * colNo + 2)     * size, -size         , size * (2 * rowNo), // bottom-left
+                (2 * colNo + 2)     * size, aSize * size  , size * (2 * rowNo), // arrow-left
+                (2 * colNo + 2)* size, -size         , size * (2 * rowNo+0.5f), // arrow-bottom-left
+
+                (2 * colNo + 2)* size, -size         , size * (2 * rowNo+0.5f), // arrow-bottom-left
+                (2 * colNo + 2)* size, aSize * size  , size * (2 * rowNo+0.5f), // arrow-middle-left
+                (2 * colNo + 2)     * size,  aSize *size  , size * (2 * rowNo), // arrow-left
+
+                (2 * colNo + 2) * size, -size         , size * (2 * rowNo + 2), // bottom-right
+                (2 * colNo + 2) * size,  aSize *size  , size * (2 * rowNo + 2), // arrow-right
+                (2 * colNo + 2)* size, -size         , size * (2 * rowNo+1.5f), // arrow-bottom-right
+
+                (2 * colNo + 2)* size, -size         , size * (2 * rowNo+1.5f), // arrow-bottom-right
+                (2 * colNo + 2)* size,  aSize *size  , size * (2 * rowNo+1.5f), // arrow-middle-right
+                (2 * colNo + 2)   * size,  aSize *size  , size * (2 * rowNo + 2 ), // arrow-right
+
+                // black
+                (2 * colNo + 2)     * size,  aSize *size  , size * (2 * rowNo), // arrow-left
+                (2 * colNo + 2) * size,  aSize *size  , size * (2 * rowNo + 2), // arrow-right
+                (2 * colNo + 2) * size,  size         , size * (2 * rowNo + 1), // arrow-top
+
+                (2 * colNo + 2)* size,  aSize *size  , size * (2 * rowNo+0.5f), // arrow-middle-left
+                (2 * colNo + 2)* size, -size         , size * (2 * rowNo+0.5f), // arrow-bottom-left
+                (2 * colNo + 2)* size, -size         , size * (2 * rowNo+1.5f), // arrow-bottom-right
+
+                (2 * colNo + 2)* size, -size         , size * (2 * rowNo+1.5f), // arrow-bottom-right
+                (2 * colNo + 2)* size,  aSize *size  , size * (2 * rowNo+1.5f), // arrow-middle-right
+                (2 * colNo + 2)* size,  aSize *size  , size * (2 * rowNo+0.5f), // arrow-middle-left
+                ////////////////////////////////////////////////////////////////////
+                // right
+                ////////////////////////////////////////////////////////////////////
+                // Triangle 1
+                (2 * colNo)     * size,  size, size * (2 * rowNo), // top-left
+                (2 * colNo)     * size, -size, size * (2 * rowNo), // bottom-left
+                (2 * colNo)     * size, -size, size * (2 * rowNo + 2), // bottom-right
+                // Triangle 2
+                (2 * colNo)     * size, -size, size * (2 * rowNo + 2), // bottom-right
+                (2 * colNo)     * size,  size, size * (2 * rowNo + 2), // top-right
+                (2 * colNo)     * size,  size, size * (2 * rowNo), // top-left
+                ////////////////////////////////////////////////////////////////////
+                // FRONT
+                ////////////////////////////////////////////////////////////////////
+                // Triangle 1
+                (2 * colNo)     * size,  size, size * (2 * rowNo + 2), // top-left
+                (2 * colNo)     * size, -size, size * (2 * rowNo + 2), // bottom-left
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo + 2), // bottom-right
+                // Triangle 2
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo + 2), // bottom-right
+                (2 * colNo + 2) * size,  size, size * (2 * rowNo + 2), // top-right
+                (2 * colNo)     * size,  size, size * (2 * rowNo + 2), // top-left
+                ////////////////////////////////////////////////////////////////////
+                // BACK
+                ////////////////////////////////////////////////////////////////////
+                // Triangle 1
+                (2 * colNo)     * size,  size, size * (2 * rowNo), // top-left
+                (2 * colNo)     * size, -size, size * (2 * rowNo), // bottom-left
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo), // bottom-right
+                // Triangle 2
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo), // bottom-right
+                (2 * colNo + 2) * size,  size, size * (2 * rowNo), // top-right
+                (2 * colNo)     * size,  size, size * (2 * rowNo), // top-left
+
+                ////////////////////////////////////////////////////////////////////
+                // TOP
+                ////////////////////////////////////////////////////////////////////
+                // Triangle 1
+                (2 * colNo)     * size,  size, size * (2 * rowNo), // top-left
+                (2 * colNo)     * size,  size, size * (2 * rowNo + 2), // bottom-left
+                (2 * colNo + 2) * size,  size, size * (2 * rowNo + 2), // bottom-right
+                // Triangle 2
+                (2 * colNo + 2) * size,  size, size * (2 * rowNo + 2), // bottom-right
+                (2 * colNo + 2) * size,  size, size * (2 * rowNo), // top-right
+                (2 * colNo)     * size,  size, size * (2 * rowNo), // top-left
+                ////////////////////////////////////////////////////////////////////
+                // BOTTOM
+                ////////////////////////////////////////////////////////////////////
+                // Triangle 1
+                (2 * colNo)     * size, -size, size * (2 * rowNo), // top-left
+                (2 * colNo)     * size, -size, size * (2 * rowNo + 2), // bottom-left
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo + 2), // bottom-right
+                // Triangle 2
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo + 2), // bottom-right
+                (2 * colNo + 2) * size, -size, size * (2 * rowNo), // top-right
+                (2 * colNo)     * size, -size, size * (2 * rowNo), // top-left
         };
     }
 }
