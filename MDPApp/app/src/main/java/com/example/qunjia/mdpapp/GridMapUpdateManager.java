@@ -58,7 +58,7 @@ class GridMapUpdateManager {
             map.update();
         }
 
-        SetRobotPosition(context, RobotDescriptor.rowNumber, RobotDescriptor.columnNumber);
+        setRobotPosition(context, RobotDescriptor.rowNumber, RobotDescriptor.columnNumber);
         myRenderer.setX(-RobotDescriptor.columnNumber);
         myRenderer.setZ(-RobotDescriptor.rowNumber);
 
@@ -127,11 +127,11 @@ class GridMapUpdateManager {
                 for (int col=0; col < MapArr[0].length; col++) {
                     int code = MapArr[row][col];
                     if (code == unexploredNo) {
-                        ChangeCellColor(context, ContextCompat.getColor(context, R.color.unexplored), row, col);
+                        changeCellColor(context, ContextCompat.getColor(context, R.color.unexplored), row, col);
                     } else if (code == exploredNo) {
-                        ChangeCellColor(context, ContextCompat.getColor(context, R.color.explored), row, col);
+                        changeCellColor(context, ContextCompat.getColor(context, R.color.explored), row, col);
                     } else  if (code == obstaclesNo) {
-                        ChangeCellColor(context, ContextCompat.getColor(context, R.color.obstacle), row, col);
+                        changeCellColor(context, ContextCompat.getColor(context, R.color.obstacle), row, col);
                     }
                 }
             }

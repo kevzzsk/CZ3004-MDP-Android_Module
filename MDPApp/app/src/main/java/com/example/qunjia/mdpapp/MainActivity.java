@@ -70,11 +70,11 @@ public class MainActivity extends AppCompatActivity{
         }
     }
 
-    public void GridMapOnClickMethods(View v) {
+    public void gridMapOnClickMethods(View v) {
         GridMapFragment.myClickMethod(v);
     }
 
-    public void BluetoothOnclickMethods(View v) {
+    public void bluetoothOnClickMethods(View v) {
         for (Fragment fragment : getSupportFragmentManager().getFragments()) {
             if (fragment instanceof BluetoothFragment) {
                 BluetoothFragment bluetooth_fragment = (BluetoothFragment) fragment;

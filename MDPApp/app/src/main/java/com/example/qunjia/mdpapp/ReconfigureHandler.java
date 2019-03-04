@@ -12,17 +12,17 @@ import android.widget.Toast;
 public class ReconfigureHandler {
     public static void F1BtnOnCLick (Context context){
         String savedString = GetSharedPreferencesStr(context, "F1");
-        GridMapFragment.AddTextToStatusWindow((Activity) context, savedString);
+        GridMapFragment.addTextToStatusWindow((Activity) context, savedString);
         BluetoothFragment.sendMessage(savedString);
     }
 
     public static void F2BtnOnCLick (Context context){
         String savedString = GetSharedPreferencesStr(context, "F2");
-        GridMapFragment.AddTextToStatusWindow((Activity) context, savedString);
+        GridMapFragment.addTextToStatusWindow((Activity) context, savedString);
         BluetoothFragment.sendMessage(savedString);
     }
 
-    public static void ReconfigBtnOnCLick (final Context context){
+    public static void reconfigBtnOnClick (final Context context){
 
         AlertDialog.Builder builder1 = new AlertDialog.Builder(context);
         final EditText input = new EditText(context);

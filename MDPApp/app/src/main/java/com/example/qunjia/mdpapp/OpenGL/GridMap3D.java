@@ -519,32 +519,32 @@ public class GridMap3D {
                 ////////////////////////////////////////////////////////////////////
                 // Triangle 1
                 //White
-                (2 * colNo)     * size,  size         , size * (2 * rowNo), // top-left
-                (2 * colNo)     * size,  aSize * size , size * (2 * rowNo), // arrow-left
+                (2 * colNo) * size,  size         , size * (2 * rowNo), // top-left
+                (2 * colNo) * size,  aSize * size , size * (2 * rowNo), // arrow-left
                 (2 * colNo) * size,  size         , size * (2 * rowNo + 1), // arrow-top
 
                 (2 * colNo) * size,  size         , size * (2 * rowNo + 2), // top-right
                 (2 * colNo) * size,  aSize *size  , size * (2 * rowNo + 2), // arrow-right
                 (2 * colNo) * size,  size         , size * (2 * rowNo + 1), // arrow-top
 
-                (2 * colNo)     * size, -size         , size * (2 * rowNo), // bottom-left
-                (2 * colNo)     * size, aSize * size  , size * (2 * rowNo), // arrow-left
-                (2 * colNo)* size, -size         , size * (2 * rowNo+0.5f), // arrow-bottom-left
+                (2 * colNo) * size, -size         , size * (2 * rowNo), // bottom-left
+                (2 * colNo) * size, aSize * size  , size * (2 * rowNo), // arrow-left
+                (2 * colNo) * size, -size         , size * (2 * rowNo+0.5f), // arrow-bottom-left
 
-                (2 * colNo)* size, -size         , size * (2 * rowNo+0.5f), // arrow-bottom-left
-                (2 * colNo)* size, aSize * size  , size * (2 * rowNo+0.5f), // arrow-middle-left
-                (2 * colNo)     * size,  aSize *size  , size * (2 * rowNo), // arrow-left
+                (2 * colNo) * size, -size         , size * (2 * rowNo+0.5f), // arrow-bottom-left
+                (2 * colNo) * size, aSize * size  , size * (2 * rowNo+0.5f), // arrow-middle-left
+                (2 * colNo) * size,  aSize *size  , size * (2 * rowNo), // arrow-left
 
                 (2 * colNo) * size, -size         , size * (2 * rowNo + 2), // bottom-right
                 (2 * colNo) * size,  aSize *size  , size * (2 * rowNo + 2), // arrow-right
-                (2 * colNo)* size, -size         , size * (2 * rowNo+1.5f), // arrow-bottom-right
+                (2 * colNo) * size, -size         , size * (2 * rowNo+1.5f), // arrow-bottom-right
 
-                (2 * colNo)* size, -size         , size * (2 * rowNo+1.5f), // arrow-bottom-right
-                (2 * colNo)* size,  aSize *size  , size * (2 * rowNo+1.5f), // arrow-middle-right
-                (2 * colNo)   * size,  aSize *size  , size * (2 * rowNo + 2 ), // arrow-right
+                (2 * colNo) * size, -size         , size * (2 * rowNo+1.5f), // arrow-bottom-right
+                (2 * colNo) * size,  aSize *size  , size * (2 * rowNo+1.5f), // arrow-middle-right
+                (2 * colNo) * size,  aSize *size  , size * (2 * rowNo + 2 ), // arrow-right
 
                 // black
-                (2 * colNo)     * size,  aSize *size  , size * (2 * rowNo), // arrow-left
+                (2 * colNo) * size,  aSize *size  , size * (2 * rowNo), // arrow-left
                 (2 * colNo) * size,  aSize *size  , size * (2 * rowNo + 2), // arrow-right
                 (2 * colNo) * size,  size         , size * (2 * rowNo + 1), // arrow-top
 

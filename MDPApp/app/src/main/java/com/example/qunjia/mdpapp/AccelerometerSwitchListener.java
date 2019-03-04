@@ -31,13 +31,13 @@ public class AccelerometerSwitchListener implements Switch.OnCheckedChangeListen
 
         if (compoundButton.isChecked()) {
             sensorListener = new SensorListener((Activity) compoundButton.getContext());
-            GridMapFragment.DirectionViewSetEnabled(((Activity) compoundButton.getContext()), false);
+            GridMapFragment.directionViewSetEnabled(((Activity) compoundButton.getContext()), false);
         } else {
             sensorListener.disable();
             sensorListener = null;
             SetVisibilityGone(((Activity) compoundButton.getContext()), 999);//set all visibility gone
-            GridMapFragment.DirectionViewSetEnabled(((Activity) compoundButton.getContext()), true);
-            GridMapFragment.DirectionViewSetEnabled(((Activity) compoundButton.getContext()), true);
+            GridMapFragment.directionViewSetEnabled(((Activity) compoundButton.getContext()), true);
+            GridMapFragment.directionViewSetEnabled(((Activity) compoundButton.getContext()), true);
 
             if (handler != null) {
                 handler.removeCallbacks(myRunnable);
@@ -46,7 +46,7 @@ public class AccelerometerSwitchListener implements Switch.OnCheckedChangeListen
         }
     }
 
-    private void AccelerometerMoveRobotHandler(final Context context, final int direction) {
+    private void AccelerometermoveRobotHandler(final Context context, final int direction) {
         final int delay = 300; //milliseconds
 
         if (handler != null) {
@@ -58,7 +58,7 @@ public class AccelerometerSwitchListener implements Switch.OnCheckedChangeListen
 
         myRunnable = new Runnable() {
             public void run() {
-                GridMapFragment.MoveRobot(context, direction);
+                GridMapFragment.moveRobot(context, direction);
                 handler.postDelayed(this, delay);
             }
         };
@@ -133,14 +133,14 @@ public class AccelerometerSwitchListener implements Switch.OnCheckedChangeListen
             if ((inclination < 25 || inclination > 155)&&
                     currentOrientation != GridMapFragment.MOVE_NONE) {
 
-                AccelerometerMoveRobotHandler(activity, GridMapFragment.MOVE_NONE);
+                AccelerometermoveRobotHandler(activity, GridMapFragment.MOVE_NONE);
                 currentOrientation = GridMapFragment.MOVE_NONE;
                 SetVisibilityGone(activity, GridMapFragment.MOVE_NONE);
             } else if ((orientationX < 90 + range && orientationX > 90 - range) &&
                     (orientationY < 0 + range && orientationY > 0 - range) &&
                     currentOrientation != GridMapFragment.MOVE_DOWN) {
 
-                AccelerometerMoveRobotHandler(activity, GridMapFragment.MOVE_DOWN);
+                AccelerometermoveRobotHandler(activity, GridMapFragment.MOVE_DOWN);
                 currentOrientation = GridMapFragment.MOVE_DOWN;
                 SetVisibilityGone(activity, GridMapFragment.MOVE_DOWN);
             }
@@ -148,7 +148,7 @@ public class AccelerometerSwitchListener implements Switch.OnCheckedChangeListen
                     (orientationY < 180 + range && orientationY > 180 - range)&&
                     currentOrientation != GridMapFragment.MOVE_UP) {
 
-                AccelerometerMoveRobotHandler(activity, GridMapFragment.MOVE_UP);
+                AccelerometermoveRobotHandler(activity, GridMapFragment.MOVE_UP);
                 currentOrientation = GridMapFragment.MOVE_UP;
                 SetVisibilityGone(activity, GridMapFragment.MOVE_UP);
             }
@@ -156,7 +156,7 @@ public class AccelerometerSwitchListener implements Switch.OnCheckedChangeListen
                     (orientationY < 90 + range && orientationY > 90 - range)&&
                     currentOrientation != GridMapFragment.MOVE_LEFT) {
 
-                AccelerometerMoveRobotHandler(activity, GridMapFragment.MOVE_LEFT);
+                AccelerometermoveRobotHandler(activity, GridMapFragment.MOVE_LEFT);
                 currentOrientation = GridMapFragment.MOVE_LEFT;
                 SetVisibilityGone(activity, GridMapFragment.MOVE_LEFT);
             }
@@ -164,7 +164,7 @@ public class AccelerometerSwitchListener implements Switch.OnCheckedChangeListen
                     (orientationY < 90 + range && orientationY > 90 - range)&&
                     currentOrientation != GridMapFragment.MOVE_RIGHT) {
 
-                AccelerometerMoveRobotHandler(activity, GridMapFragment.MOVE_RIGHT);
+                AccelerometermoveRobotHandler(activity, GridMapFragment.MOVE_RIGHT);
                 currentOrientation = GridMapFragment.MOVE_RIGHT;
                 SetVisibilityGone(activity, GridMapFragment.MOVE_RIGHT);
             }
