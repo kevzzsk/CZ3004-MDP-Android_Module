@@ -122,11 +122,15 @@ public class myRenderer implements GLSurfaceView.Renderer {
         //translate everything to 0 before rotating
         Matrix.translateM(mRotationMatrix, 0, 0, 0, 0);
         Matrix.rotateM(mRotationMatrix, 0, mAngle, 0, 1, 0);
+        int magnitude = 2;
+        if (Math.abs(mDirection - mAngle) >= 180) {
+            magnitude = magnitude * 2;
+        }
         if(turnRight && mDirection > mAngle){
-            mAngle +=2;
+            mAngle += magnitude;
         }
         else if(!turnRight && mDirection < mAngle){
-            mAngle -=2;
+            mAngle -= magnitude;
         }
 
         //move the grid map up/down and left/right
