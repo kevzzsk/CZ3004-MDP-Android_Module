@@ -34,7 +34,8 @@ public class GridMapHandler2D {
     public final static int rowTotalNumber = 20, columnTotalNumber = 15;
 
     private static int robotWaypointColumn, robotWaypointRow;
-    public static String positionString = "ROBOT\nWAYPOINT";
+    public static Boolean isWaypointSelected = false;
+    public static int robotStartCoordinateDirection;
 
     public static void setRobotPosition(Context context, int row, int column) {
         RelativeLayout relativeLayout = ((Activity) context).findViewById(R.id.gridMapFragmentLayout);
@@ -54,7 +55,7 @@ public class GridMapHandler2D {
             row = GridMapUpdateManager.RobotDescriptor.getRowNumber();
             column = GridMapUpdateManager.RobotDescriptor.getColumnNumber();
             if(robotWaypointColumn != 0 && robotWaypointRow != 0){
-                setRobotWaypointPosition(context, robotWaypointColumn, robotWaypointRow);
+                setRobotWaypointPosition(context, robotWaypointRow, robotWaypointColumn);
             }
         }
         if(row == robotWaypointRow && column == robotWaypointColumn){
@@ -66,7 +67,7 @@ public class GridMapHandler2D {
 
         //create new robot text view
         final TextView textView = new TextView(((Activity) context));
-        textView.setLayoutParams(getRobotLayoutParams((Activity) context, column, row));
+        textView.setLayoutParams(getRobotLayoutParams((Activity) context, row, column));
         textView.setText("ROBOT");
         textView.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
         textView.setId(robotID);
@@ -172,12 +173,27 @@ public class GridMapHandler2D {
                                 if (rowNumber > 0 && rowNumber < rowTotalNumber - 1 && columnNumber > 0 &&
                                         columnNumber < columnTotalNumber - 1) {
                                     //display robot waypoint
-                                    setRobotWaypointPosition(context, columnNumber, rowNumber);
+                                    String sendString = "";
+                                    if(isWaypointSelected){
+                                        setRobotWaypointPosition(context,  rowNumber, columnNumber);
+                                        sendString = "W|" + rowNumber+ "|" + columnNumber;
+                                    }
+                                    //select start coordinate
+                                    else {
+                                        setRobotPosition(context,  rowNumber, columnNumber);
+                                        String direction = "";
+                                        switch (robotStartCoordinateDirection){
+                                            case 0: direction = "N"; break;
+                                            case 1: direction = "S"; break;
+                                            case 2: direction = "E"; break;
+                                            case 3: direction = "W"; break;
+                                        }
+                                        sendString = "S|" + direction + "|" + rowNumber+ "|" + columnNumber;
+                                    }
 
-                                    //send string to bluetooth
-                                    BluetoothFragment.sendMessage("C" + columnNumber + " R" + rowNumber);
-                                    GridMapFragment.addTextToStatusWindow((Activity) context,"C" + columnNumber + " R" + rowNumber);
 
+                                    BluetoothFragment.sendMessage(sendString);
+                                    GridMapFragment.addTextToStatusWindow((Activity) context,sendString);
                                     //toggle waypoint btn
                                     ToggleButton toggleButton = ((Activity) context).findViewById(R.id.positionToggleBtn);
                                     toggleButton.toggle();
@@ -197,7 +213,7 @@ public class GridMapHandler2D {
         }
     }
 
-    private static RelativeLayout.LayoutParams getRobotLayoutParams(Activity activity, int column, int row){
+    private static RelativeLayout.LayoutParams getRobotLayoutParams(Activity activity, int row, int column){
         int[] location = new int[2];
         ImageView robotCellPosition = activity.findViewById(getImageViewID(column, row));
         robotCellPosition.getLocationOnScreen(location);
@@ -214,7 +230,7 @@ public class GridMapHandler2D {
     }
 
     //for waypoint only
-    private static void setRobotWaypointPosition(Context context, int column, int row) {
+    private static void setRobotWaypointPosition(Context context, int row, int column) {
         RelativeLayout relativeLayout = ((Activity) context).findViewById(R.id.gridMapFragmentLayout);
 
         //remove old robot text view
@@ -232,8 +248,8 @@ public class GridMapHandler2D {
 
         //create new robot text view
         final TextView textView = new TextView(((Activity) context));
-        textView.setLayoutParams(getRobotLayoutParams((Activity) context,column, row));
-        textView.setText(positionString);
+        textView.setLayoutParams(getRobotLayoutParams((Activity) context, row, column));
+        textView.setText("ROBOT\nWAYPOINT");
         textView.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
         textView.setId(robotWaypointID);
         textView.setBackgroundColor(Color.parseColor("#3281ff"));//light blue

@@ -72,15 +72,8 @@ public class GridMapFragment extends Fragment {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                /*GridMapHandler2D.setRobotPosition(getActivity(), 18, 1);
-                GridMapHandler2D.SetArrowPicture(getActivity(), 0, 5, 5);
-                GridMapHandler2D.changeCellColor(getActivity(), Color.BLACK, 5, 6);
-                GridMapHandler2D.changeCellColor(getActivity(), Color.BLACK, 5, 7);
-                GridMapHandler2D.changeCellColor(getActivity(), Color.BLACK, 5, 8);
-                GridMapHandler2D.changeCellColor(getActivity(), Color.BLACK, 6, 8);
-                GridMapHandler2D.changeCellColor(getActivity(), Color.BLACK, 7, 8);
-                GridMapHandler2D.changeCellColor(getActivity(), Color.BLACK, 8, 8);
-                GridMapHandler2D.SetArrowPicture(getActivity(), 90, 9, 8);*/
+                String msg = "MDF|C000000000000000000000000000000000000000000000000000000000000000000000000003|000000000000|N|1|1";
+                mapUpdateManager.decodeMessage(getContext(), msg);
             }
         }, 200);
     }
@@ -119,14 +112,14 @@ public class GridMapFragment extends Fragment {
         ToggleButton toggleButton = getActivity().findViewById(R.id.positionToggleBtn);
         toggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                Activity activity = (Activity) compoundButton.getContext();
-                ToggleButton autoManualToggleBtn = activity.findViewById(R.id.autoManualToggleBtn);
-                Switch accelerometerSwitch = activity.findViewById(R.id.directionToggleBtn);
-                Button updateBtn = activity.findViewById(R.id.updateBtn);
-                Button exploreBtn = activity.findViewById(R.id.exploreBtn);
-                Button fastestBtn = activity.findViewById(R.id.fastestBtn);
-                Button stopBtn = activity.findViewById(R.id.stopBtn);
+            public void onCheckedChanged(final CompoundButton compoundButton, boolean b) {
+                final Activity activity = (Activity) compoundButton.getContext();
+                final ToggleButton autoManualToggleBtn = activity.findViewById(R.id.autoManualToggleBtn);
+                final Switch accelerometerSwitch = activity.findViewById(R.id.directionToggleBtn);
+                final Button updateBtn = activity.findViewById(R.id.updateBtn);
+                final Button exploreBtn = activity.findViewById(R.id.exploreBtn);
+                final Button fastestBtn = activity.findViewById(R.id.fastestBtn);
+                final Button stopBtn = activity.findViewById(R.id.stopBtn);
                 mapUpdateManager.toggleDisplayMode();
 
                 if (compoundButton.isChecked()) {
@@ -143,13 +136,41 @@ public class GridMapFragment extends Fragment {
                     AlertDialog.Builder builder1 = new AlertDialog.Builder(compoundButton.getContext());
 
                     builder1.setMessage("Select an Option");
-                    builder1.setCancelable(true);
+                    builder1.setCancelable(false);
 
                     builder1.setPositiveButton(
                             "Start",
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
-                                    GridMapHandler2D.positionString = "ROBOT\nSTART\nPOINT";
+                                    GridMapHandler2D.isWaypointSelected = false;
+
+                                    AlertDialog.Builder adb = new AlertDialog.Builder(compoundButton.getContext());
+                                    CharSequence items[] = new CharSequence[] {"North", "South", "East", "West"};
+                                    adb.setSingleChoiceItems(items, 0, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface d, int n) {
+                                            GridMapHandler2D.robotStartCoordinateDirection = n;
+                                        }
+
+                                    });
+                                    adb.setNegativeButton("Confirm", null);
+                                    adb.setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                            GridMapHandler2D.SetRobotDragListener(compoundButton.getContext(), false);
+                                            directionViewSetEnabled(activity, true);
+
+                                            autoManualToggleBtn.setEnabled(true);
+                                            accelerometerSwitch.setEnabled(true);
+                                            updateBtn.setEnabled(true);
+                                            exploreBtn.setEnabled(true);
+                                            fastestBtn.setEnabled(true);
+                                            stopBtn.setEnabled(true);
+                                            compoundButton.toggle();
+                                        }
+                                    });
+                                    adb.setTitle("Choose a direction");
+                                    adb.show();
                                 }
                             });
 
@@ -157,12 +178,23 @@ public class GridMapFragment extends Fragment {
                             "Waypoint",
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
-                                    GridMapHandler2D.positionString = "ROBOT\nWAYPOINT";
+                                    GridMapHandler2D.isWaypointSelected = true;
                                 }
                             });
                     builder1.setNeutralButton(
                             "Cancel",
-                            null);
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    autoManualToggleBtn.setEnabled(true);
+                                    accelerometerSwitch.setEnabled(true);
+                                    updateBtn.setEnabled(true);
+                                    exploreBtn.setEnabled(true);
+                                    fastestBtn.setEnabled(true);
+                                    stopBtn.setEnabled(true);
+                                    compoundButton.toggle();
+                                }
+                            });
 
                     AlertDialog alert11 = builder1.create();
                     alert11.show();
@@ -263,9 +295,7 @@ public class GridMapFragment extends Fragment {
                 ReconfigureHandler.F2BtnOnCLick(v.getContext());
                 return;
             case R.id.stopBtn:
-                String msg = "MDF|F8007800F001F003F807F00FE01F800000000000000000000000000000000000000000000003|000000000700|N|13|4";
-                mapUpdateManager.decodeMessage(v.getContext(), msg);
-                //RobotMovingSimulator(v);
+
                 return;
             case R.id.updateBtn:
                 mapUpdateManager.updateAll(v.getContext());
