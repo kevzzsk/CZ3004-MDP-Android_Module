@@ -6,5 +6,5 @@
 
     <color name="obstacle">#000000</color>
     <color name="explored">#FFFFFF</color>
-    <color name="unexplored">#C1504A</color>
+    <color name="unexplored">#d3716463</color>
 </resources>
