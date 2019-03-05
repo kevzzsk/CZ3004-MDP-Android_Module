@@ -35,7 +35,7 @@ public class AccelerometerSwitchListener implements Switch.OnCheckedChangeListen
         } else {
             sensorListener.disable();
             sensorListener = null;
-            SetVisibilityGone(((Activity) compoundButton.getContext()), 999);//set all visibility gone
+            setVisibilityGone(((Activity) compoundButton.getContext()), 999);//set all visibility gone
             GridMapFragment.directionViewSetEnabled(((Activity) compoundButton.getContext()), true);
             GridMapFragment.directionViewSetEnabled(((Activity) compoundButton.getContext()), true);
 
@@ -46,8 +46,8 @@ public class AccelerometerSwitchListener implements Switch.OnCheckedChangeListen
         }
     }
 
-    private void AccelerometermoveRobotHandler(final Context context, final int direction) {
-        final int delay = 300; //milliseconds
+    private void accelerometerMoveRobotHandler(final Context context, final int direction) {
+        final int delay = 2000; //milliseconds
 
         if (handler != null) {
             handler.removeCallbacks(myRunnable);
@@ -66,7 +66,7 @@ public class AccelerometerSwitchListener implements Switch.OnCheckedChangeListen
         handler.postDelayed(myRunnable, delay);
     }
 
-    private void SetVisibilityGone(Activity activity, int DirectionVisible) {
+    private void setVisibilityGone(Activity activity, int DirectionVisible) {
         //DirectionView directionViewDisabled = activity.findViewById(R.id.viewDirectionDisabled);
         DirectionView directionViewDisabledUp = activity.findViewById(R.id.viewDirectionDisabledUp);
         DirectionView directionViewDisabledDown = activity.findViewById(R.id.viewDirectionDisabledDown);
@@ -128,45 +128,45 @@ public class AccelerometerSwitchListener implements Switch.OnCheckedChangeListen
             int inclination = (int) Math.round(Math.toDegrees(Math.acos(g[2])));
             int orientationX = (int) Math.round(Math.toDegrees(Math.acos(g[0])));
             int orientationY = (int) Math.round(Math.toDegrees(Math.acos(g[1])));
-            final int range = 30;
+            final int range = 60;
 
             if ((inclination < 25 || inclination > 155)&&
                     currentOrientation != GridMapFragment.MOVE_NONE) {
 
-                AccelerometermoveRobotHandler(activity, GridMapFragment.MOVE_NONE);
+                accelerometerMoveRobotHandler(activity, GridMapFragment.MOVE_NONE);
                 currentOrientation = GridMapFragment.MOVE_NONE;
-                SetVisibilityGone(activity, GridMapFragment.MOVE_NONE);
+                setVisibilityGone(activity, GridMapFragment.MOVE_NONE);
             } else if ((orientationX < 90 + range && orientationX > 90 - range) &&
                     (orientationY < 0 + range && orientationY > 0 - range) &&
                     currentOrientation != GridMapFragment.MOVE_DOWN) {
 
-                AccelerometermoveRobotHandler(activity, GridMapFragment.MOVE_DOWN);
+                accelerometerMoveRobotHandler(activity, GridMapFragment.MOVE_DOWN);
                 currentOrientation = GridMapFragment.MOVE_DOWN;
-                SetVisibilityGone(activity, GridMapFragment.MOVE_DOWN);
+                setVisibilityGone(activity, GridMapFragment.MOVE_DOWN);
             }
             else if ((orientationX < 90 + range && orientationX > 90 - range) &&
                     (orientationY < 180 + range && orientationY > 180 - range)&&
                     currentOrientation != GridMapFragment.MOVE_UP) {
 
-                AccelerometermoveRobotHandler(activity, GridMapFragment.MOVE_UP);
+                accelerometerMoveRobotHandler(activity, GridMapFragment.MOVE_UP);
                 currentOrientation = GridMapFragment.MOVE_UP;
-                SetVisibilityGone(activity, GridMapFragment.MOVE_UP);
+                setVisibilityGone(activity, GridMapFragment.MOVE_UP);
             }
             else if ((orientationX < 0 + range && orientationX > 0 - range) &&
                     (orientationY < 90 + range && orientationY > 90 - range)&&
                     currentOrientation != GridMapFragment.MOVE_LEFT) {
 
-                AccelerometermoveRobotHandler(activity, GridMapFragment.MOVE_LEFT);
+                accelerometerMoveRobotHandler(activity, GridMapFragment.MOVE_LEFT);
                 currentOrientation = GridMapFragment.MOVE_LEFT;
-                SetVisibilityGone(activity, GridMapFragment.MOVE_LEFT);
+                setVisibilityGone(activity, GridMapFragment.MOVE_LEFT);
             }
             else if ((orientationX < 180 + range && orientationX > 180 - range) &&
                     (orientationY < 90 + range && orientationY > 90 - range)&&
                     currentOrientation != GridMapFragment.MOVE_RIGHT) {
 
-                AccelerometermoveRobotHandler(activity, GridMapFragment.MOVE_RIGHT);
+                accelerometerMoveRobotHandler(activity, GridMapFragment.MOVE_RIGHT);
                 currentOrientation = GridMapFragment.MOVE_RIGHT;
-                SetVisibilityGone(activity, GridMapFragment.MOVE_RIGHT);
+                setVisibilityGone(activity, GridMapFragment.MOVE_RIGHT);
             }
         }
     }
