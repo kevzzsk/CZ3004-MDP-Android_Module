@@ -79,7 +79,7 @@ public class BluetoothFragment extends Fragment {
                     String readMessage = new String(readBuf, 0, msg.arg1);
                     Log.d("Message received", readMessage);
                     if (activity != null) {
-                        GridMapFragment.AddTextToStatusWindow(activity, readMessage);
+                        GridMapFragment.addTextToStatusWindow(activity, readMessage);
                     }
                     mapUpdateManager.decodeMessage(getContext(), readMessage);
                     break;
