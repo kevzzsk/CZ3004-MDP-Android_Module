@@ -34,6 +34,7 @@ public class GridMapHandler2D {
     public final static int rowTotalNumber = 20, columnTotalNumber = 15;
 
     private static int robotWaypointColumn, robotWaypointRow;
+    public static String positionString = "ROBOT\nWAYPOINT";
 
     public static void setRobotPosition(Context context, int row, int column) {
         RelativeLayout relativeLayout = ((Activity) context).findViewById(R.id.gridMapFragmentLayout);
@@ -178,7 +179,7 @@ public class GridMapHandler2D {
                                     GridMapFragment.addTextToStatusWindow((Activity) context,"C" + columnNumber + " R" + rowNumber);
 
                                     //toggle waypoint btn
-                                    ToggleButton toggleButton = ((Activity) context).findViewById(R.id.waypointToggleBtn);
+                                    ToggleButton toggleButton = ((Activity) context).findViewById(R.id.positionToggleBtn);
                                     toggleButton.toggle();
                                 }
 
@@ -232,7 +233,7 @@ public class GridMapHandler2D {
         //create new robot text view
         final TextView textView = new TextView(((Activity) context));
         textView.setLayoutParams(getRobotLayoutParams((Activity) context,column, row));
-        textView.setText("ROBOT\nWAYPOINT");
+        textView.setText(positionString);
         textView.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
         textView.setId(robotWaypointID);
         textView.setBackgroundColor(Color.parseColor("#3281ff"));//light blue

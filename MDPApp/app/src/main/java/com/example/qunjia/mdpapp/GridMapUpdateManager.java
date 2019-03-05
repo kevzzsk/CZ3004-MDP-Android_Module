@@ -14,6 +14,7 @@ import com.example.qunjia.mdpapp.OpenGL.myGlSurfaceView;
 import com.example.qunjia.mdpapp.OpenGL.myRenderer;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 
 import static com.example.qunjia.mdpapp.GridMapHandler2D.*;
 import static java.lang.Integer.parseInt;
@@ -28,12 +29,12 @@ class GridMapUpdateManager {
 
     private MapDescriptor map;
     private RobotDescriptor robot;
-    private ArrowDescriptor arrow;
+    private static ArrowDescriptor arrow;
 
     GridMapUpdateManager (Context context) {
         robot = new RobotDescriptor(18, 1, FacingDirection.NORTH);
         map = new MapDescriptor(context);
-        arrow = new ArrowDescriptor();
+        arrow = new ArrowDescriptor(context);
     }
 
     void toggleDisplayMode() {
@@ -73,7 +74,7 @@ class GridMapUpdateManager {
         }
 
         if (arrow != null) {
-            //SetArrowPicture(context, arrow.rotationAngle, arrow.rowNumber, arrow.columnNumber);
+            arrow.updateArrow();
         }
     }
 
@@ -103,8 +104,12 @@ class GridMapUpdateManager {
             int row = 19;
             for(int col = 0; col < full_map.length(); col++){
                 MapArr[row][(col)%15] = Character.getNumericValue(full_map.charAt(col));
-                if((col) % 15 == 14)
+                if(Character.getNumericValue(full_map.charAt(col)) == 0){
+                    arrow.removeArrowFromString(String.valueOf(row), String.valueOf(col%15));
+                }
+                if((col) % 15 == 14){
                     row--;
+                }
             }
 
             int o = 0;
@@ -212,18 +217,59 @@ class GridMapUpdateManager {
     }
 
     private static class ArrowDescriptor {
-        int rotationAngle;
-        int rowNumber;
-        int columnNumber;
+        ArrayList<Integer> rotationAngle;
+        ArrayList<Integer> rowNumber;
+        ArrayList<Integer> columnNumber;
+        ArrayList<Integer> rowNumberRemove;
+        ArrayList<Integer> columnNumberRemove;
+        Context context;
 
-        ArrowDescriptor() {
-            this.rotationAngle = 90;
-            this.rowNumber = 5;
-            this.columnNumber = 5;
+        ArrowDescriptor(Context c) {
+            context = c;
+            rowNumber = new ArrayList<>();
+            columnNumber = new ArrayList<>();
+            rotationAngle = new ArrayList<>();
+            rowNumberRemove = new ArrayList<>();
+            columnNumberRemove= new ArrayList<>();
         }
 
-        void fromString(String message){
-            // TODO: decode message
+        void addArrowFromString(String direction,String row, String col){
+            switch (direction){
+                case "S":
+                    rotationAngle.add(FacingDirection.SOUTH);
+                    break;
+                case "W":
+                    rotationAngle.add(FacingDirection.WEST);
+                    break;
+                case "N":
+                    rotationAngle.add(FacingDirection.NORTH);
+                    break;
+                case "E":
+                    rotationAngle.add(FacingDirection.EAST);
+                    break;
+            }
+            rowNumber.add(Integer.parseInt(row));
+            columnNumber.add(Integer.parseInt(col));
+        }
+
+        void removeArrowFromString(String row, String col){
+            rowNumberRemove.add(Integer.parseInt(row));
+            columnNumberRemove.add(Integer.parseInt(col));
+        }
+
+        void updateArrow(){
+            while(rotationAngle.size()>0){
+                setArrowPicture(context, rotationAngle.get(0), rowNumber.get(0), columnNumber.get(0));
+                rotationAngle.remove(0);
+                rowNumber.remove(0);
+                columnNumber.remove(0);
+            }
+
+            while(rowNumberRemove.size()>0){
+                GridMapHandler2D.removeArrowPicture(context, rowNumberRemove.get(0), columnNumberRemove.get(0));
+                rowNumberRemove.remove(0);
+                columnNumberRemove.remove(0);
+            }
         }
     }
 
@@ -238,8 +284,11 @@ class GridMapUpdateManager {
                     robot.fromString(decoded[4], decoded[5], decoded[3]);
                     break;
                 case "ARW":
-                    // TODO: decode arrow message
-                    arrow.fromString(message);
+                    arrow.addArrowFromString(decoded[1], decoded[2],decoded[3]);
+                    break;
+
+                case "ARWR":
+                    arrow.removeArrowFromString(decoded[2], decoded[3]);
                     break;
             }
 

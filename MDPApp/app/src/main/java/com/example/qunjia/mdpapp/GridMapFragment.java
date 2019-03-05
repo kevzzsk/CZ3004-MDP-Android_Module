@@ -2,7 +2,9 @@ package com.example.qunjia.mdpapp;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -61,7 +63,7 @@ public class GridMapFragment extends Fragment {
         initSwitchListener();
         GridMapHandler2D.createGridMap(getActivity());
         directionViewSetup(getActivity());
-        initWaypointToggleBtnListener();
+        initPositionToggleBtnListener();
         initAutoManualToggleBtnListener();
         init3DToggleBtnListener();
         getActivity().findViewById(R.id.updateBtn).setEnabled(false);
@@ -113,8 +115,8 @@ public class GridMapFragment extends Fragment {
         });
     }
 
-    private void initWaypointToggleBtnListener() {
-        ToggleButton toggleButton = getActivity().findViewById(R.id.waypointToggleBtn);
+    private void initPositionToggleBtnListener() {
+        ToggleButton toggleButton = getActivity().findViewById(R.id.positionToggleBtn);
         toggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
@@ -138,6 +140,32 @@ public class GridMapFragment extends Fragment {
                     fastestBtn.setEnabled(false);
                     stopBtn.setEnabled(false);
 
+                    AlertDialog.Builder builder1 = new AlertDialog.Builder(compoundButton.getContext());
+
+                    builder1.setMessage("Select an Option");
+                    builder1.setCancelable(true);
+
+                    builder1.setPositiveButton(
+                            "Start",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    GridMapHandler2D.positionString = "ROBOT\nSTART\nPOINT";
+                                }
+                            });
+
+                    builder1.setNegativeButton(
+                            "Waypoint",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    GridMapHandler2D.positionString = "ROBOT\nWAYPOINT";
+                                }
+                            });
+                    builder1.setNeutralButton(
+                            "Cancel",
+                            null);
+
+                    AlertDialog alert11 = builder1.create();
+                    alert11.show();
                 } else {
                     GridMapHandler2D.SetRobotDragListener(compoundButton.getContext(), false);
                     directionViewSetEnabled(activity, true);
@@ -199,86 +227,6 @@ public class GridMapFragment extends Fragment {
         });
     }
 
-
-
-    private int simulatorInt = 0;//for 3d map simulator
-    private Boolean forward = true;
-    private void robot3DMapSimulator(Boolean moving){
-       /* final int[] gridMap = new int[300];
-        for(int i = 0; i < 300; i++){
-            double rand = Math.random();
-            if(i % 15 == 14 || i % 15 == 13 ) gridMap[i] = 0;
-            else if(rand < 0.8) {
-                gridMap[i] = 0;
-            }
-            else {
-                gridMap[i] = 1;
-            }
-        }
-
-        if(!moving){
-            gridMap[14] = -1;
-            RelativeLayout relativeLayout = getActivity().findViewById(R.id.gridMap3DOne);
-            myGlSurfaceView openGLView = new myGlSurfaceView(getContext(), gridMap);
-            relativeLayout.removeAllViews();
-            relativeLayout.addView(openGLView);
-            return;
-        }
-
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable(){
-            public void run(){
-                //do something
-                handler.postDelayed(this, 500);
-
-                if(forward){
-                    gridMap[14 + 15 * simulatorInt] = -1;
-                    if(simulatorInt != 0){
-                        gridMap[14 + 15 * (simulatorInt - 1)] = 0;
-                    }
-                    simulatorInt++;
-                }else {
-                    gridMap[14 + 15 * simulatorInt] = -1;
-                    if(simulatorInt != 0){
-                        gridMap[14 + 15 * (simulatorInt + 1)] = 0;
-                    }
-                    simulatorInt--;
-                }
-
-                if(simulatorInt == 18 || simulatorInt == 0) forward = !forward;
-
-                if(usingFirstLayout){
-                    RelativeLayout relativeLayout = getActivity().findViewById(R.id.gridMap3DOne);
-                    myGlSurfaceView openGLView = new myGlSurfaceView(getContext(), gridMap);
-                    relativeLayout.removeAllViews();
-                    relativeLayout.addView(openGLView);
-                } else {
-                    RelativeLayout relativeLayout = getActivity().findViewById(R.id.gridMap3DTwo);
-                    myGlSurfaceView openGLView = new myGlSurfaceView(getContext(), gridMap);
-                    relativeLayout.removeAllViews();
-                    relativeLayout.addView(openGLView);
-                }
-
-                Handler handler2 = new Handler();
-                handler2.postDelayed(new Runnable(){
-                    public void run(){
-                        RelativeLayout relativeLayoutOne = getActivity().findViewById(R.id.gridMap3DOne);
-                        RelativeLayout relativeLayoutTwo = getActivity().findViewById(R.id.gridMap3DTwo);
-
-                        if(usingFirstLayout){
-                            relativeLayoutOne.setVisibility(View.VISIBLE);
-                            relativeLayoutTwo.setVisibility(View.GONE);
-                        }
-                        else {
-                            relativeLayoutOne.setVisibility(View.GONE);
-                            relativeLayoutTwo.setVisibility(View.VISIBLE);
-                        }
-                        usingFirstLayout = !usingFirstLayout;
-                    }
-                }, 100);
-            }
-        }, 500);*/
-    }
 
     public static void directionViewSetEnabled(Activity activity, Boolean enabled) {
         DirectionView directionView = activity.findViewById(R.id.viewDirection);

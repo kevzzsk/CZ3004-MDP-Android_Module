@@ -220,10 +220,10 @@
             android:text="ToggleButton"
             android:layout_width="120dp"
             android:layout_height="60dp"
-            android:id="@+id/waypointToggleBtn"
+            android:id="@+id/positionToggleBtn"
             android:layout_marginStart="20dp"
-            android:textOff="Waypoint"
-            android:textOn="Waypoint"
+            android:textOff="Position"
+            android:textOn="Position"
             android:layout_marginTop="3dp" />
 
         <ToggleButton
@@ -231,10 +231,10 @@
             android:layout_width="120dp"
             android:layout_height="60dp"
             android:id="@+id/autoManualToggleBtn"
-            android:layout_toRightOf="@+id/waypointToggleBtn"
+            android:layout_toRightOf="@+id/positionToggleBtn"
             android:textOff="Auto"
             android:textOn="Manual"
-            android:layout_toEndOf="@+id/waypointToggleBtn"
+            android:layout_toEndOf="@+id/positionToggleBtn"
             android:layout_marginTop="3dp" />
 
         <Button
@@ -254,7 +254,7 @@
             android:layout_height="60dp"
             android:text="EXPLORE"
             android:onClick="gridMapOnClickMethods"
-            android:layout_below="@+id/waypointToggleBtn"
+            android:layout_below="@+id/positionToggleBtn"
             android:layout_marginLeft="20dp"
             android:layout_marginTop="3dp" />
 
