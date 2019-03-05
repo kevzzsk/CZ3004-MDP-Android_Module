@@ -169,6 +169,7 @@ public class GridMapFragment extends Fragment {
                                         }
                                     });
                                     adb.setTitle("Choose a direction");
+                                    adb.setCancelable(false);
                                     adb.show();
                                 }
                             });
@@ -236,6 +237,7 @@ public class GridMapFragment extends Fragment {
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 ConstraintLayout constraintLayout2D = getActivity().findViewById(R.id.constraintLayout2D);
                 ConstraintLayout constraintLayout3D = getActivity().findViewById(R.id.constraintLayout3D);
+                ToggleButton posToggleBtn = getActivity().findViewById(R.id.positionToggleBtn);
 
                 if (compoundButton.isChecked()) {
                     is3Dmode = true;
@@ -243,8 +245,7 @@ public class GridMapFragment extends Fragment {
                     constraintLayout2D.setVisibility(View.GONE);
                     constraintLayout3D.setVisibility(View.VISIBLE);
                     addTextToStatusWindow(getActivity(), null);
-
-                    //robot3DMapSimulator(true);
+                    posToggleBtn.setEnabled(false);
 
 
                 } else {
@@ -253,6 +254,7 @@ public class GridMapFragment extends Fragment {
                     constraintLayout2D.setVisibility(View.VISIBLE);
                     constraintLayout3D.setVisibility(View.GONE);
                     addTextToStatusWindow(getActivity(), null);
+                    posToggleBtn.setEnabled(true);
                 }
             }
         });
