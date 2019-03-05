@@ -127,7 +127,6 @@ public class GridMapFragment extends Fragment {
                 Button exploreBtn = activity.findViewById(R.id.exploreBtn);
                 Button fastestBtn = activity.findViewById(R.id.fastestBtn);
                 Button stopBtn = activity.findViewById(R.id.stopBtn);
-                mapUpdateManager.toggleDisplayMode();
 
                 if (compoundButton.isChecked()) {
                     GridMapHandler2D.SetRobotDragListener(compoundButton.getContext(), true);
@@ -188,7 +187,7 @@ public class GridMapFragment extends Fragment {
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 Activity activity = (Activity) compoundButton.getContext();
                 Button updateBtn = activity.findViewById(R.id.updateBtn);
-
+                mapUpdateManager.toggleDisplayMode();
                 if (compoundButton.isChecked()) {
                     updateBtn.setEnabled(true);
                 } else {
