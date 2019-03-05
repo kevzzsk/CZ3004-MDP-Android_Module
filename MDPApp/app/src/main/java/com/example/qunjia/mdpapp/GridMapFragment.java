@@ -120,15 +120,6 @@ public class GridMapFragment extends Fragment {
                 final Button exploreBtn = activity.findViewById(R.id.exploreBtn);
                 final Button fastestBtn = activity.findViewById(R.id.fastestBtn);
                 final Button stopBtn = activity.findViewById(R.id.stopBtn);
-                mapUpdateManager.toggleDisplayMode();
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                Activity activity = (Activity) compoundButton.getContext();
-                ToggleButton autoManualToggleBtn = activity.findViewById(R.id.autoManualToggleBtn);
-                Switch accelerometerSwitch = activity.findViewById(R.id.directionToggleBtn);
-                Button updateBtn = activity.findViewById(R.id.updateBtn);
-                Button exploreBtn = activity.findViewById(R.id.exploreBtn);
-                Button fastestBtn = activity.findViewById(R.id.fastestBtn);
-                Button stopBtn = activity.findViewById(R.id.stopBtn);
 
                 if (compoundButton.isChecked()) {
                     GridMapHandler2D.SetRobotDragListener(compoundButton.getContext(), true);
