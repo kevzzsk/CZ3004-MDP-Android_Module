@@ -40,7 +40,7 @@ class GridMapUpdateManager {
         this.isAutoMode = !this.isAutoMode;
     }
 
-    private static int calculate_delta(int current_direction, int target_direction) {
+    static int calculate_delta(int current_direction, int target_direction) {
         current_direction = current_direction % 360;
         if (current_direction == -270) {
             current_direction = 90;

@@ -3,7 +3,6 @@ package com.example.qunjia.mdpapp;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -15,7 +14,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -24,7 +22,6 @@ import android.widget.ToggleButton;
 
 import com.andretietz.android.controller.DirectionView;
 import com.andretietz.android.controller.InputView;
-import com.example.qunjia.mdpapp.OpenGL.myGlSurfaceView;
 import com.example.qunjia.mdpapp.OpenGL.myRenderer;
 
 
@@ -339,15 +336,32 @@ public class GridMapFragment extends Fragment {
         Toast.makeText(v.getContext(), "to be updated", Toast.LENGTH_LONG).show();
     }
 
+    private static String getRotationPayload(int facing_direction, int target_direction) {
+        int delta_direction = GridMapUpdateManager.calculate_delta(facing_direction, target_direction);
+        String payload = "";
+        while (delta_direction == -90 || delta_direction == -180 || delta_direction == 270) { // turn left
+            payload += "L";
+            facing_direction -= 90;
+            delta_direction = GridMapUpdateManager.calculate_delta(facing_direction, target_direction);
+        }
+        while (delta_direction == 90 || delta_direction == 180 || delta_direction == -270) { // turn right
+            payload += "R";
+            facing_direction += 90;
+            delta_direction = GridMapUpdateManager.calculate_delta(facing_direction, target_direction);
+        }
 
+        return payload;
+    }
 
     @SuppressLint("SetTextI18n")
     public static void MoveRobot(Context context, int direction) {
 
-        if(is3Dmode){
-            direction = RotateDirection(direction);
-            if(direction == MOVE_NONE) return;
-        }
+//        if(is3Dmode){
+//            direction = RotateDirection(direction);
+//            if(direction == MOVE_NONE) return;
+//        }
+        int facing = (int)myRenderer.getRotation() % 360;
+        String payload = "";
 
         switch (direction) {
             case MOVE_UP:myRenderer.setZ(myRenderer.getZ() - 1);
@@ -355,8 +369,8 @@ public class GridMapFragment extends Fragment {
                     AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move up anymore\n");
                 } else {
                     //SetRobotPosition(context, false);
-                    AddTextToStatusWindow((Activity) context, "UP");
-                    BluetoothFragment.sendMessage("UP");
+                    AddTextToStatusWindow((Activity) context, "NORTH");
+                    payload += "S" + getRotationPayload(facing, GridMapUpdateManager.FacingDirection.NORTH) + "S1";
                 }
                 break;
             case MOVE_DOWN:myRenderer.setZ(myRenderer.getZ()+1);
@@ -364,9 +378,8 @@ public class GridMapFragment extends Fragment {
                     AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move down anymore\n");
                 } else {
                     //SetRobotPosition(context, false);
-                    AddTextToStatusWindow((Activity) context, "DOWN");
-                    BluetoothFragment.sendMessage("DOWN");
-
+                    AddTextToStatusWindow((Activity) context, "SOUTH");
+                    payload += "S" + getRotationPayload(facing, GridMapUpdateManager.FacingDirection.SOUTH) + "S1";
                 }
                 break;
             case MOVE_LEFT:myRenderer.setX(myRenderer.getX() - 1);
@@ -374,8 +387,8 @@ public class GridMapFragment extends Fragment {
                     AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move left anymore\n");
                 } else {
                     //SetRobotPosition(context, false);
-                    AddTextToStatusWindow((Activity) context, "LEFT");
-                    BluetoothFragment.sendMessage("LEFT");
+                    AddTextToStatusWindow((Activity) context, "WEST");
+                    payload += "S" + getRotationPayload(facing, GridMapUpdateManager.FacingDirection.WEST) + "S1";
                 }
                 break;
             case MOVE_RIGHT:myRenderer.setX(myRenderer.getX() + 1);
@@ -383,10 +396,14 @@ public class GridMapFragment extends Fragment {
                     AddTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move right anymore\n");
                 } else {
                     //SetRobotPosition(context, false);
-                    AddTextToStatusWindow((Activity) context, "RIGHT");
-                    BluetoothFragment.sendMessage("RIGHT");
+                    AddTextToStatusWindow((Activity) context, "EAST");
+                    payload += "S" + getRotationPayload(facing, GridMapUpdateManager.FacingDirection.EAST) + "S1";
                 }
                 break;
+        }
+
+        if (!payload.equals("")) {
+            BluetoothFragment.sendMessage(payload);
         }
     }
 
