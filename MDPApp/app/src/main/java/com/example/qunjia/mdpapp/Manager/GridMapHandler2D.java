@@ -1,4 +1,4 @@
-package com.example.qunjia.mdpapp;
+package com.example.qunjia.mdpapp.Manager;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -22,6 +22,9 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+import com.example.qunjia.mdpapp.Fragment.BluetoothFragment;
+import com.example.qunjia.mdpapp.Fragment.GridMapFragment;
+import com.example.qunjia.mdpapp.R;
 
 import java.io.InputStream;
 

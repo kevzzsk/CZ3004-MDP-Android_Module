@@ -1,4 +1,4 @@
-package com.example.qunjia.mdpapp;
+package com.example.qunjia.mdpapp.Handler;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -7,7 +7,8 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.Toast;
+import com.example.qunjia.mdpapp.Fragment.BluetoothFragment;
+import com.example.qunjia.mdpapp.Fragment.GridMapFragment;
 
 public class ReconfigureHandler {
     public static void F1BtnOnCLick (Context context){

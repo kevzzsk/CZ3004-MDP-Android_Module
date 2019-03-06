@@ -1,22 +1,23 @@
-package com.example.qunjia.mdpapp;
+package com.example.qunjia.mdpapp.Manager;
 
 
 import android.app.Activity;
 import android.content.Context;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
 
 
+import com.example.qunjia.mdpapp.Manager.GridMapHandler2D;
 import com.example.qunjia.mdpapp.OpenGL.myGlSurfaceView;
 import com.example.qunjia.mdpapp.OpenGL.myRenderer;
+import com.example.qunjia.mdpapp.R;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 
-import static com.example.qunjia.mdpapp.GridMapHandler2D.*;
+import static com.example.qunjia.mdpapp.Manager.GridMapHandler2D.*;
 import static java.lang.Integer.parseInt;
 
 /**
@@ -24,24 +25,24 @@ import static java.lang.Integer.parseInt;
  * buffering of latest map descriptor string and conversion of raw coordinates
  * (from Raspberry Pi) into row number and column number.
  */
-class GridMapUpdateManager {
+public class GridMapUpdateManager {
     private boolean isAutoMode = true;
 
     private MapDescriptor map;
     private RobotDescriptor robot;
     private static ArrowDescriptor arrow;
 
-    GridMapUpdateManager (Context context) {
+    public GridMapUpdateManager(Context context) {
         robot = new RobotDescriptor(18, 1, FacingDirection.NORTH);
         map = new MapDescriptor(context);
         arrow = new ArrowDescriptor(context);
     }
 
-    void toggleDisplayMode() {
+    public void toggleDisplayMode() {
         this.isAutoMode = !this.isAutoMode;
     }
 
-    static int calculate_delta(int current_direction, int target_direction) {
+    public static int calculate_delta(int current_direction, int target_direction) {
         current_direction = current_direction % 360;
         if (current_direction == -270) {
             current_direction = 90;
@@ -54,7 +55,7 @@ class GridMapUpdateManager {
         return target_direction - current_direction;
     }
 
-    void updateAll(Context context) {
+    public void updateAll(Context context) {
         if (map != null) {
             map.update();
         }
@@ -170,7 +171,7 @@ class GridMapUpdateManager {
         }
     }
 
-    static interface FacingDirection {
+    public static interface FacingDirection {
         final static int SOUTH = 0;
         final static int WEST = 90;
         final static int NORTH = 180;
@@ -207,11 +208,11 @@ class GridMapUpdateManager {
             }
         }
 
-        static int getRowNumber() {
+        public static int getRowNumber() {
             return rowNumber;
         }
 
-        static int getColumnNumber() {
+        public static int getColumnNumber() {
             return columnNumber;
         }
     }
@@ -273,7 +274,7 @@ class GridMapUpdateManager {
         }
     }
 
-    void decodeMessage(Context context, String message) {
+    public void decodeMessage(Context context, String message) {
         String[] decoded = message.split("\\|");
         if (decoded.length > 0) {
             String header = decoded[0];

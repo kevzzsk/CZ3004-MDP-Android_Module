@@ -1,4 +1,4 @@
-package com.example.qunjia.mdpapp;
+package com.example.qunjia.mdpapp.Fragment;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -24,6 +24,11 @@ import android.widget.ToggleButton;
 
 import com.andretietz.android.controller.DirectionView;
 import com.andretietz.android.controller.InputView;
+import com.example.qunjia.mdpapp.*;
+import com.example.qunjia.mdpapp.Handler.AccelerometerSwitchListener;
+import com.example.qunjia.mdpapp.Handler.ReconfigureHandler;
+import com.example.qunjia.mdpapp.Manager.GridMapHandler2D;
+import com.example.qunjia.mdpapp.Manager.GridMapUpdateManager;
 import com.example.qunjia.mdpapp.OpenGL.myRenderer;
 
 
@@ -44,7 +49,7 @@ public class GridMapFragment extends Fragment {
         return f;
     }
 
-    static GridMapUpdateManager mapUpdateManager;
+    public static GridMapUpdateManager mapUpdateManager;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

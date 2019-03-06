@@ -1,4 +1,4 @@
-package com.example.qunjia.mdpapp;
+package com.example.qunjia.mdpapp.Fragment;
 
 import android.Manifest;
 import android.app.Activity;
@@ -24,6 +24,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.example.qunjia.mdpapp.Manager.BluetoothService;
+import com.example.qunjia.mdpapp.Adapter.BluetoothDataAdapter;
+import com.example.qunjia.mdpapp.Manager.GridMapUpdateManager;
+import com.example.qunjia.mdpapp.R;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -45,7 +49,7 @@ public class BluetoothFragment extends Fragment {
     private BluetoothAdapter mBluetoothAdapter;
     private static BluetoothService mBluetoothService;
 
-    static GridMapUpdateManager mapUpdateManager;
+    public static GridMapUpdateManager mapUpdateManager;
 
     // Connection handler
     private final Handler mHandler = new Handler(new Handler.Callback() {
@@ -53,27 +57,33 @@ public class BluetoothFragment extends Fragment {
         public boolean handleMessage(Message msg) {
             FragmentActivity activity = getActivity();
             switch (msg.what) {
-                case HandlerConstants.MESSAGE_STATE_CHANGE:
+                case BluetoothService.HandlerConstants.MESSAGE_STATE_CHANGE:
                     showLastConnected();
                     switch (msg.arg1) {
-                        case ConnectionConstants.STATE_CONNECTED:
+                        case BluetoothService.ConnectionConstants.STATE_CONNECTED:
                             setConnectionStatus("Connected");
+                            if (activity != null) {
+                                activity.findViewById(R.id.bluetooth_reconnect_btn).setVisibility(View.VISIBLE);
+                            }
                             break;
-                        case ConnectionConstants.STATE_CONNECTING:
+                        case BluetoothService.ConnectionConstants.STATE_CONNECTING:
                             setConnectionStatus("Connecting...");
                             break;
-                        case ConnectionConstants.STATE_DISCONNECTED:
+                        case BluetoothService.ConnectionConstants.STATE_DISCONNECTED:
                             setConnectionStatus("Disconnected");
+                            if (activity != null) {
+                                activity.findViewById(R.id.bluetooth_reconnect_btn).setVisibility(View.GONE);
+                            }
                             break;
                     }
                     break;
-                case HandlerConstants.MESSAGE_CONNECTED_DEVICE:
+                case BluetoothService.HandlerConstants.MESSAGE_CONNECTED_DEVICE:
                     BluetoothDevice device = (BluetoothDevice) msg.obj;
                     if (activity != null) {
                         saveLastConnectedDevice(activity, device);
                     }
                     break;
-                case HandlerConstants.MESSAGE_READ:
+                case BluetoothService.HandlerConstants.MESSAGE_READ:
                     byte[] readBuf = (byte[]) msg.obj;
                     // construct a string from the valid bytes in the buffer
                     String readMessage = new String(readBuf, 0, msg.arg1);
@@ -83,13 +93,13 @@ public class BluetoothFragment extends Fragment {
 //                    }
                     mapUpdateManager.decodeMessage(getContext(), readMessage);
                     break;
-                case HandlerConstants.MESSAGE_WRITE:
+                case BluetoothService.HandlerConstants.MESSAGE_WRITE:
                     byte[] writeBuf = (byte[]) msg.obj;
                     // construct a string from the buffer
                     String writeMessage = new String(writeBuf);
                     Log.d("Message sent", writeMessage);
                     break;
-                case HandlerConstants.MESSAGE_DEVICE_FOUND:
+                case BluetoothService.HandlerConstants.MESSAGE_DEVICE_FOUND:
                     BluetoothDevice found_device = (BluetoothDevice) msg.obj;
                     if (activity != null) {
                         String last_connected_MAC = getLastConnectedDevice(activity).first;
@@ -110,7 +120,7 @@ public class BluetoothFragment extends Fragment {
                                 String.format("Found device (MAC address: %s)", deviceHardwareAddress));
                     }
                     break;
-                case HandlerConstants.MESSAGE_START_DISCOVERY:
+                case BluetoothService.HandlerConstants.MESSAGE_START_DISCOVERY:
                     Log.d(BluetoothService.BLUETOOTH_SCAN_TAG, "Started Bluetooth scanning");
                     mDataAdapter.clear();
                     View view = getView();
@@ -119,7 +129,7 @@ public class BluetoothFragment extends Fragment {
                         getView().findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
                     }
                     break;
-                case HandlerConstants.MESSAGE_FINISH_DISCOVERY:
+                case BluetoothService.HandlerConstants.MESSAGE_FINISH_DISCOVERY:
                     Log.d(BluetoothService.BLUETOOTH_SCAN_TAG, "Finished Bluetooth scanning");
                     View view_ = getView();
                     if (view_ != null) {
@@ -127,7 +137,7 @@ public class BluetoothFragment extends Fragment {
                         getView().findViewById(R.id.bluetooth_scan_btn).setVisibility(View.VISIBLE);
                     }
                     break;
-                case HandlerConstants.MESSAGE_DEVICE_BONDED:
+                case BluetoothService.HandlerConstants.MESSAGE_DEVICE_BONDED:
                     BluetoothDevice bonded_device = (BluetoothDevice) msg.obj;
                     mDataAdapter.remove(bonded_device);
                     mBluetoothService.connect(bonded_device, true);
@@ -136,10 +146,10 @@ public class BluetoothFragment extends Fragment {
                     }
                     HideProgressDialog();
                     break;
-                case HandlerConstants.MESSAGE_TOAST:
+                case BluetoothService.HandlerConstants.MESSAGE_TOAST:
                     showToast((String) msg.obj, getContext());
                     break;
-                case HandlerConstants.MESSAGE_DEVICE_PAIR_CANCEL:
+                case BluetoothService.HandlerConstants.MESSAGE_DEVICE_PAIR_CANCEL:
                     HideProgressDialog();
                     break;
             }
@@ -151,7 +161,7 @@ public class BluetoothFragment extends Fragment {
     // initializations
     public BluetoothFragment() {}
 
-    static BluetoothFragment newInstance(int position) {
+    public static BluetoothFragment newInstance(int position) {
         BluetoothFragment f = new BluetoothFragment();
         Bundle b = new Bundle();
         b.putInt("position", position);
@@ -247,7 +257,7 @@ public class BluetoothFragment extends Fragment {
     }
 
     // click handlers
-    void myClickMethod(View v, Activity activity) {
+    public void myClickMethod(View v, Activity activity) {
         switch(v.getId()) {
             case R.id.bluetooth_scan_btn:
                 accessBluetooth(REQUEST_SCAN, activity);
@@ -263,6 +273,10 @@ public class BluetoothFragment extends Fragment {
                 mBluetoothAdapter.cancelDiscovery();
                 mBluetoothService.setDevice(device);
                 accessBluetooth(REQUEST_CONNECT, activity);
+                break;
+            case R.id.bluetooth_reconnect_btn:
+                mBluetoothService.stop(activity);
+                v.setVisibility(View.GONE);
                 break;
         }
     }
@@ -349,7 +363,7 @@ public class BluetoothFragment extends Fragment {
         }
     };
 
-    static void sendMessage(String msg) {
+    public static void sendMessage(String msg) {
         mBluetoothService.write(msg.getBytes());
     }
 
@@ -363,7 +377,7 @@ public class BluetoothFragment extends Fragment {
                     for (BluetoothDevice device : pairedDevices) {
                         if (device.getAddress().equals(mac_address)) {
                             Log.d(BluetoothService.BLUETOOTH_PAIR_TAG, "Detected paired device");
-                            if (mBluetoothService.getState() == ConnectionConstants.STATE_DISCONNECTED) {
+                            if (mBluetoothService.getState() == BluetoothService.ConnectionConstants.STATE_DISCONNECTED) {
                                 mBluetoothService.setDevice(device);
                                 accessBluetooth(REQUEST_CONNECT, getActivity());
                             }
@@ -401,7 +415,7 @@ public class BluetoothFragment extends Fragment {
         editor.apply();
     }
 
-    public static void ShowProgressDialog(Context context, String string){
+    private static void ShowProgressDialog(Context context, String string){
         if (progressDialog == null){
             progressDialog = new ProgressDialog(context, ProgressDialog.STYLE_SPINNER);
             progressDialog.setMessage(string);
@@ -409,7 +423,7 @@ public class BluetoothFragment extends Fragment {
         }
     }
 
-    public static void HideProgressDialog(){
+    private static void HideProgressDialog(){
         if(progressDialog != null){
             progressDialog.dismiss();
             progressDialog = null;

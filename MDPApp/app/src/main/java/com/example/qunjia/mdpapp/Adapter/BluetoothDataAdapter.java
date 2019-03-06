@@ -1,17 +1,19 @@
-package com.example.qunjia.mdpapp;
+package com.example.qunjia.mdpapp.Adapter;
 
 import android.bluetooth.BluetoothDevice;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import com.example.qunjia.mdpapp.R;
 
 import java.util.ArrayList;
 
 public class BluetoothDataAdapter extends RecyclerView.Adapter<BluetoothDataAdapter.BluetoothViewHolder> {
-    protected ArrayList<BluetoothDevice> devices;
+    private ArrayList<BluetoothDevice> devices;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -25,14 +27,14 @@ public class BluetoothDataAdapter extends RecyclerView.Adapter<BluetoothDataAdap
         }
     }
 
-    // Provide a suitable constructor (depends on the kind of dataset)
-    BluetoothDataAdapter(ArrayList<BluetoothDevice> devices) {
+    public BluetoothDataAdapter(ArrayList<BluetoothDevice> devices) {
         this.devices = devices;
     }
 
     // Create new views (invoked by the layout manager)
     @Override
-    public BluetoothViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    @NonNull
+    public BluetoothViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         // create a new view
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_available_bluetooth_devices,
                 parent, false);
@@ -41,9 +43,7 @@ public class BluetoothDataAdapter extends RecyclerView.Adapter<BluetoothDataAdap
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(BluetoothViewHolder holder, int position) {
-        // - get element from your dataset at this position
-        // - replace the contents of the view with that element
+    public void onBindViewHolder(@NonNull BluetoothViewHolder holder, int position) {
         String device_name = this.devices.get(position).getName();
         String address = this.devices.get(position).getAddress();
         TextView textview = holder.view.findViewById(R.id.bluetooth_device_text);
@@ -56,7 +56,6 @@ public class BluetoothDataAdapter extends RecyclerView.Adapter<BluetoothDataAdap
         }
     }
 
-    // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
         return devices.size();

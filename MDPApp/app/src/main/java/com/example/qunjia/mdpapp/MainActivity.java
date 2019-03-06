@@ -10,6 +10,10 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.astuetz.PagerSlidingTabStrip;
+import com.example.qunjia.mdpapp.Fragment.BluetoothFragment;
+import com.example.qunjia.mdpapp.Fragment.GridMapFragment;
+import com.example.qunjia.mdpapp.Manager.GridMapUpdateManager;
+
 public class MainActivity extends AppCompatActivity{
     private GridMapUpdateManager gridMapUpdateManager;
 

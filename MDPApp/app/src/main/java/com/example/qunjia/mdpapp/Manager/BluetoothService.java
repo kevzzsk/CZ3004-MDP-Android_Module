@@ -1,4 +1,4 @@
-package com.example.qunjia.mdpapp;
+package com.example.qunjia.mdpapp.Manager;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
-import android.os.ParcelUuid;
 import android.util.Log;
 
 import java.io.IOException;
@@ -27,32 +26,33 @@ import static android.bluetooth.BluetoothDevice.*;
  *
  * Adapted and modified from https://github.com/googlesamples/android-BluetoothChat
  */
-interface HandlerConstants {
-    // Message types sent from the BluetoothChatService Handler
-    int MESSAGE_STATE_CHANGE = 1;
-    int MESSAGE_CONNECTED_DEVICE = 2;
-    int MESSAGE_READ = 3;
-    int MESSAGE_WRITE = 4;
-    int MESSAGE_DEVICE_FOUND = 5;
-    int MESSAGE_START_DISCOVERY = 6;
-    int MESSAGE_FINISH_DISCOVERY = 7;
-    int MESSAGE_DEVICE_BONDED = 8;
-    int MESSAGE_TOAST = 9;
-    int MESSAGE_DEVICE_PAIR_CANCEL = 10;
-}
-
-interface ConnectionConstants {
-    // Constants that indicate the current connection state
-    int STATE_DISCONNECTED = 0;       // we're doing nothing
-    int STATE_CONNECTING = 1; // now initiating an outgoing connection
-    int STATE_CONNECTED = 2;  // now connected to a remote device
-}
 
 public class BluetoothService {
+    public interface HandlerConstants {
+        // Message types sent from the BluetoothChatService Handler
+        int MESSAGE_STATE_CHANGE = 1;
+        int MESSAGE_CONNECTED_DEVICE = 2;
+        int MESSAGE_READ = 3;
+        int MESSAGE_WRITE = 4;
+        int MESSAGE_DEVICE_FOUND = 5;
+        int MESSAGE_START_DISCOVERY = 6;
+        int MESSAGE_FINISH_DISCOVERY = 7;
+        int MESSAGE_DEVICE_BONDED = 8;
+        int MESSAGE_TOAST = 9;
+        int MESSAGE_DEVICE_PAIR_CANCEL = 10;
+    }
+
+    public interface ConnectionConstants {
+        // Constants that indicate the current connection state
+        int STATE_DISCONNECTED = 0;       // we're doing nothing
+        int STATE_CONNECTING = 1; // now initiating an outgoing connection
+        int STATE_CONNECTED = 2;  // now connected to a remote device
+    }
+
     // Debug tag
     private static String BLUETOOTH_CONNECTION_TAG = "Bluetooth (Connection)";
-    static String BLUETOOTH_SCAN_TAG = "Bluetooth (Scan)";
-    static String BLUETOOTH_PAIR_TAG = "Bluetooth (Pair)";
+    public static String BLUETOOTH_SCAN_TAG = "Bluetooth (Scan)";
+    public static String BLUETOOTH_PAIR_TAG = "Bluetooth (Pair)";
 
     // Unique UUID for this application
     private static UUID DEFAULT_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
@@ -66,9 +66,9 @@ public class BluetoothService {
     private int mState;
     private int mNewState;
     private BluetoothDevice current_device;
-    boolean reconnecting = false;
+    private boolean reconnecting = false;
 
-    BroadcastReceiver mReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
@@ -133,28 +133,28 @@ public class BluetoothService {
     /**
      * Return the current connection state.
      */
-    synchronized int getState() {
+    public synchronized int getState() {
         return mState;
     }
 
-    void setDevice(BluetoothDevice device) {
+    public void setDevice(BluetoothDevice device) {
         current_device = device;
     }
 
-    BluetoothDevice getDevice() {
+    public BluetoothDevice getDevice() {
         return current_device;
     }
 
-    void removeDevice() {
+    public void removeDevice() {
         current_device = null;
     }
 
-    void scan(){
+    public void scan(){
         Log.d(BLUETOOTH_SCAN_TAG, "Scanning for Bluetooth devices");
         mAdapter.startDiscovery();
     }
 
-    void pair(BluetoothDevice device){
+    public void pair(BluetoothDevice device){
         if (device.getBondState() == BOND_NONE){
             Log.d(BLUETOOTH_PAIR_TAG, "Pairing with " + device);
             device.createBond();
@@ -236,10 +236,10 @@ public class BluetoothService {
         mState = ConnectionConstants.STATE_DISCONNECTED;
         updateUIStatus();
 
-        activity.unregisterReceiver(mReceiver);
+//        activity.unregisterReceiver(mReceiver);
     }
 
-    void write(byte[] out) {
+    public void write(byte[] out) {
         // Create temporary object
         ConnectedThread r;
         // Synchronize a copy of the ConnectedThread
@@ -247,7 +247,7 @@ public class BluetoothService {
             if (mState != ConnectionConstants.STATE_CONNECTED) return;
             r = mConnectedThread;
         }
-        // Perform the write unsynchronized
+        // Perform the write un-synchronized
         r.write(out);
     }
 
@@ -314,7 +314,7 @@ public class BluetoothService {
             }
         }
 
-        public void cancel() {
+        void cancel() {
             this.flag = false;
         }
     }
