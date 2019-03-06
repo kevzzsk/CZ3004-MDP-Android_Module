@@ -192,6 +192,12 @@ public class GridMapHandler2D {
                                             case 3: direction = "W"; break;
                                         }
                                         sendString = "S|" + direction + "|" + rowNumber+ "|" + columnNumber;
+
+                                        if(GridMapFragment.isDebug){
+                                            String msg = "MDF|C000000000000000000000000000000000000000000000000000000000000000000000000003|000000000000|N|"
+                                                    + rowNumber + "|" + columnNumber;
+                                            GridMapFragment.mapUpdateManager.decodeMessage(context, msg);
+                                        }
                                     }
 
 

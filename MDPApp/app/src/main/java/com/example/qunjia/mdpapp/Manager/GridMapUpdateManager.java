@@ -259,17 +259,16 @@ public class GridMapUpdateManager {
         }
 
         void updateArrow(){
+            while(rowNumberRemove.size()>0){
+                GridMapHandler2D.removeArrowPicture(context, rowNumberRemove.get(0), columnNumberRemove.get(0));
+                rowNumberRemove.remove(0);
+                columnNumberRemove.remove(0);
+            }
             while(rotationAngle.size()>0){
                 setArrowPicture(context, rotationAngle.get(0), rowNumber.get(0), columnNumber.get(0));
                 rotationAngle.remove(0);
                 rowNumber.remove(0);
                 columnNumber.remove(0);
-            }
-
-            while(rowNumberRemove.size()>0){
-                GridMapHandler2D.removeArrowPicture(context, rowNumberRemove.get(0), columnNumberRemove.get(0));
-                rowNumberRemove.remove(0);
-                columnNumberRemove.remove(0);
             }
         }
     }
