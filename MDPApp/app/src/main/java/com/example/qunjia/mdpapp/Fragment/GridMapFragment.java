@@ -39,8 +39,12 @@ public class GridMapFragment extends Fragment {
 
     public static Boolean is3Dmode = false;
     private static String statusWindowTxt = "";
+
+    //debug var
     public static Boolean isDebug = false;
-    private static int debugCounter = 0;
+    private static int debugCounter = 0, debugdirection = 0;
+    private static String[] debugDirectionStr = {"N", "E", "S", "W"};
+
 
 
     public static GridMapFragment newInstance(int position) {
@@ -248,7 +252,7 @@ public class GridMapFragment extends Fragment {
 
                 if (compoundButton.isChecked()) {
                     is3Dmode = true;
-                    GridMapHandler2D.setRobotPosition(getContext(), -1,-1);//hide robot
+                    GridMapHandler2D.setRobotPosition(getContext(), -1,-1,-1);//hide robot
                     constraintLayout2D.setVisibility(View.GONE);
                     constraintLayout3D.setVisibility(View.VISIBLE);
                     addTextToStatusWindow(getActivity(), null);
@@ -257,7 +261,7 @@ public class GridMapFragment extends Fragment {
 
                 } else {
                     is3Dmode = false;
-                    GridMapHandler2D.setRobotPosition(getContext(), 100,100);//show robot
+                    GridMapHandler2D.setRobotPosition(getContext(), 1000, 100,100);//show robot
                     constraintLayout2D.setVisibility(View.VISIBLE);
                     constraintLayout3D.setVisibility(View.GONE);
                     addTextToStatusWindow(getActivity(), null);
@@ -358,72 +362,95 @@ public class GridMapFragment extends Fragment {
 
         switch (direction) {
             case MOVE_UP:
+                if(isDebug){
+                    payload = "SS1";
+
+                    int row = 0;
+                    int col = 0;
+
+                    switch (debugdirection){
+                        case 0: if(GridMapUpdateManager.RobotDescriptor.getRowNumber() != 1) row = -1;
+                            break;
+                        case 1: if(GridMapUpdateManager.RobotDescriptor.getColumnNumber() != 14) col = 1;
+                            break;
+                        case 2: if(GridMapUpdateManager.RobotDescriptor.getRowNumber() != 18) row = 1;
+                            break;
+                        case 3: if(GridMapUpdateManager.RobotDescriptor.getColumnNumber() != 1)col = -1;
+                            break;
+                    }
+
+                    addTextToStatusWindow((Activity) context, "Bluetooth send: " + payload);
+                    String msg = "MDF|C000000000000000000000000000000000000000000000000000000000000000000000000003|000000000000|"
+                            + debugDirectionStr[debugdirection] + "|"
+                            + (GridMapUpdateManager.RobotDescriptor.getRowNumber() + row) + "|"
+                            + (GridMapUpdateManager.RobotDescriptor.getColumnNumber() + col);
+                    GridMapFragment.mapUpdateManager.decodeMessage(context, msg);
+                    myRenderer.setZ(myRenderer.getZ() - 1);
+                    break;
+                }
+
                 if (GridMapUpdateManager.RobotDescriptor.getRowNumber() - 1 == 0) {
                     addTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move up anymore\n");
                 } else {
                     addTextToStatusWindow((Activity) context, "NORTH");
-                    //payload += "S" + getRotationPayload(facing, GridMapUpdateManager.FacingDirection.NORTH) + "S1";
-                    payload = "SS1";
-                    addTextToStatusWindow((Activity) context, "SS1");
-                    if(GridMapFragment.isDebug){
-                        String msg = "MDF|C000000000000000000000000000000000000000000000000000000000000000000000000003|000000000000|N|"
-                                + (GridMapUpdateManager.RobotDescriptor.getRowNumber() - 1) + "|"
-                                + (GridMapUpdateManager.RobotDescriptor.getColumnNumber());
-                        GridMapFragment.mapUpdateManager.decodeMessage(context, msg);
-                        myRenderer.setZ(myRenderer.getZ() - 1);
-                    }
+                    payload += "S" + getRotationPayload(facing, GridMapUpdateManager.FacingDirection.NORTH) + "S1";
                 }
                 break;
             case MOVE_DOWN:
+                if(isDebug)
+                    break;
+
                 if (GridMapUpdateManager.RobotDescriptor.getRowNumber() + 1 == GridMapHandler2D.rowTotalNumber - 1) {
                     addTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move down anymore\n");
                 } else {
                     addTextToStatusWindow((Activity) context, "SOUTH");
-                    //payload += "S" + getRotationPayload(facing, GridMapUpdateManager.FacingDirection.SOUTH) + "S1";
-
-                    if(GridMapFragment.isDebug){
-                        String msg = "MDF|C000000000000000000000000000000000000000000000000000000000000000000000000003|000000000000|N|"
-                                + (GridMapUpdateManager.RobotDescriptor.getRowNumber() + 1) + "|"
-                                + (GridMapUpdateManager.RobotDescriptor.getColumnNumber());
-                        GridMapFragment.mapUpdateManager.decodeMessage(context, msg);
-                        myRenderer.setZ(myRenderer.getZ()+1);
-                    }
+                    payload += "S" + getRotationPayload(facing, GridMapUpdateManager.FacingDirection.SOUTH) + "S1";
                 }
                 break;
             case MOVE_LEFT:
+                if(isDebug){
+                    payload = "SL";
+                    addTextToStatusWindow((Activity) context, "Bluetooth send: " + payload);
+                    debugdirection -= 1;
+                    if(debugdirection == -1) debugdirection = 3;
+
+
+                    String msg = "MDF|C000000000000000000000000000000000000000000000000000000000000000000000000003|000000000000|"
+                            + debugDirectionStr[debugdirection] + "|"
+                            + (GridMapUpdateManager.RobotDescriptor.getRowNumber()) + "|"
+                            + (GridMapUpdateManager.RobotDescriptor.getColumnNumber());
+                    GridMapFragment.mapUpdateManager.decodeMessage(context, msg);
+                    //myRenderer.setX(myRenderer.getX() - 1);
+                    break;
+                }
+
                 if (GridMapUpdateManager.RobotDescriptor.getColumnNumber() - 1 == 0) {
                     addTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move left anymore\n");
                 } else {
                     addTextToStatusWindow((Activity) context, "WEST");
-                    //payload += "S" + getRotationPayload(facing, GridMapUpdateManager.FacingDirection.WEST) + "S1";
-                    payload = "SL";
-                    addTextToStatusWindow((Activity) context, "SL");
-
-                    if(GridMapFragment.isDebug){
-                        String msg = "MDF|C000000000000000000000000000000000000000000000000000000000000000000000000003|000000000000|N|"
-                                + (GridMapUpdateManager.RobotDescriptor.getRowNumber()) + "|"
-                                + (GridMapUpdateManager.RobotDescriptor.getColumnNumber() - 1);
-                        GridMapFragment.mapUpdateManager.decodeMessage(context, msg);
-                        myRenderer.setX(myRenderer.getX() - 1);
-                    }
+                    payload += "S" + getRotationPayload(facing, GridMapUpdateManager.FacingDirection.WEST) + "S1";
                 }
                 break;
             case MOVE_RIGHT:
+                if(GridMapFragment.isDebug){
+                    payload = "SR";
+                    addTextToStatusWindow((Activity) context, "Bluetooth send: " + payload);
+                    debugdirection = (debugdirection + 1)%4;
+
+                    String msg = "MDF|C000000000000000000000000000000000000000000000000000000000000000000000000003|000000000000|"
+                            + debugDirectionStr[debugdirection] + "|"
+                            + (GridMapUpdateManager.RobotDescriptor.getRowNumber()) + "|"
+                            + (GridMapUpdateManager.RobotDescriptor.getColumnNumber());
+                    GridMapFragment.mapUpdateManager.decodeMessage(context, msg);
+                    //myRenderer.setX(myRenderer.getX() + 1);
+                    break;
+                }
+
                 if (GridMapUpdateManager.RobotDescriptor.getColumnNumber() + 1 == GridMapHandler2D.columnTotalNumber - 1) {
                     addTextToStatusWindow(((Activity) context), "ERROR: Robot cannot move right anymore\n");
                 } else {
                     addTextToStatusWindow((Activity) context, "EAST");
-                    //payload += "S" + getRotationPayload(facing, GridMapUpdateManager.FacingDirection.EAST) + "S1";
-                    payload = "SR";
-                    addTextToStatusWindow((Activity) context, "SR");
-
-                    if(GridMapFragment.isDebug){
-                        String msg = "MDF|C000000000000000000000000000000000000000000000000000000000000000000000000003|000000000000|N|"
-                                + (GridMapUpdateManager.RobotDescriptor.getRowNumber()) + "|"
-                                + (GridMapUpdateManager.RobotDescriptor.getColumnNumber() + 1);
-                        GridMapFragment.mapUpdateManager.decodeMessage(context, msg);
-                        myRenderer.setX(myRenderer.getX() + 1);
-                    }
+                    payload += "S" + getRotationPayload(facing, GridMapUpdateManager.FacingDirection.EAST) + "S1";
                 }
                 break;
         }

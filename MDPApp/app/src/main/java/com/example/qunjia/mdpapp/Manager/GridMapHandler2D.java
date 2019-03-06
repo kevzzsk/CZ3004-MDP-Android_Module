@@ -40,7 +40,7 @@ public class GridMapHandler2D {
     public static Boolean isWaypointSelected = false;
     public static int robotStartCoordinateDirection;
 
-    public static void setRobotPosition(Context context, int row, int column) {
+    public static void setRobotPosition(Context context, int rotationAngle, int row, int column) {
         RelativeLayout relativeLayout = ((Activity) context).findViewById(R.id.gridMapFragmentLayout);
 
         //remove old robot text view
@@ -69,12 +69,12 @@ public class GridMapHandler2D {
         }
 
         //create new robot text view
-        final TextView textView = new TextView(((Activity) context));
+        final TextView textView = new TextView(context);
         textView.setLayoutParams(getRobotLayoutParams((Activity) context, row, column));
-        textView.setText("ROBOT");
         textView.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
         textView.setId(robotID);
-        textView.setBackgroundColor(Color.parseColor("#1100ce"));//blue
+        textView.setBackgroundResource(R.drawable.robot);
+        textView.setRotation(rotationAngle);
 
         relativeLayout.addView(textView);
     }
@@ -183,13 +183,20 @@ public class GridMapHandler2D {
                                     }
                                     //select start coordinate
                                     else {
-                                        setRobotPosition(context,  rowNumber, columnNumber);
                                         String direction = "";
                                         switch (robotStartCoordinateDirection){
-                                            case 0: direction = "N"; break;
-                                            case 1: direction = "S"; break;
-                                            case 2: direction = "E"; break;
-                                            case 3: direction = "W"; break;
+                                            case 0: direction = "N";
+                                                setRobotPosition(context,  0, rowNumber, columnNumber);
+                                                break;
+                                            case 1: direction = "S";
+                                                setRobotPosition(context,  180, rowNumber, columnNumber);
+                                                break;
+                                            case 2: direction = "E";
+                                                setRobotPosition(context,  90,rowNumber, columnNumber);
+                                                break;
+                                            case 3: direction = "W";
+                                                setRobotPosition(context,  270, rowNumber, columnNumber);
+                                                break;
                                         }
                                         sendString = "S|" + direction + "|" + rowNumber+ "|" + columnNumber;
 

@@ -60,7 +60,7 @@ public class GridMapUpdateManager {
             map.update();
         }
 
-        setRobotPosition(context, RobotDescriptor.rowNumber, RobotDescriptor.columnNumber);
+        setRobotPosition(context, RobotDescriptor.getFaceAngle() + 180, RobotDescriptor.rowNumber, RobotDescriptor.columnNumber);
         myRenderer.setX(-RobotDescriptor.columnNumber);
         myRenderer.setZ(-RobotDescriptor.rowNumber);
 
@@ -206,6 +206,10 @@ public class GridMapUpdateManager {
                     faceAngle = FacingDirection.EAST;
                     break;
             }
+        }
+
+        public static int getFaceAngle() {
+            return faceAngle;
         }
 
         public static int getRowNumber() {
