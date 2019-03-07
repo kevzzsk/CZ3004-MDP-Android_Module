@@ -14,6 +14,8 @@ import com.example.qunjia.mdpapp.OpenGL.myGlSurfaceView;
 import com.example.qunjia.mdpapp.OpenGL.myRenderer;
 import com.example.qunjia.mdpapp.R;
 
+import org.json.JSONArray;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 
@@ -27,7 +29,6 @@ import static java.lang.Integer.parseInt;
  */
 public class GridMapUpdateManager {
     private boolean isAutoMode = true;
-
     private MapDescriptor map;
     private RobotDescriptor robot;
     private static ArrowDescriptor arrow;
@@ -238,7 +239,7 @@ public class GridMapUpdateManager {
             columnNumberRemove= new ArrayList<>();
         }
 
-        void addArrowFromString(String direction,String row, String col){
+        /*void addArrowFromString(String direction,String row, String col){
             switch (direction){
                 case "S":
                     rotationAngle.add(FacingDirection.SOUTH);
@@ -255,6 +256,35 @@ public class GridMapUpdateManager {
             }
             rowNumber.add(Integer.parseInt(row));
             columnNumber.add(Integer.parseInt(col));
+        }*/
+
+        void addArrowFromString(String haveArrow){
+            if(haveArrow.equals("1")){
+                int offset = 2;
+
+                switch (RobotDescriptor.getFaceAngle()){
+                    case FacingDirection.NORTH:
+                        rowNumber.add(RobotDescriptor.getRowNumber());
+                        columnNumber.add(RobotDescriptor.getColumnNumber() - offset);
+                        rotationAngle.add(0);
+                        break;
+                    case FacingDirection.SOUTH:
+                        rowNumber.add(RobotDescriptor.getRowNumber());
+                        columnNumber.add(RobotDescriptor.getColumnNumber() + offset);
+                        rotationAngle.add(180);
+                        break;
+                    case FacingDirection.EAST:
+                        rowNumber.add(RobotDescriptor.getRowNumber() - offset);
+                        columnNumber.add(RobotDescriptor.getColumnNumber());
+                        rotationAngle.add(90);
+                        break;
+                    case FacingDirection.WEST:
+                        rowNumber.add(RobotDescriptor.getRowNumber() + offset);
+                        columnNumber.add(RobotDescriptor.getColumnNumber());
+                        rotationAngle.add(270);
+                        break;
+                }
+            }
         }
 
         void removeArrowFromString(String row, String col){
@@ -286,14 +316,15 @@ public class GridMapUpdateManager {
                 case "MDF":
                     map.fromString(decoded[1],decoded[2]);
                     robot.fromString(decoded[4], decoded[5], decoded[3]);
+                    arrow.addArrowFromString(decoded[6]);
                     break;
-                case "ARW":
-                    arrow.addArrowFromString(decoded[1], decoded[2],decoded[3]);
-                    break;
+                //case "ARW":
+                    //arrow.addArrowFromString(decoded[1], decoded[2],decoded[3]);
+                    //break;
 
-                case "ARWR":
-                    arrow.removeArrowFromString(decoded[2], decoded[3]);
-                    break;
+               // case "ARWR":
+                   // arrow.removeArrowFromString(decoded[2], decoded[3]);
+                   // break;
             }
 
             if (this.isAutoMode) {

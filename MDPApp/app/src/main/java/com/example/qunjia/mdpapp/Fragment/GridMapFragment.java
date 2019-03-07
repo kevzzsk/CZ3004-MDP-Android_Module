@@ -31,6 +31,8 @@ import com.example.qunjia.mdpapp.Manager.GridMapHandler2D;
 import com.example.qunjia.mdpapp.Manager.GridMapUpdateManager;
 import com.example.qunjia.mdpapp.OpenGL.myRenderer;
 
+import org.json.JSONArray;
+
 
 public class GridMapFragment extends Fragment {
 
@@ -44,6 +46,10 @@ public class GridMapFragment extends Fragment {
     public static Boolean isDebug = false;
     private static int debugCounter = 0, debugdirection = 0;
     private static String[] debugDirectionStr = {"N", "E", "S", "W"};
+
+    //for demo
+    private static JSONArray jsonArray;
+    private static int democounter = 0;
 
 
 
@@ -83,7 +89,8 @@ public class GridMapFragment extends Fragment {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                String msg = "MDF|C000000000000000000000000000000000000000000000000000000000000000000000000003|000000000000|N|1|1";
+                //String msg = "MDF|C000000000000000000000000000000000000000000000000000000000000000000000000003|000000000000|N|1|1|0";
+                String msg = "MDF|FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF|000000000080010042038400000000000000010C000000000000021F84000800000000000400|W|17|3|1";
                 mapUpdateManager.decodeMessage(getContext(), msg);
             }
         }, 200);
@@ -297,11 +304,11 @@ public class GridMapFragment extends Fragment {
                 TextView statusWindowTV3D = ((Activity) v.getContext()).findViewById(R.id.statusWindowTV3D);
                 statusWindowTV3D.setText("");
 
+                //to enable debugging mode
                 debugCounter++;
-
                 if(debugCounter >= 10){
                     isDebug = true;
-                    Toast.makeText(v.getContext(), "Debug enabled", Toast.LENGTH_SHORT).show();
+                    addTextToStatusWindow((Activity) v.getContext(), "Debugging Mode Enabled!");
                 }
 
                 return;
@@ -321,8 +328,35 @@ public class GridMapFragment extends Fragment {
                 mapUpdateManager.updateAll(v.getContext());
                 return;
             case R.id.fastestBtn:
-                //GridMapHandler2D.setRobotPosition(v.getContext(), 5, 5);
+                //BluetoothFragment.sendMessage("");
+                //addTextToStatusWindow((Activity)v.getContext(), "Fastest");
                 return;
+            case R.id.exploreBtn:
+                //BluetoothFragment.sendMessage("");
+                //addTextToStatusWindow((Activity)v.getContext(), "Explore");
+
+                try {
+                    jsonArray = new JSONArray(v.getContext().getResources().getString(R.string.sampleMDF));
+                }catch (Exception e){
+                }
+               final Context context = v.getContext();
+                final Handler handler = new Handler();
+                final int delay = 200; //milliseconds
+
+                handler.postDelayed(new Runnable(){
+                    public void run(){
+                        String msg = "";
+                        try{
+                            msg = jsonArray.getString(democounter);
+                        }catch (Exception e){
+                            return;
+                        }
+                        mapUpdateManager.decodeMessage(context, msg);
+                        democounter++;
+                        handler.postDelayed(this, delay);
+                    }
+                }, delay);
+
             case R.id.rotateRightBtn:
                 myRenderer.rotateRight();
                 return;
@@ -380,7 +414,7 @@ public class GridMapFragment extends Fragment {
                     }
 
                     addTextToStatusWindow((Activity) context, "Bluetooth send: " + payload);
-                    String msg = "MDF|C000000000000000000000000000000000000000000000000000000000000000000000000003|000000000000|"
+                    String msg = "MDF|C000000000000000000000000000000000000000000000000000000000000000000000000003|000000000000|0"
                             + debugDirectionStr[debugdirection] + "|"
                             + (GridMapUpdateManager.RobotDescriptor.getRowNumber() + row) + "|"
                             + (GridMapUpdateManager.RobotDescriptor.getColumnNumber() + col);
@@ -415,7 +449,7 @@ public class GridMapFragment extends Fragment {
                     if(debugdirection == -1) debugdirection = 3;
 
 
-                    String msg = "MDF|C000000000000000000000000000000000000000000000000000000000000000000000000003|000000000000|"
+                    String msg = "MDF|C000000000000000000000000000000000000000000000000000000000000000000000000003|000000000000|0"
                             + debugDirectionStr[debugdirection] + "|"
                             + (GridMapUpdateManager.RobotDescriptor.getRowNumber()) + "|"
                             + (GridMapUpdateManager.RobotDescriptor.getColumnNumber());
@@ -437,7 +471,7 @@ public class GridMapFragment extends Fragment {
                     addTextToStatusWindow((Activity) context, "Bluetooth send: " + payload);
                     debugdirection = (debugdirection + 1)%4;
 
-                    String msg = "MDF|C000000000000000000000000000000000000000000000000000000000000000000000000003|000000000000|"
+                    String msg = "MDF|C000000000000000000000000000000000000000000000000000000000000000000000000003|000000000000|0"
                             + debugDirectionStr[debugdirection] + "|"
                             + (GridMapUpdateManager.RobotDescriptor.getRowNumber()) + "|"
                             + (GridMapUpdateManager.RobotDescriptor.getColumnNumber());

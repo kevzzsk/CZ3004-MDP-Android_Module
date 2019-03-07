@@ -150,7 +150,7 @@ public class GridMap3D {
                     GLES30.glDrawArrays(GLES30.GL_LINES, i, 6);
                     GLES30.glLineWidth(2);
                     i+=6;
-                } else if(gridMap[r][c] == obstaclesNo){
+                } /*else if(gridMap[r][c] == obstaclesNo){
                     float[] obstaclesColor =  getFloatArrayFromARGB(ContextCompat.getColor(context, R.color.obstacle));
                     //white part of arrow (1st face)
                     GLES30.glUniform4fv(mColorHandle, 1,getFloatArrayFromARGB(Color.parseColor("#FFFFFF")) ,0);
@@ -173,8 +173,7 @@ public class GridMap3D {
                     GLES30.glDrawArrays(GLES30.GL_LINES, i, 30);
                     GLES30.glLineWidth(2);
                     i+= 30;
-                }
-                /*else if(gridMap[r][c] == obstaclesNo){
+                }*/ else if(gridMap[r][c] == obstaclesNo){
                     float[] obstaclesColor =  getFloatArrayFromARGB(ContextCompat.getColor(context, R.color.obstacle));
                     GLES30.glUniform4fv(mColorHandle, 1,obstaclesColor ,0);
                     GLES30.glDrawArrays(GLES30.GL_TRIANGLES, i, 36);
@@ -182,7 +181,7 @@ public class GridMap3D {
                     GLES30.glDrawArrays(GLES30.GL_LINES, i, 36);
                     GLES30.glLineWidth(2);
                     i+=36;
-                }*/
+                }
             }
         }
     }
@@ -199,8 +198,8 @@ public class GridMap3D {
                     arrayList.addAll(Arrays.asList(getFlatGroundVertices(c, r)));
                 }
                 else if (gridMap[r][c] == obstaclesNo) {
-                    //arrayList.addAll(Arrays.asList(getObstacleVertices(c, r)));
-                    arrayList.addAll(Arrays.asList(getRightArrowVertices(c, r)));
+                    arrayList.addAll(Arrays.asList(getObstacleVertices(c, r)));
+                    //arrayList.addAll(Arrays.asList(getRightArrowVertices(c, r)));
                 }
             }
         }
