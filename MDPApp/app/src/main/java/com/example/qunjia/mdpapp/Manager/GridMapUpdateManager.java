@@ -3,6 +3,7 @@ package com.example.qunjia.mdpapp.Manager;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
@@ -32,6 +33,7 @@ public class GridMapUpdateManager {
     private MapDescriptor map;
     private RobotDescriptor robot;
     private static ArrowDescriptor arrow;
+    private String fullMapStr = "0", obstaclesStr = "0";
 
     public GridMapUpdateManager(Context context) {
         robot = new RobotDescriptor(18, 1, FacingDirection.NORTH);
@@ -307,6 +309,7 @@ public class GridMapUpdateManager {
         }
     }
 
+    private static int counter = 0;
     public void decodeMessage(Context context, String message) {
         String[] decoded = message.split("\\|");
         if (decoded.length > 0) {
@@ -317,6 +320,56 @@ public class GridMapUpdateManager {
                     map.fromString(decoded[1],decoded[2]);
                     robot.fromString(decoded[4], decoded[5], decoded[3]);
                     arrow.addArrowFromString(decoded[6]);
+                    fullMapStr = decoded[1];
+                    obstaclesStr = decoded[2];
+                    if (this.isAutoMode) {
+                        this.updateAll(context);
+                    }
+                    break;
+                case "FAST":
+                    final String fastStr = decoded[1];
+                    final Context c = context;
+                    final Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(counter >= fastStr.length()){
+                                return;
+                            }
+                            int row = RobotDescriptor.getRowNumber();
+                            int col = RobotDescriptor.getColumnNumber();
+                            String direction = String.valueOf(fastStr.charAt(counter+1));
+                            char fastChar = fastStr.charAt(counter);
+                            if(fastChar == 'M'){
+
+                                switch (direction) {
+                                    case "S":
+                                        row += Integer.parseInt(String.valueOf(fastStr.charAt(counter+2)));
+                                        break;
+                                    case "W":
+                                        col -= Integer.parseInt(String.valueOf(fastStr.charAt(counter+2)));
+                                        break;
+                                    case "N":
+                                        row -= Integer.parseInt(String.valueOf(fastStr.charAt(counter+2)));
+                                        break;
+                                    case "E":
+                                        col += Integer.parseInt(String.valueOf(fastStr.charAt(counter+2)));
+                                        break;
+                                }
+                                robot.fromString(String.valueOf(row), String.valueOf(col),direction);
+                                counter += 3;
+                            }else if(fastChar == 'R'){
+                                robot.fromString(String.valueOf(row), String.valueOf(col),direction);
+                                counter += 2;
+                            }
+
+                            if (isAutoMode) {
+                                updateAll(c);
+                            }
+                            handler.postDelayed(this, 300);
+                        }
+                    }, 300);
+
                     break;
                 //case "ARW":
                     //arrow.addArrowFromString(decoded[1], decoded[2],decoded[3]);
@@ -325,10 +378,6 @@ public class GridMapUpdateManager {
                // case "ARWR":
                    // arrow.removeArrowFromString(decoded[2], decoded[3]);
                    // break;
-            }
-
-            if (this.isAutoMode) {
-                this.updateAll(context);
             }
         }
     }

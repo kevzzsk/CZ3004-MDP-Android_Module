@@ -90,7 +90,7 @@ public class GridMapFragment extends Fragment {
             @Override
             public void run() {
                 //String msg = "MDF|C000000000000000000000000000000000000000000000000000000000000000000000000003|000000000000|N|1|1|0";
-                String msg = "MDF|FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF|000000000080010042038400000000000000010C000000000000021F84000800000000000400|W|17|3|1";
+                String msg = "MDF|FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF|000000000080010042038400000000000000010C000000000000021F84000800000000000400|W|18|1|1";
                 mapUpdateManager.decodeMessage(getContext(), msg);
             }
         }, 200);
@@ -160,35 +160,7 @@ public class GridMapFragment extends Fragment {
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
                                     GridMapHandler2D.isWaypointSelected = false;
-
-                                    AlertDialog.Builder adb = new AlertDialog.Builder(compoundButton.getContext());
-                                    CharSequence items[] = new CharSequence[] {"North", "South", "East", "West"};
-                                    adb.setSingleChoiceItems(items, 0, new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface d, int n) {
-                                            GridMapHandler2D.robotStartCoordinateDirection = n;
-                                        }
-
-                                    });
-                                    adb.setNegativeButton("Confirm", null);
-                                    adb.setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int i) {
-                                            GridMapHandler2D.SetRobotDragListener(compoundButton.getContext(), false);
-                                            directionViewSetEnabled(activity, true);
-
-                                            autoManualToggleBtn.setEnabled(true);
-                                            accelerometerSwitch.setEnabled(true);
-                                            updateBtn.setEnabled(true);
-                                            exploreBtn.setEnabled(true);
-                                            fastestBtn.setEnabled(true);
-                                            stopBtn.setEnabled(true);
-                                            compoundButton.toggle();
-                                        }
-                                    });
-                                    adb.setTitle("Choose a direction");
-                                    adb.setCancelable(false);
-                                    adb.show();
+                                    showDirectionAlertDialog(compoundButton.getContext(), compoundButton);
                                 }
                             });
 
@@ -197,6 +169,7 @@ public class GridMapFragment extends Fragment {
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
                                     GridMapHandler2D.isWaypointSelected = true;
+                                    showDirectionAlertDialog(compoundButton.getContext(), compoundButton);
                                 }
                             });
                     builder1.setNeutralButton(
@@ -229,6 +202,45 @@ public class GridMapFragment extends Fragment {
                 }
             }
         });
+    }
+
+    private static void showDirectionAlertDialog(final Context context, final CompoundButton compoundButton){
+        final Activity activity = (Activity) context;
+        final ToggleButton autoManualToggleBtn = activity.findViewById(R.id.autoManualToggleBtn);
+        final Switch accelerometerSwitch = activity.findViewById(R.id.directionToggleBtn);
+        final Button updateBtn = activity.findViewById(R.id.updateBtn);
+        final Button exploreBtn = activity.findViewById(R.id.exploreBtn);
+        final Button fastestBtn = activity.findViewById(R.id.fastestBtn);
+        final Button stopBtn = activity.findViewById(R.id.stopBtn);
+
+        AlertDialog.Builder adb = new AlertDialog.Builder(context);
+        CharSequence items[] = new CharSequence[] {"North", "South", "East", "West"};
+        adb.setSingleChoiceItems(items, 0, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface d, int n) {
+                GridMapHandler2D.robotStartCoordinateDirection = n;
+            }
+
+        });
+        adb.setNegativeButton("Confirm", null);
+        adb.setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                GridMapHandler2D.SetRobotDragListener(context, false);
+                directionViewSetEnabled(activity, true);
+
+                autoManualToggleBtn.setEnabled(true);
+                accelerometerSwitch.setEnabled(true);
+                updateBtn.setEnabled(true);
+                exploreBtn.setEnabled(true);
+                fastestBtn.setEnabled(true);
+                stopBtn.setEnabled(true);
+                compoundButton.toggle();
+            }
+        });
+        adb.setTitle("Choose a direction");
+        adb.setCancelable(false);
+        adb.show();
     }
 
     private void initAutoManualToggleBtnListener() {
@@ -322,41 +334,34 @@ public class GridMapFragment extends Fragment {
                 ReconfigureHandler.F2BtnOnCLick(v.getContext());
                 return;
             case R.id.stopBtn:
-
+                String stopMsg = "A|S";
+                BluetoothFragment.sendMessage(stopMsg);
+                addTextToStatusWindow((Activity)v.getContext(), "Stop");
+                if(isDebug){
+                    addTextToStatusWindow((Activity) v.getContext(), stopMsg);
+                }
                 return;
             case R.id.updateBtn:
                 mapUpdateManager.updateAll(v.getContext());
                 return;
             case R.id.fastestBtn:
-                //BluetoothFragment.sendMessage("");
-                //addTextToStatusWindow((Activity)v.getContext(), "Fastest");
+                String fastMsg = "A|F";
+                BluetoothFragment.sendMessage(fastMsg);
+                addTextToStatusWindow((Activity)v.getContext(), "Fastest");
+                if(isDebug){
+                    addTextToStatusWindow((Activity) v.getContext(), fastMsg);
+                }
+                robotFastestSimulator(v.getContext());
                 return;
             case R.id.exploreBtn:
-                //BluetoothFragment.sendMessage("");
-                //addTextToStatusWindow((Activity)v.getContext(), "Explore");
-
-                try {
-                    jsonArray = new JSONArray(v.getContext().getResources().getString(R.string.sampleMDF));
-                }catch (Exception e){
+                String exploreMsg = "SV";
+                BluetoothFragment.sendMessage(exploreMsg);
+                addTextToStatusWindow((Activity)v.getContext(), "Explore");
+                if(isDebug){
+                    addTextToStatusWindow((Activity) v.getContext(), exploreMsg);
                 }
-               final Context context = v.getContext();
-                final Handler handler = new Handler();
-                final int delay = 200; //milliseconds
-
-                handler.postDelayed(new Runnable(){
-                    public void run(){
-                        String msg = "";
-                        try{
-                            msg = jsonArray.getString(democounter);
-                        }catch (Exception e){
-                            return;
-                        }
-                        mapUpdateManager.decodeMessage(context, msg);
-                        democounter++;
-                        handler.postDelayed(this, delay);
-                    }
-                }, delay);
-
+                robotExploreSimulator(v);
+                return;
             case R.id.rotateRightBtn:
                 myRenderer.rotateRight();
                 return;
@@ -568,6 +573,35 @@ public class GridMapFragment extends Fragment {
             return;
         }
 
+    }
+
+    private static void robotExploreSimulator(View v){
+        try {
+            jsonArray = new JSONArray(v.getContext().getResources().getString(R.string.sampleMDF));
+        }catch (Exception e){
+        }
+        final Context context = v.getContext();
+        final Handler handler = new Handler();
+        final int delay = 200; //milliseconds
+
+        handler.postDelayed(new Runnable(){
+            public void run(){
+                String msg = "";
+                try{
+                    msg = jsonArray.getString(democounter) + "|0";
+                }catch (Exception e){
+                    return;
+                }
+                mapUpdateManager.decodeMessage(context, msg);
+                democounter++;
+                handler.postDelayed(this, delay);
+            }
+        }, delay);
+    }
+
+    private static void robotFastestSimulator(Context c){
+        String fastString = "FAST|REME9ME3RNRWMW4RNMN5REME4RNMN9MN3";
+        mapUpdateManager.decodeMessage(c, fastString);
     }
 
     /*

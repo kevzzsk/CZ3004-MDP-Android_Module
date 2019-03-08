@@ -177,28 +177,14 @@ public class GridMapHandler2D {
                                         columnNumber < columnTotalNumber - 1) {
                                     //display robot waypoint
                                     String sendString = "";
+
                                     if(isWaypointSelected){
                                         setRobotWaypointPosition(context,  rowNumber, columnNumber);
-                                        sendString = "W|" + rowNumber+ "|" + columnNumber;
+                                        sendString = "A|W|";
                                     }
                                     //select start coordinate
                                     else {
-                                        String direction = "";
-                                        switch (robotStartCoordinateDirection){
-                                            case 0: direction = "N";
-                                                setRobotPosition(context,  0, rowNumber, columnNumber);
-                                                break;
-                                            case 1: direction = "S";
-                                                setRobotPosition(context,  180, rowNumber, columnNumber);
-                                                break;
-                                            case 2: direction = "E";
-                                                setRobotPosition(context,  90,rowNumber, columnNumber);
-                                                break;
-                                            case 3: direction = "W";
-                                                setRobotPosition(context,  270, rowNumber, columnNumber);
-                                                break;
-                                        }
-                                        sendString = "S|" + direction + "|" + rowNumber+ "|" + columnNumber;
+                                        sendString = "A|S|";
 
                                         if(GridMapFragment.isDebug){
                                             String msg = "MDF|C000000000000000000000000000000000000000000000000000000000000000000000000003|000000000000|N|"
@@ -207,6 +193,27 @@ public class GridMapHandler2D {
                                         }
                                     }
 
+                                    String direction = "";
+                                    switch (robotStartCoordinateDirection){
+                                        case 0:
+                                            direction = "N";
+                                            setRobotPosition(context,  0, rowNumber, columnNumber);
+                                            break;
+                                        case 1:
+                                            direction = "S";
+                                            setRobotPosition(context,  180, rowNumber, columnNumber);
+                                            break;
+                                        case 2:
+                                            direction = "E";
+                                            setRobotPosition(context,  90,rowNumber, columnNumber);
+                                            break;
+                                        case 3:
+                                            direction = "W";
+                                            setRobotPosition(context,  270, rowNumber, columnNumber);
+                                            break;
+                                    }
+
+                                    sendString += direction + "|" + rowNumber + "|" + columnNumber;
 
                                     BluetoothFragment.sendMessage(sendString);
                                     GridMapFragment.addTextToStatusWindow((Activity) context,sendString);
