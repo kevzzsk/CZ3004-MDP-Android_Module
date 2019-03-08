@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.RelativeLayout;
 
 
+import com.example.qunjia.mdpapp.Fragment.GridMapFragment;
 import com.example.qunjia.mdpapp.Manager.GridMapHandler2D;
 import com.example.qunjia.mdpapp.OpenGL.myGlSurfaceView;
 import com.example.qunjia.mdpapp.OpenGL.myRenderer;
@@ -33,7 +34,7 @@ public class GridMapUpdateManager {
     private MapDescriptor map;
     private RobotDescriptor robot;
     private static ArrowDescriptor arrow;
-    private String fullMapStr = "0", obstaclesStr = "0";
+    public static String fullMapStr = "0", obstaclesStr = "0";
 
     public GridMapUpdateManager(Context context) {
         robot = new RobotDescriptor(18, 1, FacingDirection.NORTH);
@@ -268,22 +269,22 @@ public class GridMapUpdateManager {
                     case FacingDirection.NORTH:
                         rowNumber.add(RobotDescriptor.getRowNumber());
                         columnNumber.add(RobotDescriptor.getColumnNumber() - offset);
-                        rotationAngle.add(0);
+                        rotationAngle.add(FacingDirection.WEST);
                         break;
                     case FacingDirection.SOUTH:
                         rowNumber.add(RobotDescriptor.getRowNumber());
                         columnNumber.add(RobotDescriptor.getColumnNumber() + offset);
-                        rotationAngle.add(180);
+                        rotationAngle.add(FacingDirection.EAST);
                         break;
                     case FacingDirection.EAST:
                         rowNumber.add(RobotDescriptor.getRowNumber() - offset);
                         columnNumber.add(RobotDescriptor.getColumnNumber());
-                        rotationAngle.add(90);
+                        rotationAngle.add(FacingDirection.NORTH);
                         break;
                     case FacingDirection.WEST:
                         rowNumber.add(RobotDescriptor.getRowNumber() + offset);
                         columnNumber.add(RobotDescriptor.getColumnNumber());
-                        rotationAngle.add(270);
+                        rotationAngle.add(FacingDirection.SOUTH);
                         break;
                 }
             }
@@ -302,6 +303,24 @@ public class GridMapUpdateManager {
             }
             while(rotationAngle.size()>0){
                 setArrowPicture(context, rotationAngle.get(0), rowNumber.get(0), columnNumber.get(0));
+                String direction = "";
+                switch (rotationAngle.get(0)){
+                    case FacingDirection.NORTH:
+                        direction = "D";
+                        break;
+                    case FacingDirection.SOUTH:
+                        direction = "U";
+                        break;
+                    case FacingDirection.EAST:
+                        direction = "L";
+                        break;
+                    case FacingDirection.WEST:
+                        direction = "R";
+                        break;
+
+                }
+                GridMapFragment.addTextToStatusWindow((Activity) context,
+                        "Arrow detected- (" + rowNumber.get(0) + ","  + columnNumber.get(0) + "," + direction + ")");
                 rotationAngle.remove(0);
                 rowNumber.remove(0);
                 columnNumber.remove(0);
@@ -370,6 +389,12 @@ public class GridMapUpdateManager {
                         }
                     }, 300);
 
+                    break;
+                case "MDFDONE":
+                    GridMapFragment.addTextToStatusWindow((Activity) context,
+                            "==Exploration Done==");
+                    GridMapFragment.addTextToStatusWindow((Activity) context,
+                            "MDF|"+ fullMapStr + "|" + obstaclesStr);
                     break;
                 //case "ARW":
                     //arrow.addArrowFromString(decoded[1], decoded[2],decoded[3]);

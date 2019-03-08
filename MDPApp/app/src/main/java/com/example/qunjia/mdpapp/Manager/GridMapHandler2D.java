@@ -57,12 +57,12 @@ public class GridMapHandler2D {
         else if(row > 19 && column > 14){
             row = GridMapUpdateManager.RobotDescriptor.getRowNumber();
             column = GridMapUpdateManager.RobotDescriptor.getColumnNumber();
-            if(robotWaypointColumn != 0 && robotWaypointRow != 0){
+            if(robotWaypointColumn != -1 && robotWaypointRow != -1){
                 setRobotWaypointPosition(context, robotWaypointRow, robotWaypointColumn);
             }
         }
         if(row == robotWaypointRow && column == robotWaypointColumn){
-            setRobotWaypointPosition(context, -1, -1);//remove robot waypoint
+            setRobotWaypointPosition(context, -2, -2);//remove robot waypoint forever
         }
         else if(GridMapFragment.is3Dmode){
             return;
@@ -186,11 +186,9 @@ public class GridMapHandler2D {
                                     else {
                                         sendString = "A|S|";
 
-                                        if(GridMapFragment.isDebug){
-                                            String msg = "MDF|C000000000000000000000000000000000000000000000000000000000000000000000000003|000000000000|N|"
-                                                    + rowNumber + "|" + columnNumber;
-                                            GridMapFragment.mapUpdateManager.decodeMessage(context, msg);
-                                        }
+                                        String msg = "MDF|" +GridMapUpdateManager.fullMapStr + "|" + GridMapUpdateManager.obstaclesStr + "|N|"
+                                                + rowNumber + "|" + columnNumber + "|0";
+                                        GridMapFragment.mapUpdateManager.decodeMessage(context, msg);
                                     }
 
                                     String direction = "";
@@ -212,6 +210,8 @@ public class GridMapHandler2D {
                                             setRobotPosition(context,  270, rowNumber, columnNumber);
                                             break;
                                     }
+
+                                    robotStartCoordinateDirection = 0;
 
                                     sendString += direction + "|" + rowNumber + "|" + columnNumber;
 
@@ -262,8 +262,15 @@ public class GridMapHandler2D {
             relativeLayout.removeViewInLayout(oldTV);
         }
 
-        //return if robot reached the waypoint
+        //return for 3dMode
         if(row == -1 && column == -1){
+            return;
+        }
+
+        //remove waypoint if robot reached the waypoint
+        if(row == -2 && column == -2){
+            robotWaypointRow = -1;
+            robotWaypointColumn = -1;
             return;
         }
         robotWaypointRow = row;
