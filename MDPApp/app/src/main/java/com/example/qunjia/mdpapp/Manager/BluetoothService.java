@@ -14,6 +14,7 @@ import android.util.Log;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Set;
 import java.util.UUID;
 
 import static android.bluetooth.BluetoothDevice.*;
@@ -68,6 +69,8 @@ public class BluetoothService {
     private BluetoothDevice current_device;
     private boolean reconnecting = false;
 
+    private static BluetoothService mBluetoothService;
+
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
@@ -99,12 +102,12 @@ public class BluetoothService {
      * @param context The UI Activity Context
      * @param handler A Handler to send messages back to the UI Activity
      */
-    public BluetoothService(Context context, BluetoothAdapter adapter, Handler handler) {
-        if (adapter == null) {
+    private BluetoothService(Context context, Handler handler) {
+        mAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (mAdapter == null) {
             throw new RuntimeException("Bluetooth is not supported!");
         }
 
-        mAdapter = adapter;
         mState = ConnectionConstants.STATE_DISCONNECTED;
         mNewState = mState;
         mHandler = handler;
@@ -116,6 +119,15 @@ public class BluetoothService {
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         context.registerReceiver(mReceiver, filter);
+    }
+
+    public static BluetoothService getInstance(Context context, Handler handler) {
+        if (mBluetoothService == null) {
+            mBluetoothService = new BluetoothService(context, handler);
+            return mBluetoothService;
+        } else {
+            return mBluetoothService;
+        }
     }
 
     /**
@@ -152,6 +164,18 @@ public class BluetoothService {
     public void scan(){
         Log.d(BLUETOOTH_SCAN_TAG, "Scanning for Bluetooth devices");
         mAdapter.startDiscovery();
+    }
+
+    public void cancelDiscovery() {
+        mAdapter.cancelDiscovery();
+    }
+
+    public boolean adapterEnabled() {
+        return mAdapter != null && mAdapter.isEnabled();
+    }
+
+    public Set<BluetoothDevice> getBondedDevices() {
+        return mAdapter.getBondedDevices();
     }
 
     public void pair(BluetoothDevice device){
@@ -237,6 +261,10 @@ public class BluetoothService {
         updateUIStatus();
 
 //        activity.unregisterReceiver(mReceiver);
+    }
+
+    public void sendMessage(String msg) {
+        this.write(msg.getBytes());
     }
 
     public void write(byte[] out) {

@@ -27,6 +27,7 @@ import com.andretietz.android.controller.InputView;
 import com.example.qunjia.mdpapp.*;
 import com.example.qunjia.mdpapp.Handler.AccelerometerSwitchListener;
 import com.example.qunjia.mdpapp.Handler.ReconfigureHandler;
+import com.example.qunjia.mdpapp.Manager.BluetoothService;
 import com.example.qunjia.mdpapp.Manager.GridMapHandler2D;
 import com.example.qunjia.mdpapp.Manager.GridMapUpdateManager;
 import com.example.qunjia.mdpapp.OpenGL.myRenderer;
@@ -335,7 +336,7 @@ public class GridMapFragment extends Fragment {
                 return;
             case R.id.stopBtn:
                 String stopMsg = "A|S";
-                BluetoothFragment.sendMessage(stopMsg);
+                BluetoothService.getInstance(null, null).sendMessage(stopMsg);
                 addTextToStatusWindow((Activity)v.getContext(), "Stop");
                 if(isDebug){
                     addTextToStatusWindow((Activity) v.getContext(), stopMsg);
@@ -346,7 +347,7 @@ public class GridMapFragment extends Fragment {
                 return;
             case R.id.fastestBtn:
                 String fastMsg = "A|F";
-                BluetoothFragment.sendMessage(fastMsg);
+                BluetoothService.getInstance(null, null).sendMessage(fastMsg);
                 addTextToStatusWindow((Activity)v.getContext(), "Fastest");
                 if(isDebug){
                     addTextToStatusWindow((Activity) v.getContext(), fastMsg);
@@ -355,7 +356,7 @@ public class GridMapFragment extends Fragment {
                 return;
             case R.id.exploreBtn:
                 String exploreMsg = "SV";
-                BluetoothFragment.sendMessage(exploreMsg);
+                BluetoothService.getInstance(null, null).sendMessage(exploreMsg);
                 addTextToStatusWindow((Activity)v.getContext(), "Explore");
                 if(isDebug){
                     addTextToStatusWindow((Activity) v.getContext(), exploreMsg);
@@ -495,7 +496,7 @@ public class GridMapFragment extends Fragment {
         }
 
         if (!payload.equals("")) {
-            BluetoothFragment.sendMessage(payload);
+            BluetoothService.getInstance(null, null).sendMessage(payload);
         }
     }
 
