@@ -215,7 +215,7 @@ public class GridMapHandler2D {
 
                                     sendString += direction + "|" + rowNumber + "|" + columnNumber;
 
-                                    BluetoothFragment.sendMessage(sendString);
+                                    BluetoothService.getInstance(null, null).sendMessage(sendString);
                                     GridMapFragment.addTextToStatusWindow((Activity) context,sendString);
                                     //toggle waypoint btn
                                     ToggleButton toggleButton = ((Activity) context).findViewById(R.id.positionToggleBtn);

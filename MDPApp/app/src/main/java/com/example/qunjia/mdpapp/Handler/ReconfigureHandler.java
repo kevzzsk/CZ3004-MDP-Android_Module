@@ -7,20 +7,20 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import com.example.qunjia.mdpapp.Fragment.BluetoothFragment;
 import com.example.qunjia.mdpapp.Fragment.GridMapFragment;
+import com.example.qunjia.mdpapp.Manager.BluetoothService;
 
 public class ReconfigureHandler {
     public static void F1BtnOnCLick (Context context){
         String savedString = GetSharedPreferencesStr(context, "F1");
         GridMapFragment.addTextToStatusWindow((Activity) context, savedString);
-        BluetoothFragment.sendMessage(savedString);
+        BluetoothService.getInstance(null, null).sendMessage(savedString);
     }
 
     public static void F2BtnOnCLick (Context context){
         String savedString = GetSharedPreferencesStr(context, "F2");
         GridMapFragment.addTextToStatusWindow((Activity) context, savedString);
-        BluetoothFragment.sendMessage(savedString);
+        BluetoothService.getInstance(null, null).sendMessage(savedString);
     }
 
     public static void reconfigBtnOnClick (final Context context){
