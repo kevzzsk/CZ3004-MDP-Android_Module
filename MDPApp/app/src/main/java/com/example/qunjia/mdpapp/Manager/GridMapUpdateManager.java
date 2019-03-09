@@ -6,6 +6,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
 
@@ -25,7 +26,7 @@ import static com.example.qunjia.mdpapp.Manager.GridMapHandler2D.*;
 import static java.lang.Integer.parseInt;
 
 /**
- * This class handles decoding of incoming messages from Raspberry Pi,
+ * This class handles decoding of incoming meblussages from Raspberry Pi,
  * buffering of latest map descriptor string and conversion of raw coordinates
  * (from Raspberry Pi) into row number and column number.
  */
@@ -330,6 +331,7 @@ public class GridMapUpdateManager {
 
     private static int counter = 0;
     public void decodeMessage(Context context, String message) {
+        Log.d("xxxxxxxx", "decodemsg");
         String[] decoded = message.split("\\|");
         if (decoded.length > 0) {
             String header = decoded[0];
@@ -338,7 +340,10 @@ public class GridMapUpdateManager {
                 case "MDF":
                     map.fromString(decoded[1],decoded[2]);
                     robot.fromString(decoded[4], decoded[5], decoded[3]);
-                    arrow.addArrowFromString(decoded[6]);
+                    try{
+                        arrow.addArrowFromString(decoded[6]);
+                    }catch (Exception e){}
+
                     fullMapStr = decoded[1];
                     obstaclesStr = decoded[2];
                     if (this.isAutoMode) {

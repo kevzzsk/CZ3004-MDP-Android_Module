@@ -153,54 +153,45 @@ public class GridMapFragment extends Fragment {
                     fastestBtn.setEnabled(false);
                     stopBtn.setEnabled(false);
 
-                    AlertDialog.Builder builder1 = new AlertDialog.Builder(compoundButton.getContext());
-
-                    builder1.setMessage("Select an Option");
-                    builder1.setCancelable(false);
-
-                  /*  CharSequence items[] = new CharSequence[] {"North", "South", "East", "West"};
-                    builder1.setSingleChoiceItems(items, 0, new DialogInterface.OnClickListener() {
+                    AlertDialog.Builder adb = new AlertDialog.Builder(compoundButton.getContext());
+                    CharSequence items[] = new CharSequence[] {"North", "South", "East", "West"};
+                    adb.setSingleChoiceItems(items, 0, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface d, int n) {
                             GridMapHandler2D.robotStartCoordinateDirection = n;
                         }
 
-                    });*/
+                    });
+                    adb.setPositiveButton("Waypoint", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            GridMapHandler2D.isWaypointSelected = true;
+                        }
+                    });
+                    adb.setNegativeButton("Start", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            GridMapHandler2D.isWaypointSelected = false;
+                        }
+                    });
+                    adb.setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            GridMapHandler2D.SetRobotDragListener(compoundButton.getContext(), false);
+                            directionViewSetEnabled(activity, true);
 
-                    builder1.setPositiveButton(
-                            "Start",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    GridMapHandler2D.isWaypointSelected = false;
-                                    showDirectionAlertDialog(compoundButton.getContext(), compoundButton);
-                                }
-                            });
-
-                    builder1.setNegativeButton(
-                            "Waypoint",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    GridMapHandler2D.isWaypointSelected = true;
-                                    showDirectionAlertDialog(compoundButton.getContext(), compoundButton);
-                                }
-                            });
-                    builder1.setNeutralButton(
-                            "Cancel",
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    autoManualToggleBtn.setEnabled(true);
-                                    accelerometerSwitch.setEnabled(true);
-                                    updateBtn.setEnabled(true);
-                                    exploreBtn.setEnabled(true);
-                                    fastestBtn.setEnabled(true);
-                                    stopBtn.setEnabled(true);
-                                    compoundButton.toggle();
-                                }
-                            });
-
-                    AlertDialog alert11 = builder1.create();
-                    alert11.show();
+                            autoManualToggleBtn.setEnabled(true);
+                            accelerometerSwitch.setEnabled(true);
+                            updateBtn.setEnabled(true);
+                            exploreBtn.setEnabled(true);
+                            fastestBtn.setEnabled(true);
+                            stopBtn.setEnabled(true);
+                            compoundButton.toggle();
+                        }
+                    });
+                    adb.setTitle("Choose a direction");
+                    adb.setCancelable(false);
+                    adb.show();
                 } else {
                     GridMapHandler2D.SetRobotDragListener(compoundButton.getContext(), false);
                     directionViewSetEnabled(activity, true);

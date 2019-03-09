@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.util.Log;
 import android.view.Display;
 import android.view.DragEvent;
 import android.view.Gravity;
@@ -211,7 +212,7 @@ public class GridMapHandler2D {
                                             break;
                                     }
 
-                                    robotStartCoordinateDirection = 0;
+                                    robotStartCoordinateDirection = 0;//reset to north
 
                                     sendString += direction + "|" + rowNumber + "|" + columnNumber;
 
