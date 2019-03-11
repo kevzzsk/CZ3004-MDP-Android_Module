@@ -43,7 +43,6 @@ public class GridMapHandler2D {
 
     public static void setRobotPosition(Context context, int rotationAngle, int row, int column) {
         RelativeLayout relativeLayout = ((Activity) context).findViewById(R.id.gridMapFragmentLayout);
-
         //remove old robot text view
         TextView oldTV = ((Activity) context).findViewById(robotID);
         if(oldTV != null){
@@ -190,25 +189,37 @@ public class GridMapHandler2D {
                                         String msg = "MDF|" +GridMapUpdateManager.fullMapStr + "|" + GridMapUpdateManager.obstaclesStr + "|N|"
                                                 + rowNumber + "|" + columnNumber + "|0";
                                         GridMapFragment.mapUpdateManager.decodeMessage(context, msg);
+
+                                        switch (robotStartCoordinateDirection){
+                                            case 0:
+                                                setRobotPosition(context,  0, rowNumber, columnNumber);
+                                                break;
+                                            case 1:
+                                                setRobotPosition(context,  180, rowNumber, columnNumber);
+                                                break;
+                                            case 2:
+                                                setRobotPosition(context,  90,rowNumber, columnNumber);
+                                                break;
+                                            case 3:
+                                                setRobotPosition(context,  270, rowNumber, columnNumber);
+                                                break;
+                                        }
+
                                     }
 
                                     String direction = "";
                                     switch (robotStartCoordinateDirection){
                                         case 0:
                                             direction = "N";
-                                            setRobotPosition(context,  0, rowNumber, columnNumber);
                                             break;
                                         case 1:
                                             direction = "S";
-                                            setRobotPosition(context,  180, rowNumber, columnNumber);
                                             break;
                                         case 2:
                                             direction = "E";
-                                            setRobotPosition(context,  90,rowNumber, columnNumber);
                                             break;
                                         case 3:
                                             direction = "W";
-                                            setRobotPosition(context,  270, rowNumber, columnNumber);
                                             break;
                                     }
 

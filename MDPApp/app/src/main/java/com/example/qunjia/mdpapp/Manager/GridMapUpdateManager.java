@@ -64,7 +64,6 @@ public class GridMapUpdateManager {
         if (map != null) {
             map.update();
         }
-
         setRobotPosition(context, RobotDescriptor.getFaceAngle() + 180, RobotDescriptor.rowNumber, RobotDescriptor.columnNumber);
         myRenderer.setX(-RobotDescriptor.columnNumber);
         myRenderer.setZ(-RobotDescriptor.rowNumber);
@@ -331,7 +330,6 @@ public class GridMapUpdateManager {
 
     private static int counter = 0;
     public void decodeMessage(Context context, String message) {
-        Log.d("xxxxxxxx", "decodemsg");
         String[] decoded = message.split("\\|");
         if (decoded.length > 0) {
             String header = decoded[0];
