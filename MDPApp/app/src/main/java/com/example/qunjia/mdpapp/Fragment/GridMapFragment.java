@@ -352,7 +352,7 @@ public class GridMapFragment extends Fragment {
                 BluetoothService.getInstance(null, null).sendMessage(fastMsg);
                 addTextToStatusWindow((Activity)v.getContext(), "Fastest");
                 if(isDebug){
-                    addTextToStatusWindow((Activity) v.getContext(), fastMsg);
+                    addTextToStatusWindow((Activity) v.getContext(), "Bluetooth:" + fastMsg);
                 }
                 //robotFastestSimulator(v.getContext());
                 return;
@@ -361,7 +361,7 @@ public class GridMapFragment extends Fragment {
                 BluetoothService.getInstance(null, null).sendMessage(exploreMsg);
                 addTextToStatusWindow((Activity)v.getContext(), "Explore");
                 if(isDebug){
-                    addTextToStatusWindow((Activity) v.getContext(), exploreMsg);
+                    addTextToStatusWindow((Activity) v.getContext(), "Bluetooth:" + exploreMsg);
                 }
                 //robotExploreSimulator(v);
                 return;
@@ -421,11 +421,14 @@ public class GridMapFragment extends Fragment {
                             break;
                     }
 
-                    addTextToStatusWindow((Activity) context, "Bluetooth send: " + payload);
-                    String msg = "MDF|C000000000000000000000000000000000000000000000000000000000000000000000000003|000000000000|0|0"
+                    addTextToStatusWindow((Activity) context, "Bluetooth: " + payload);
+                    String msg = "MDF|"
+                            + GridMapUpdateManager.fullMapStr + "|"
+                            + GridMapUpdateManager.obstaclesStr + "|"
                             + debugDirectionStr[debugdirection] + "|"
                             + (GridMapUpdateManager.RobotDescriptor.getRowNumber() + row) + "|"
-                            + (GridMapUpdateManager.RobotDescriptor.getColumnNumber() + col);
+                            + (GridMapUpdateManager.RobotDescriptor.getColumnNumber() + col)
+                            + "|0";
                     GridMapFragment.mapUpdateManager.decodeMessage(context, msg);
                     myRenderer.setZ(myRenderer.getZ() - 1);
                     break;
@@ -452,15 +455,18 @@ public class GridMapFragment extends Fragment {
             case MOVE_LEFT:
                 if(isDebug){
                     payload = "SL";
-                    addTextToStatusWindow((Activity) context, "Bluetooth send: " + payload);
+                    addTextToStatusWindow((Activity) context, "Bluetooth: " + payload);
                     debugdirection -= 1;
                     if(debugdirection == -1) debugdirection = 3;
 
 
-                    String msg = "MDF|C000000000000000000000000000000000000000000000000000000000000000000000000003|000000000000|0|0"
+                    String msg = "MDF|"
+                            + GridMapUpdateManager.fullMapStr + "|"
+                            + GridMapUpdateManager.obstaclesStr + "|"
                             + debugDirectionStr[debugdirection] + "|"
-                            + (GridMapUpdateManager.RobotDescriptor.getRowNumber()) + "|"
-                            + (GridMapUpdateManager.RobotDescriptor.getColumnNumber());
+                            + GridMapUpdateManager.RobotDescriptor.getRowNumber() + "|"
+                            + GridMapUpdateManager.RobotDescriptor.getColumnNumber()
+                            + "|0";
                     GridMapFragment.mapUpdateManager.decodeMessage(context, msg);
                     //myRenderer.setX(myRenderer.getX() - 1);
                     break;
@@ -476,13 +482,16 @@ public class GridMapFragment extends Fragment {
             case MOVE_RIGHT:
                 if(GridMapFragment.isDebug){
                     payload = "SR";
-                    addTextToStatusWindow((Activity) context, "Bluetooth send: " + payload);
+                    addTextToStatusWindow((Activity) context, "Bluetooth: " + payload);
                     debugdirection = (debugdirection + 1)%4;
 
-                    String msg = "MDF|C000000000000000000000000000000000000000000000000000000000000000000000000003|000000000000|0|0"
+                    String msg = "MDF|"
+                            + GridMapUpdateManager.fullMapStr + "|"
+                            + GridMapUpdateManager.obstaclesStr + "|"
                             + debugDirectionStr[debugdirection] + "|"
-                            + (GridMapUpdateManager.RobotDescriptor.getRowNumber()) + "|"
-                            + (GridMapUpdateManager.RobotDescriptor.getColumnNumber());
+                            + GridMapUpdateManager.RobotDescriptor.getRowNumber() + "|"
+                            + GridMapUpdateManager.RobotDescriptor.getColumnNumber()
+                            + "|0";
                     GridMapFragment.mapUpdateManager.decodeMessage(context, msg);
                     //myRenderer.setX(myRenderer.getX() + 1);
                     break;
