@@ -332,7 +332,7 @@ public class GridMapUpdateManager {
     public void decodeMessage(Context context, String message) {
         String[] decoded = message.split("\\|");
         if (decoded.length > 0) {
-            String header = decoded[0];
+            String header = decoded[0].toUpperCase();
 
             switch (header) {
                 case "MDF":
@@ -348,52 +348,10 @@ public class GridMapUpdateManager {
                         this.updateAll(context);
                     }
                     break;
-                case "FAST":
-                    final String fastStr = decoded[1];
-                    final Context c = context;
-                    final Handler handler = new Handler();
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            if(counter >= fastStr.length()){
-                                return;
-                            }
-                            int row = RobotDescriptor.getRowNumber();
-                            int col = RobotDescriptor.getColumnNumber();
-                            String direction = String.valueOf(fastStr.charAt(counter+1));
-                            char fastChar = fastStr.charAt(counter);
-                            if(fastChar == 'M'){
-
-                                switch (direction) {
-                                    case "S":
-                                        row += Integer.parseInt(String.valueOf(fastStr.charAt(counter+2)));
-                                        break;
-                                    case "W":
-                                        col -= Integer.parseInt(String.valueOf(fastStr.charAt(counter+2)));
-                                        break;
-                                    case "N":
-                                        row -= Integer.parseInt(String.valueOf(fastStr.charAt(counter+2)));
-                                        break;
-                                    case "E":
-                                        col += Integer.parseInt(String.valueOf(fastStr.charAt(counter+2)));
-                                        break;
-                                }
-                                robot.fromString(String.valueOf(row), String.valueOf(col),direction);
-                                counter += 3;
-                            }else if(fastChar == 'R'){
-                                robot.fromString(String.valueOf(row), String.valueOf(col),direction);
-                                counter += 2;
-                            }
-
-                            if (isAutoMode) {
-                                updateAll(c);
-                            }
-                            handler.postDelayed(this, 300);
-                        }
-                    }, 300);
-
+                case "F":
+                    fastestPathWithDirection(context, decoded[1]);
                     break;
-                case "MDFDONE":
+                case "MDF STRING DONE":
                     GridMapFragment.addTextToStatusWindow((Activity) context,
                             "==Exploration Done==");
                     GridMapFragment.addTextToStatusWindow((Activity) context,
@@ -408,5 +366,135 @@ public class GridMapUpdateManager {
                    // break;
             }
         }
+    }
+    //F|REME9ME3RNRWMW4RNMN5REME4RNMN9MN3
+    private void fastestPathWithNSEW(final Context c, final String fastStr){
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if(counter >= fastStr.length()){
+                    return;
+                }
+                int row = RobotDescriptor.getRowNumber();
+                int col = RobotDescriptor.getColumnNumber();
+                String direction = String.valueOf(fastStr.charAt(counter+1));
+                char fastChar = fastStr.charAt(counter);
+                if(fastChar == 'M'){
+
+                    switch (direction) {
+                        case "S":
+                            row += Integer.parseInt(String.valueOf(fastStr.charAt(counter+2)));
+                            break;
+                        case "W":
+                            col -= Integer.parseInt(String.valueOf(fastStr.charAt(counter+2)));
+                            break;
+                        case "N":
+                            row -= Integer.parseInt(String.valueOf(fastStr.charAt(counter+2)));
+                            break;
+                        case "E":
+                            col += Integer.parseInt(String.valueOf(fastStr.charAt(counter+2)));
+                            break;
+                    }
+                    robot.fromString(String.valueOf(row), String.valueOf(col),direction);
+                    counter += 3;
+                }else if(fastChar == 'R'){
+                    robot.fromString(String.valueOf(row), String.valueOf(col),direction);
+                    counter += 2;
+                }
+
+                if (isAutoMode) {
+                    updateAll(c);
+                }
+                handler.postDelayed(this, 300);
+            }
+        }, 300);
+    }
+    //F|LLS4RS5RS4LS9S3
+    private void fastestPathWithDirection(final Context c, final String fastStr){
+        if(counter != 0)
+            return;
+        int firstDelay = 0;
+        final int rotateDelay = 500, moveDelay = 300, stepDelay = 200;
+        if(fastStr.charAt(0) == 'L' || fastStr.charAt(0) == 'R'){
+            firstDelay = 500;
+        } else if(fastStr.charAt(0) == 'S' ){
+            int steps = Integer.parseInt(String.valueOf(fastStr.charAt(1)));
+            firstDelay = moveDelay + steps * stepDelay;
+        }
+
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if(counter >= fastStr.length()){
+                    counter = 0;
+                    return;
+                }
+                int row = RobotDescriptor.getRowNumber();
+                int col = RobotDescriptor.getColumnNumber();
+                int direction = RobotDescriptor.getFaceAngle();
+                char fastChar = fastStr.charAt(counter);
+                switch (fastChar) {
+                    case 'L':
+                         direction -= 90;
+                         if(direction == -90)
+                             direction = 270;
+                        break;
+                    case 'R':
+                        direction = (direction + 90) % 360;
+                        break;
+                    case 'S':
+                        int steps = Integer.parseInt(String.valueOf(fastStr.charAt(counter+1)));
+                        switch (direction) {
+                            case FacingDirection.SOUTH:
+                                row += steps;
+                                break;
+                            case FacingDirection.WEST:
+                                col -= steps;
+                                break;
+                            case FacingDirection.NORTH:
+                                row -= steps;
+                                break;
+                            case FacingDirection.EAST:
+                                col += steps;
+                                break;
+                        }
+                        break;
+                }
+                String directionStr = "";
+                switch (direction){
+                    case FacingDirection.NORTH:
+                        directionStr = "N";
+                        break;
+                    case FacingDirection.SOUTH:
+                        directionStr = "S";
+                        break;
+                    case FacingDirection.WEST:
+                        directionStr = "W";
+                        break;
+                    case FacingDirection.EAST:
+                        directionStr = "E";
+                        break;
+                }
+                robot.fromString(String.valueOf(row), String.valueOf(col),directionStr);
+
+                if (isAutoMode) {
+                    updateAll(c);
+                }
+
+                //create delay
+                int delay = 0;
+                if(fastChar == 'L' || fastChar == 'R'){
+                    delay = rotateDelay;
+                    counter++;
+                } else if(fastChar == 'S' ){
+                    int steps = Integer.parseInt(String.valueOf(fastStr.charAt(counter+1)));
+                    delay = moveDelay + steps * stepDelay;
+                    counter += 2;
+                }
+                handler.postDelayed(this, delay);
+            }
+        }, firstDelay);
     }
 }
