@@ -37,7 +37,7 @@ public class GridMapHandler2D {
     private final static int cellMargin = 2;
     public final static int rowTotalNumber = 20, columnTotalNumber = 15;
 
-    private static int robotWaypointColumn, robotWaypointRow;
+    public static int robotWaypointColumn, robotWaypointRow;
     public static Boolean isWaypointSelected = false;
     public static int robotStartCoordinateDirection;
 
@@ -61,9 +61,9 @@ public class GridMapHandler2D {
                 setRobotWaypointPosition(context, robotWaypointRow, robotWaypointColumn);
             }
         }
-        if(row == robotWaypointRow && column == robotWaypointColumn){
+        /*if(row == robotWaypointRow && column == robotWaypointColumn){
             setRobotWaypointPosition(context, -2, -2);//remove robot waypoint forever
-        }
+        }*/
         else if(GridMapFragment.is3Dmode){
             return;
         }
@@ -204,7 +204,7 @@ public class GridMapHandler2D {
                                                 setRobotPosition(context,  270, rowNumber, columnNumber);
                                                 break;
                                         }
-
+                                        setRobotWaypointPosition(context, -2, -2);//remove robot waypoint forever
                                     }
 
                                     String direction = "";
@@ -265,7 +265,7 @@ public class GridMapHandler2D {
     }
 
     //for waypoint only
-    private static void setRobotWaypointPosition(Context context, int row, int column) {
+    static void setRobotWaypointPosition(Context context, int row, int column) {
         RelativeLayout relativeLayout = ((Activity) context).findViewById(R.id.gridMapFragmentLayout);
 
         //remove old robot text view

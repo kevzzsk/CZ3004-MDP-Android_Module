@@ -429,6 +429,10 @@ public class GridMapUpdateManager {
             public void run() {
                 if(counter >= fastStr.length()){
                     counter = 0;
+                    if(RobotDescriptor.getRowNumber() == GridMapHandler2D.robotWaypointRow &&
+                            RobotDescriptor.getColumnNumber() == GridMapHandler2D.robotWaypointColumn){
+                        setRobotWaypointPosition(c, -2, -2);//remove robot waypoint forever
+                    }
                     return;
                 }
                 int row = RobotDescriptor.getRowNumber();

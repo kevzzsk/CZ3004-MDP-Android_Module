@@ -338,11 +338,11 @@ public class GridMapFragment extends Fragment {
                 ReconfigureHandler.F2BtnOnCLick(v.getContext());
                 return;
             case R.id.stopBtn:
-                String stopMsg = "A|S";
+                String stopMsg = "SZ";
                 BluetoothService.getInstance(null, null).sendMessage(stopMsg);
                 addTextToStatusWindow((Activity)v.getContext(), "Stop");
                 if(isDebug){
-                    addTextToStatusWindow((Activity) v.getContext(), stopMsg);
+                    addTextToStatusWindow((Activity) v.getContext(), "Bluetooth:" + stopMsg);
                 }
                 return;
             case R.id.updateBtn:
