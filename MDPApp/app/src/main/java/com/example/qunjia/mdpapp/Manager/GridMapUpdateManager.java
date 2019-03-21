@@ -8,7 +8,9 @@ import android.os.Handler;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 
 import com.example.qunjia.mdpapp.Fragment.GridMapFragment;
@@ -36,6 +38,7 @@ public class GridMapUpdateManager {
     private RobotDescriptor robot;
     private static ArrowDescriptor arrow;
     public static String fullMapStr = "0", obstaclesStr = "0";
+    public static ArrayList<String> MDFArrayList;
 
     public GridMapUpdateManager(Context context) {
         robot = new RobotDescriptor(18, 1, FacingDirection.NORTH);
@@ -226,6 +229,7 @@ public class GridMapUpdateManager {
     }
 
     private static class ArrowDescriptor {
+        public static ArrayList<String> imagePositionArrayList;
         ArrayList<Integer> rotationAngle;
         ArrayList<Integer> rowNumber;
         ArrayList<Integer> columnNumber;
@@ -240,6 +244,7 @@ public class GridMapUpdateManager {
             rotationAngle = new ArrayList<>();
             rowNumberRemove = new ArrayList<>();
             columnNumberRemove= new ArrayList<>();
+            imagePositionArrayList = new ArrayList<>();
         }
 
         /*void addArrowFromString(String direction,String row, String col){
@@ -267,21 +272,29 @@ public class GridMapUpdateManager {
 
                 switch (RobotDescriptor.getFaceAngle()){
                     case FacingDirection.NORTH:
+                        if((RobotDescriptor.getColumnNumber() - offset) == -1)
+                            return;
                         rowNumber.add(RobotDescriptor.getRowNumber());
                         columnNumber.add(RobotDescriptor.getColumnNumber() - offset);
                         rotationAngle.add(FacingDirection.WEST);
                         break;
                     case FacingDirection.SOUTH:
+                        if((RobotDescriptor.getColumnNumber() + offset) == 15)
+                            return;
                         rowNumber.add(RobotDescriptor.getRowNumber());
                         columnNumber.add(RobotDescriptor.getColumnNumber() + offset);
                         rotationAngle.add(FacingDirection.EAST);
                         break;
                     case FacingDirection.EAST:
+                        if((RobotDescriptor.getRowNumber() - offset) == -1)
+                            return;
                         rowNumber.add(RobotDescriptor.getRowNumber() - offset);
                         columnNumber.add(RobotDescriptor.getColumnNumber());
                         rotationAngle.add(FacingDirection.NORTH);
                         break;
                     case FacingDirection.WEST:
+                        if((RobotDescriptor.getRowNumber() + offset) == 20)
+                            return;
                         rowNumber.add(RobotDescriptor.getRowNumber() + offset);
                         columnNumber.add(RobotDescriptor.getColumnNumber());
                         rotationAngle.add(FacingDirection.SOUTH);
@@ -319,8 +332,7 @@ public class GridMapUpdateManager {
                         break;
 
                 }
-                GridMapFragment.addTextToStatusWindow((Activity) context,
-                        "Arrow detected- (" + (19 - rowNumber.get(0)) + ","  + columnNumber.get(0) + "," + direction + ")");
+                imagePositionArrayList.add( "(" + (19 - rowNumber.get(0)) + ","  + columnNumber.get(0) + "," + direction + ")");
                 rotationAngle.remove(0);
                 rowNumber.remove(0);
                 columnNumber.remove(0);
@@ -336,6 +348,7 @@ public class GridMapUpdateManager {
 
             switch (header) {
                 case "MDF":
+                    MDFArrayList.add(message);
                     map.fromString(decoded[1],decoded[2]);
                     robot.fromString(decoded[4], decoded[5], decoded[3]);
                     try{
@@ -352,10 +365,43 @@ public class GridMapUpdateManager {
                     fastestPathWithDirection(context, decoded[1]);
                     break;
                 case "MDF STRING DONE":
+                    GridMapFragment.timer.cancel();
+                    GridMapFragment.timer = null;
+                    TextView textView = ((Activity)context).findViewById(R.id.exploreBtn);
+                    if(GridMapUpdateManager.MDFArrayList.size() > 0){
+                        Button playbackForward = ((Activity) context).findViewById(R.id.playback_forward);
+                        Button playbackBackward = ((Activity) context).findViewById(R.id.playback_backward);
+                        playbackForward.setEnabled(true);
+                        playbackBackward.setEnabled(true);
+                    }
+
+                    String timeTaken = textView.getText().toString();
+                    textView.setText("Explore");
+                    textView.setEnabled(true);
+
                     GridMapFragment.addTextToStatusWindow((Activity) context,
                             "==Exploration Done==");
                     GridMapFragment.addTextToStatusWindow((Activity) context,
-                            "MDF|"+ fullMapStr + "|" + obstaclesStr);
+                            "Time taken : " + timeTaken);
+                    GridMapFragment.addTextToStatusWindow((Activity) context,
+                            "Part 1\n"+ fullMapStr);
+                    GridMapFragment.addTextToStatusWindow((Activity) context,
+                            "Part 2\n" + obstaclesStr);
+                    GridMapFragment.addTextToStatusWindow((Activity) context,
+                            "\nImage Position:");
+                    String imagePostionStr = "";
+                    for(int i = 0; i < ArrowDescriptor.imagePositionArrayList.size(); i++){
+                        imagePostionStr += ArrowDescriptor.imagePositionArrayList.get(i) + ",";
+                    }
+                    ArrowDescriptor.imagePositionArrayList = new ArrayList<>();
+                    if(imagePostionStr.length() != 0){
+                        imagePostionStr = imagePostionStr.substring(0, imagePostionStr.length()-1);
+                    }else {
+                        imagePostionStr = "none!";
+                    }
+
+                    GridMapFragment.addTextToStatusWindow((Activity) context,
+                            imagePostionStr);
                     break;
                 //case "ARW":
                     //arrow.addArrowFromString(decoded[1], decoded[2],decoded[3]);

@@ -339,8 +339,8 @@
         <RelativeLayout
             android:id="@+id/directionSwitchLayout"
             android:layout_width="wrap_content"
-            android:layout_alignParentEnd="true"
             android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
             android:layout_marginEnd="20dp">
 
             <TextView
@@ -359,13 +359,36 @@
         </RelativeLayout>
 
         <include  layout="@layout/direction_view_layout"
-            android:layout_width="wrap_content"
+            android:id="@+id/direction_view_layout"
+            android:layout_width="130dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="25dp"
             android:layout_marginTop="10dp"
             android:layout_alignParentEnd="true"
             android:layout_below="@+id/directionSwitchLayout"
             />
+
+        <Button
+            android:enabled="false"
+            android:id="@+id/playback_forward"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:text="&#62;"
+            android:layout_marginEnd="5dp"
+            android:layout_toStartOf="@+id/direction_view_layout"
+            android:layout_below="@+id/directionSwitchLayout"
+            android:onClick="gridMapOnClickMethods"/>
+
+        <Button
+            android:enabled="false"
+            android:id="@+id/playback_backward"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:text="&#60;"
+            android:layout_marginEnd="5dp"
+            android:layout_toStartOf="@+id/direction_view_layout"
+            android:layout_below="@+id/playback_forward"
+            android:onClick="gridMapOnClickMethods"/>
     </RelativeLayout>
 
     <RelativeLayout

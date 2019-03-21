@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -35,6 +36,7 @@ import com.example.qunjia.mdpapp.OpenGL.myRenderer;
 
 import org.json.JSONArray;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 
@@ -45,6 +47,9 @@ public class GridMapFragment extends Fragment {
 
     public static Boolean is3Dmode = false;
     private static String statusWindowTxt = "";
+
+    public static CountDownTimer timer;
+    private static int playbackCounter = 0;
 
     //debug var
     public static Boolean isDebug = false;
@@ -93,6 +98,7 @@ public class GridMapFragment extends Fragment {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
+                GridMapUpdateManager.MDFArrayList = new ArrayList<>();
                 String msg = "MDF|C000000000000000000000000000000000000000000000000000000000000000000000000003|000000000000|N|1|1|0";
                 //String msg = "MDF|FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF|000000000080010042038400000000000000010C000000000000021F84000800000000000400|W|17|2|1";
                 mapUpdateManager.decodeMessage(getContext(), msg);
@@ -142,6 +148,13 @@ public class GridMapFragment extends Fragment {
                 final Button exploreBtn = activity.findViewById(R.id.exploreBtn);
                 final Button fastestBtn = activity.findViewById(R.id.fastestBtn);
                 final Button stopBtn = activity.findViewById(R.id.stopBtn);
+
+                exploreBtn.setEnabled(true);
+                exploreBtn.setText("Explore");
+                if(timer != null){
+                    timer.cancel();
+                }
+
 
                 if (compoundButton.isChecked()) {
                     GridMapHandler2D.SetRobotDragListener(compoundButton.getContext(), true);
@@ -311,6 +324,10 @@ public class GridMapFragment extends Fragment {
     }
 
     public static void myClickMethod(final View v) {
+        Button playbackForward = ((Activity) v.getContext()).findViewById(R.id.playback_forward);
+        Button playbackBackward = ((Activity) v.getContext()).findViewById(R.id.playback_backward);
+        Button exploreBtn = ((Activity) v.getContext()).findViewById(R.id.exploreBtn);
+
         switch (v.getId()) {
             case R.id.clearStatusWindowBtn2D:
             case R.id.clearStatusWindowBtn3D:
@@ -338,6 +355,16 @@ public class GridMapFragment extends Fragment {
                 ReconfigureHandler.F2BtnOnCLick(v.getContext());
                 return;
             case R.id.stopBtn:
+                if(GridMapUpdateManager.MDFArrayList.size() > 0){
+                    playbackForward.setEnabled(true);
+                    playbackBackward.setEnabled(true);
+                }
+                exploreBtn.setEnabled(true);
+                exploreBtn.setText("Explore");
+                if(timer != null){
+                    timer.cancel();
+                }
+
                 String stopMsg = "SZ";
                 BluetoothService.getInstance(null, null).sendMessage(stopMsg);
                 addTextToStatusWindow((Activity)v.getContext(), "Stop");
@@ -358,9 +385,44 @@ public class GridMapFragment extends Fragment {
                 //robotFastestSimulator(v.getContext());
                 return;
             case R.id.exploreBtn:
+                GridMapUpdateManager.MDFArrayList = new ArrayList<>();
+                playbackCounter = 0;
+                playbackForward.setEnabled(false);
+                playbackBackward.setEnabled(false);
                 String exploreMsg = "SV";
                 BluetoothService.getInstance(null, null).sendMessage(exploreMsg);
                 addTextToStatusWindow((Activity)v.getContext(), "Explore");
+
+                final long totalTime = 30 * 60 * 1000;//30 mins
+                long intervalSeconds = 1;
+                final TextView textView = (TextView) v;
+                textView.setEnabled(false);
+
+                timer = new CountDownTimer(totalTime, intervalSeconds * 1000) {
+
+                    @SuppressLint("SetTextI18n")
+                    public void onTick(long millisUntilFinished) {
+                        int secondsInt = (int)((totalTime - millisUntilFinished) / 1000 % 60);
+                        String seconds;
+                        if(secondsInt < 10) {
+                            seconds = "0" + secondsInt;
+                        }else {
+                            seconds = "" + secondsInt;
+                        }
+                        String mins = "0" + ((totalTime - millisUntilFinished) / 1000 / 60) + "";
+                        textView.setText(mins + ":" + seconds);
+                    }
+
+                    public void onFinish() {
+                        textView.setText("Explore");
+                        timer = null;
+                    }
+
+                };
+
+                timer.start();
+
+
                 if(isDebug){
                     addTextToStatusWindow((Activity) v.getContext(), "Bluetooth:" + exploreMsg);
                 }
@@ -371,6 +433,19 @@ public class GridMapFragment extends Fragment {
                 return;
             case R.id.rotateLeftBtn:
                 myRenderer.rotateLeft();
+                return;
+            case R.id.playback_forward:
+                mapUpdateManager.decodeMessage(v.getContext(), GridMapUpdateManager.MDFArrayList.get(playbackCounter));
+                if(playbackCounter < GridMapUpdateManager.MDFArrayList.size()){
+                    playbackCounter++;
+                }
+
+                return;
+            case R.id.playback_backward:
+                mapUpdateManager.decodeMessage(v.getContext(), GridMapUpdateManager.MDFArrayList.get(playbackCounter));
+                if(playbackCounter > 0){
+                    playbackCounter--;
+                }
                 return;
         }
 
@@ -595,7 +670,7 @@ public class GridMapFragment extends Fragment {
         }
         final Context context = v.getContext();
         final Handler handler = new Handler();
-        final int delay = 200; //milliseconds
+        final int delay = 100; //milliseconds
 
         handler.postDelayed(new Runnable(){
             public void run(){
