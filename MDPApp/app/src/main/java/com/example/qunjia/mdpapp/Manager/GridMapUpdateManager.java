@@ -320,7 +320,7 @@ public class GridMapUpdateManager {
 
                 }
                 GridMapFragment.addTextToStatusWindow((Activity) context,
-                        "Arrow detected- (" + rowNumber.get(0) + ","  + columnNumber.get(0) + "," + direction + ")");
+                        "Arrow detected- (" + (19 - rowNumber.get(0)) + ","  + columnNumber.get(0) + "," + direction + ")");
                 rotationAngle.remove(0);
                 rowNumber.remove(0);
                 columnNumber.remove(0);

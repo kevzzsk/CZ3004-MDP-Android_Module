@@ -9,7 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Point;
-import android.util.Log;
+import android.support.design.widget.Snackbar;
 import android.view.Display;
 import android.view.DragEvent;
 import android.view.Gravity;
@@ -169,10 +169,11 @@ public class GridMapHandler2D {
                     public boolean onDrag(View view, DragEvent dragEvent) {
                         final int action = dragEvent.getAction();
 
+                        int rowNumber = (int) view.getId() % 1000;
+                        int columnNumber = (int) view.getId() / 1000;
                         switch (action) {
                             case DragEvent.ACTION_DROP:
-                                int rowNumber = (int) view.getId() % 1000;
-                                int columnNumber = (int) view.getId() / 1000;
+
                                 if (rowNumber > 0 && rowNumber < rowTotalNumber - 1 && columnNumber > 0 &&
                                         columnNumber < columnTotalNumber - 1) {
                                     //display robot waypoint
@@ -236,6 +237,9 @@ public class GridMapHandler2D {
 
                                 break;
                             case DragEvent.ACTION_DRAG_LOCATION:
+                                Snackbar mySnackbar = Snackbar.make(((Activity)context).findViewById(R.id.topLayout),
+                                        "Row: " + (19 - rowNumber) + " Col: " + columnNumber , Snackbar.LENGTH_SHORT);
+                                mySnackbar.show();
                                 break;
                         }
                         return true;
