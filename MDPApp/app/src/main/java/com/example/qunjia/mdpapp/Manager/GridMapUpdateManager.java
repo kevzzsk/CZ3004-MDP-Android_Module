@@ -3,6 +3,7 @@ package com.example.qunjia.mdpapp.Manager;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
@@ -228,7 +229,7 @@ public class GridMapUpdateManager {
         }
     }
 
-    private static class ArrowDescriptor {
+    public static class ArrowDescriptor {
         public static ArrayList<String> imagePositionArrayList;
         ArrayList<Integer> rotationAngle;
         ArrayList<Integer> rowNumber;
@@ -348,7 +349,17 @@ public class GridMapUpdateManager {
 
             switch (header) {
                 case "MDF":
-                    MDFArrayList.add(message);
+                    if(GridMapFragment.isExploring){
+                        MDFArrayList.add(message);
+                        //save MDF string
+                        String strToSave = "";
+                        for(int i = 0 ; i < MDFArrayList.size(); i++){
+                            strToSave += MDFArrayList.get(i) + "divider";
+                        }
+                        SharedPreferences.Editor editor = context.getSharedPreferences("MY_PREFS_NAME", Context.MODE_PRIVATE).edit();
+                        editor.putString("MDFArrayList", strToSave);
+                        editor.apply();
+                    }
                     map.fromString(decoded[1],decoded[2]);
                     robot.fromString(decoded[4], decoded[5], decoded[3]);
                     try{
@@ -365,8 +376,10 @@ public class GridMapUpdateManager {
                     fastestPathWithDirection(context, decoded[1]);
                     break;
                 case "MDF STRING DONE":
+                    GridMapFragment.isExploring = false;
                     GridMapFragment.timer.cancel();
                     GridMapFragment.timer = null;
+
                     TextView textView = ((Activity)context).findViewById(R.id.exploreBtn);
                     if(GridMapUpdateManager.MDFArrayList.size() > 0){
                         Button playbackForward = ((Activity) context).findViewById(R.id.playback_forward);

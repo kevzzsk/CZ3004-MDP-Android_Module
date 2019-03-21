@@ -369,7 +369,6 @@
             />
 
         <Button
-            android:enabled="false"
             android:id="@+id/playback_forward"
             android:layout_width="50dp"
             android:layout_height="50dp"
@@ -380,7 +379,6 @@
             android:onClick="gridMapOnClickMethods"/>
 
         <Button
-            android:enabled="false"
             android:id="@+id/playback_backward"
             android:layout_width="50dp"
             android:layout_height="50dp"

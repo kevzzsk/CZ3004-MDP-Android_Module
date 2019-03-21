@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -37,6 +38,7 @@ import com.example.qunjia.mdpapp.OpenGL.myRenderer;
 import org.json.JSONArray;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 
@@ -50,6 +52,7 @@ public class GridMapFragment extends Fragment {
 
     public static CountDownTimer timer;
     private static int playbackCounter = 0;
+    public static Boolean isExploring = false;
 
     //debug var
     public static Boolean isDebug = false;
@@ -99,6 +102,14 @@ public class GridMapFragment extends Fragment {
             @Override
             public void run() {
                 GridMapUpdateManager.MDFArrayList = new ArrayList<>();
+
+                SharedPreferences prefs = getContext().getSharedPreferences("MY_PREFS_NAME", Context.MODE_PRIVATE);
+                String savedMDF = prefs.getString("MDFArrayList", "");
+                if(!savedMDF.equals("")){
+                    String[] decoded = savedMDF.split("divider");
+                    GridMapUpdateManager.MDFArrayList = new ArrayList<>(Arrays.asList(decoded));
+                }
+
                 String msg = "MDF|C000000000000000000000000000000000000000000000000000000000000000000000000003|000000000000|N|1|1|0";
                 //String msg = "MDF|FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF|000000000080010042038400000000000000010C000000000000021F84000800000000000400|W|17|2|1";
                 mapUpdateManager.decodeMessage(getContext(), msg);
@@ -148,13 +159,6 @@ public class GridMapFragment extends Fragment {
                 final Button exploreBtn = activity.findViewById(R.id.exploreBtn);
                 final Button fastestBtn = activity.findViewById(R.id.fastestBtn);
                 final Button stopBtn = activity.findViewById(R.id.stopBtn);
-
-                exploreBtn.setEnabled(true);
-                exploreBtn.setText("Explore");
-                if(timer != null){
-                    timer.cancel();
-                }
-
 
                 if (compoundButton.isChecked()) {
                     GridMapHandler2D.SetRobotDragListener(compoundButton.getContext(), true);
@@ -355,6 +359,7 @@ public class GridMapFragment extends Fragment {
                 ReconfigureHandler.F2BtnOnCLick(v.getContext());
                 return;
             case R.id.stopBtn:
+                isExploring = false;
                 if(GridMapUpdateManager.MDFArrayList.size() > 0){
                     playbackForward.setEnabled(true);
                     playbackBackward.setEnabled(true);
@@ -365,6 +370,7 @@ public class GridMapFragment extends Fragment {
                     timer.cancel();
                 }
 
+                //send stop message to rpi
                 String stopMsg = "SZ";
                 BluetoothService.getInstance(null, null).sendMessage(stopMsg);
                 addTextToStatusWindow((Activity)v.getContext(), "Stop");
@@ -385,7 +391,9 @@ public class GridMapFragment extends Fragment {
                 //robotFastestSimulator(v.getContext());
                 return;
             case R.id.exploreBtn:
+                isExploring = true;
                 GridMapUpdateManager.MDFArrayList = new ArrayList<>();
+                GridMapUpdateManager.ArrowDescriptor.imagePositionArrayList = new ArrayList<>();
                 playbackCounter = 0;
                 playbackForward.setEnabled(false);
                 playbackBackward.setEnabled(false);
@@ -435,16 +443,16 @@ public class GridMapFragment extends Fragment {
                 myRenderer.rotateLeft();
                 return;
             case R.id.playback_forward:
-                mapUpdateManager.decodeMessage(v.getContext(), GridMapUpdateManager.MDFArrayList.get(playbackCounter));
-                if(playbackCounter < GridMapUpdateManager.MDFArrayList.size()){
+                if(playbackCounter < GridMapUpdateManager.MDFArrayList.size() - 1){
                     playbackCounter++;
+                    mapUpdateManager.decodeMessage(v.getContext(), GridMapUpdateManager.MDFArrayList.get(playbackCounter));
                 }
 
                 return;
             case R.id.playback_backward:
-                mapUpdateManager.decodeMessage(v.getContext(), GridMapUpdateManager.MDFArrayList.get(playbackCounter));
                 if(playbackCounter > 0){
                     playbackCounter--;
+                    mapUpdateManager.decodeMessage(v.getContext(), GridMapUpdateManager.MDFArrayList.get(playbackCounter));
                 }
                 return;
         }
