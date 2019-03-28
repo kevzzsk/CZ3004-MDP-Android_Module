@@ -112,9 +112,6 @@ public class GridMapHandler2D {
         }
     }
 
-    //////you dunnid anything below this line/////
-
-
     //for waypoint only
     @SuppressLint("ClickableViewAccessibility")
     public static void SetRobotDragListener(Context context, Boolean enableListener){
@@ -212,18 +209,21 @@ public class GridMapHandler2D {
                                     switch (robotStartCoordinateDirection){
                                         case 0:
                                             direction = "N";
+                                            GridMapUpdateManager.arrowFacing = "U";
                                             break;
                                         case 1:
                                             direction = "S";
+                                            GridMapUpdateManager.arrowFacing = "D";
                                             break;
                                         case 2:
                                             direction = "E";
+                                            GridMapUpdateManager.arrowFacing = "R";
                                             break;
                                         case 3:
                                             direction = "W";
+                                            GridMapUpdateManager.arrowFacing = "L";
                                             break;
                                     }
-
                                     robotStartCoordinateDirection = 0;//reset to north
 
                                     sendString += direction + "|" + rowNumber + "|" + columnNumber;

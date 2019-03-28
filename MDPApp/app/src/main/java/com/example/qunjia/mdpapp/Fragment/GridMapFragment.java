@@ -51,7 +51,7 @@ public class GridMapFragment extends Fragment {
     private static String statusWindowTxt = "";
 
     public static CountDownTimer timer;
-    private static int playbackCounter = 0;
+    public static int playbackCounter = 0;
     public static Boolean isExploring = false;
 
     //debug var
@@ -156,7 +156,7 @@ public class GridMapFragment extends Fragment {
                 final ToggleButton autoManualToggleBtn = activity.findViewById(R.id.autoManualToggleBtn);
                 final Switch accelerometerSwitch = activity.findViewById(R.id.directionToggleBtn);
                 final Button updateBtn = activity.findViewById(R.id.updateBtn);
-                final Button exploreBtn = activity.findViewById(R.id.exploreBtn);
+                //final Button exploreBtn = activity.findViewById(R.id.exploreBtn);
                 final Button fastestBtn = activity.findViewById(R.id.fastestBtn);
                 final Button stopBtn = activity.findViewById(R.id.stopBtn);
 
@@ -167,7 +167,7 @@ public class GridMapFragment extends Fragment {
                     autoManualToggleBtn.setEnabled(false);
                     accelerometerSwitch.setEnabled(false);
                     updateBtn.setEnabled(false);
-                    exploreBtn.setEnabled(false);
+                    //exploreBtn.setEnabled(false);
                     fastestBtn.setEnabled(false);
                     stopBtn.setEnabled(false);
 
@@ -201,7 +201,7 @@ public class GridMapFragment extends Fragment {
                             autoManualToggleBtn.setEnabled(true);
                             accelerometerSwitch.setEnabled(true);
                             updateBtn.setEnabled(true);
-                            exploreBtn.setEnabled(true);
+                            //exploreBtn.setEnabled(true);
                             fastestBtn.setEnabled(true);
                             stopBtn.setEnabled(true);
                             compoundButton.toggle();
@@ -217,7 +217,7 @@ public class GridMapFragment extends Fragment {
                     autoManualToggleBtn.setEnabled(true);
                     accelerometerSwitch.setEnabled(true);
                     updateBtn.setEnabled(true);
-                    exploreBtn.setEnabled(true);
+                    //exploreBtn.setEnabled(true);
                     fastestBtn.setEnabled(true);
                     stopBtn.setEnabled(true);
                 }
@@ -368,11 +368,12 @@ public class GridMapFragment extends Fragment {
                 exploreBtn.setText("Explore");
                 if(timer != null){
                     timer.cancel();
+                    timer = null;
                 }
 
                 //send stop message to rpi
                 String stopMsg = "SZ";
-                BluetoothService.getInstance(null, null).sendMessage(stopMsg);
+                //BluetoothService.getInstance(null, null).sendMessage(stopMsg);
                 addTextToStatusWindow((Activity)v.getContext(), "Stop");
                 if(isDebug){
                     addTextToStatusWindow((Activity) v.getContext(), "Bluetooth:" + stopMsg);
@@ -429,7 +430,11 @@ public class GridMapFragment extends Fragment {
                 };
 
                 timer.start();
-
+                for(int r = 0; r < 20; r++){
+                    for(int c = 0; c < 15; c++){
+                        GridMapHandler2D.removeArrowPicture(v.getContext(),r ,c);
+                    }
+                }
 
                 if(isDebug){
                     addTextToStatusWindow((Activity) v.getContext(), "Bluetooth:" + exploreMsg);
@@ -452,7 +457,9 @@ public class GridMapFragment extends Fragment {
             case R.id.playback_backward:
                 if(playbackCounter > 0){
                     playbackCounter--;
-                    mapUpdateManager.decodeMessage(v.getContext(), GridMapUpdateManager.MDFArrayList.get(playbackCounter));
+                    String removeArrowStr = GridMapUpdateManager.MDFArrayList.get(playbackCounter).substring(0,GridMapUpdateManager.MDFArrayList.get(playbackCounter).length() -1);
+                    String addZero = removeArrowStr + "0";
+                    mapUpdateManager.decodeMessage(v.getContext(), addZero);
                 }
                 return;
         }
@@ -671,7 +678,7 @@ public class GridMapFragment extends Fragment {
 
     }
 
-    private static void robotExploreSimulator(View v){
+    private static void robotExploreSimulator(final View v){
         try {
             jsonArray = new JSONArray(v.getContext().getResources().getString(R.string.sampleMDF));
         }catch (Exception e){
@@ -686,8 +693,12 @@ public class GridMapFragment extends Fragment {
                 try{
                     Random rand = new Random();
                     int n = rand.nextInt(100);
+                    String[] decoded = jsonArray.getString(democounter).split("\\|");
                     if(n < 90)msg = jsonArray.getString(democounter) + "|0";
-                    else msg = jsonArray.getString(democounter) + "|1";
+                    else {
+                        msg = jsonArray.getString(democounter) + "|0";
+                        addTextToStatusWindow((Activity)v.getContext(), "R" + decoded[4] + " C" + decoded[5] + decoded[3]);
+                    }
                 }catch (Exception e){
                     return;
                 }
