@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.graphics.drawable.BitmapDrawable;
 import android.support.design.widget.Snackbar;
 import android.view.Display;
 import android.view.DragEvent;
@@ -37,7 +38,7 @@ public class GridMapHandler2D {
     private final static int cellMargin = 2;
     public final static int rowTotalNumber = 20, columnTotalNumber = 15;
 
-    public static int robotWaypointColumn, robotWaypointRow;
+    public static int robotWaypointColumn = -1, robotWaypointRow = -1;
     public static Boolean isWaypointSelected = false;
     public static int robotStartCoordinateDirection;
 
@@ -57,7 +58,8 @@ public class GridMapHandler2D {
         else if(row > 19 && column > 14){
             row = GridMapUpdateManager.RobotDescriptor.getRowNumber();
             column = GridMapUpdateManager.RobotDescriptor.getColumnNumber();
-            if(robotWaypointColumn != -1 && robotWaypointRow != -1){
+            if((robotWaypointColumn != -1 && robotWaypointRow != -1) ||
+                    (robotWaypointColumn != 0 && robotWaypointRow != 0)){
                 setRobotWaypointPosition(context, robotWaypointRow, robotWaypointColumn);
             }
         }
@@ -109,6 +111,18 @@ public class GridMapHandler2D {
             imageView.setImageBitmap(null);
         } catch (Exception e) {
             Toast.makeText(context, "Set arrow Error at row " + rowNumber + " col " + columnNumber, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public static int getGridArrowRotation(Context context, int rowNumber, int columnNumber){
+        ImageView image = ((Activity) context).findViewById(getImageViewID(columnNumber, rowNumber));
+        Bitmap bitmap = ((BitmapDrawable)image.getDrawable()).getBitmap();
+
+        if(bitmap!= null){
+            return (int) image.getRotation();
+        }
+        else {
+            return -1;
         }
     }
 

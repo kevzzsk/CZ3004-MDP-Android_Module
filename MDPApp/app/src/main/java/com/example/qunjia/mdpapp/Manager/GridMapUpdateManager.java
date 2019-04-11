@@ -40,8 +40,6 @@ public class GridMapUpdateManager {
     private static ArrowDescriptor arrow;
     public static String fullMapStr = "0", obstaclesStr = "0";
     public static ArrayList<String> MDFArrayList;
-    private static int arrowObstacleRow = -1, arrowObstacleCol = -1;
-    public static String arrowFacing = "-1";
 
     public GridMapUpdateManager(Context context) {
         robot = new RobotDescriptor(18, 1, FacingDirection.NORTH);
@@ -128,20 +126,12 @@ public class GridMapUpdateManager {
             }
 
             //part 2: read obstacles and store into MapArr[][]
-            int zzz = 0;
             int o = 0;
             for (int r = MapArr.length - 1; r >= 0; r--) {
                 for (int c = 0; c < MapArr[r].length; c++) {
                     if (MapArr[r][c] == 1) {
                         if (Character.getNumericValue(obstacles.charAt(o)) == 1) {
                             MapArr[r][c] = obstaclesNo;
-                            if(r == 0 || r == 19 || c == 0 || c == 14){
-                                zzz++;
-                                if(zzz <= 3){
-                                    arrowObstacleCol = c;
-                                    arrowObstacleRow = r;
-                                }
-                            }
                         }
                         o++;
                     }
@@ -198,17 +188,21 @@ public class GridMapUpdateManager {
         }
     }
 
-    public static interface FacingDirection {
-        final static int SOUTH = 0;
-        final static int WEST = 90;
-        final static int NORTH = 180;
-        final static int EAST = 270;
+    public interface FacingDirection {
+        int SOUTH = 0;
+        int WEST = 90;
+        int NORTH = 180;
+        int EAST = 270;
     }
 
     public static class RobotDescriptor {
-        private static int rowNumberPrevious;
-        private static int columnNumberPrevious;
-        private static int faceAnglePrevious;
+        private static int rowNumberPrevious2 = -1;
+        private static int columnNumberPrevious2 = -1;
+        private static int faceAnglePrevious2 = -1;
+
+        private static int rowNumberPrevious = -1;
+        private static int columnNumberPrevious = -1;
+        private static int faceAnglePrevious = -1;
         private static int rowNumber = -1;
         private static int columnNumber = -1;
         private static int faceAngle = -1;
@@ -219,12 +213,17 @@ public class GridMapUpdateManager {
                 columnNumberPrevious = RobotDescriptor.columnNumber;
                 faceAnglePrevious = RobotDescriptor.faceAngle;
             }
+
             RobotDescriptor.rowNumber = rowNumber;
             RobotDescriptor.columnNumber = columnNumber;
             RobotDescriptor.faceAngle = faceAngleNumber;
         }
 
         void fromString(String rowString, String columnString, String faceAngleString) {
+            rowNumberPrevious2 = rowNumberPrevious;
+            columnNumberPrevious2 = columnNumberPrevious;
+            faceAnglePrevious2 = faceAnglePrevious;
+
             rowNumberPrevious = RobotDescriptor.rowNumber;
             columnNumberPrevious = RobotDescriptor.columnNumber;
             faceAnglePrevious = RobotDescriptor.faceAngle;
@@ -245,6 +244,18 @@ public class GridMapUpdateManager {
                     faceAngle = FacingDirection.EAST;
                     break;
             }
+        }
+
+        public static void setRowNumber(int rowNumber) {
+            RobotDescriptor.rowNumber = rowNumber;
+        }
+
+        public static void setColumnNumber(int columnNumber) {
+            RobotDescriptor.columnNumber = columnNumber;
+        }
+
+        public static void setFaceAngle(int faceAngle) {
+            RobotDescriptor.faceAngle = faceAngle;
         }
 
         public static int getFaceAngle() {
@@ -270,16 +281,42 @@ public class GridMapUpdateManager {
         public static int getColumnNumberPrevious() {
             return columnNumberPrevious;
         }
+
+        public static int getRowNumberPrevious2() {
+            return rowNumberPrevious2;
+        }
+
+        public static int getColumnNumberPrevious2() {
+            return columnNumberPrevious2;
+        }
+
+        public static int getFaceAnglePrevious2() {
+            return faceAnglePrevious2;
+        }
     }
 
     public static class ArrowDescriptor {
-        public static ArrayList<String> imagePositionArrayList;
-        ArrayList<Integer> rotationAngle;
-        ArrayList<Integer> rowNumber;
-        ArrayList<Integer> columnNumber;
+        static ArrayList<Integer> rotationAngle;
+        static ArrayList<Integer> rowNumber;
+        static ArrayList<Integer> columnNumber;
         ArrayList<Integer> rowNumberRemove;
         ArrayList<Integer> columnNumberRemove;
+        static ArrayList<String> whichGrid;
         Context context;
+        static Boolean haveArrowInPreviousGrid = false;
+        static int arrowStepCounter = 0, robotSavedRow = -1, robotSavedCol = -1, robotSavedFacing = -1;
+
+        public static ArrayList<Integer> getRowNumber(){
+            return rowNumber;
+        }
+
+        public static ArrayList<Integer> getColumnNumber(){
+            return columnNumber;
+        }
+
+        public static ArrayList<Integer> getRotationAngle(){
+            return rotationAngle;
+        }
 
         ArrowDescriptor(Context c) {
             context = c;
@@ -288,59 +325,113 @@ public class GridMapUpdateManager {
             rotationAngle = new ArrayList<>();
             rowNumberRemove = new ArrayList<>();
             columnNumberRemove= new ArrayList<>();
-            imagePositionArrayList = new ArrayList<>();
+            whichGrid = new ArrayList<>();
         }
 
         void addArrowFromString(String haveArrow){
-            if(haveArrow.equals("1")){
+            haveArrow = haveArrow.toUpperCase();
 
-                GridMapFragment.addTextToStatusWindow((Activity)context, "image");
-                int offset = 2;
-
-                //for debugging
-                Boolean isPrevious = true;
-                int facing;
-                int row;
-                int col;
-                if(isPrevious){
-                    facing = RobotDescriptor.getFaceAnglePrevious();
-                    row = RobotDescriptor.getRowNumberPrevious();
-                    col = RobotDescriptor.getColumnNumberPrevious();
+            //if no arrow
+            if(haveArrow.equals("0")){
+                if(haveArrowInPreviousGrid){
+                    //if not calibrating, increase arrow step counter
+                    if(!(robotSavedRow == RobotDescriptor.getRowNumber() &&
+                            robotSavedCol == RobotDescriptor.getColumnNumber() &&
+                            robotSavedFacing == RobotDescriptor.getFaceAngle())){
+                        arrowStepCounter++;
+                        if(arrowStepCounter >= 2) {
+                            arrowStepCounter = 0;
+                            haveArrowInPreviousGrid = false;
+                        }
+                    }
                 }
-                else {
+                return;
+            }
+
+            //if have arrow
+            if(haveArrow.equals("F") || haveArrow.equals("M") || haveArrow.equals("B")){
+
+                String directionStr = "error";
+                switch (RobotDescriptor.getFaceAngle()){
+                    case FacingDirection.NORTH:
+                        directionStr = "N";
+                        break;
+                    case FacingDirection.SOUTH:
+                        directionStr = "S";
+                        break;
+                    case FacingDirection.WEST:
+                        directionStr = "W";
+                        break;
+                    case FacingDirection.EAST:
+                        directionStr = "E";
+                        break;
+                }
+
+                //if calibrating, return
+                if(robotSavedRow == RobotDescriptor.getRowNumber() &&
+                        robotSavedCol == RobotDescriptor.getColumnNumber() &&
+                        robotSavedFacing == RobotDescriptor.getFaceAngle()){
+                    return;
+                }
+
+                //if detected arrow recently (2 step), ignore arrow
+                if(haveArrowInPreviousGrid){
+                    arrowStepCounter++;
+                    if(arrowStepCounter >= 2) {
+                        arrowStepCounter = 0;
+                        haveArrowInPreviousGrid = false;
+                        GridMapFragment.addTextToStatusWindow((Activity) context, haveArrow + "|" +
+                                directionStr + "|" +
+                                RobotDescriptor.getRowNumber() + "|"+
+                                RobotDescriptor.getColumnNumber() + " (rejected)");
+                    }
+                    return;
+                }
+                haveArrowInPreviousGrid = true;
+                robotSavedCol = RobotDescriptor.getColumnNumber();
+                robotSavedRow = RobotDescriptor.getRowNumber();
+                robotSavedFacing = RobotDescriptor.getFaceAngle();
+
+                GridMapFragment.addTextToStatusWindow((Activity) context, haveArrow + "|" +
+                                                                directionStr + "|" +
+                                                                RobotDescriptor.getRowNumber() + "|"+
+                                                                RobotDescriptor.getColumnNumber());
+                whichGrid.add(haveArrow);
+                //for debugging
+                int isPrevious = -1;
+                int facing = 0;
+                int row = 0;
+                int col = 0;
+                if(isPrevious == 0){
                     facing = RobotDescriptor.getFaceAngle();
                     row = RobotDescriptor.getRowNumber();
                     col = RobotDescriptor.getColumnNumber();
                 }
+                else if(isPrevious == -1){
+                    facing = RobotDescriptor.getFaceAnglePrevious();
+                    row = RobotDescriptor.getRowNumberPrevious();
+                    col = RobotDescriptor.getColumnNumberPrevious();
+                }
 
+                else if(isPrevious == -2){
+                    facing = RobotDescriptor.getFaceAnglePrevious2();
+                    row = RobotDescriptor.getRowNumberPrevious2();
+                    col = RobotDescriptor.getColumnNumberPrevious2();
+                }
 
+                rowNumber.add(row);
+                columnNumber.add(col);
                 switch (facing){
                     case FacingDirection.NORTH:
-                        if((col - offset) == -1)
-                            return;
-                        rowNumber.add(row - 1);
-                        columnNumber.add(col - offset);
                         rotationAngle.add(FacingDirection.WEST);
                         break;
                     case FacingDirection.SOUTH:
-                        if((col + offset) == 15)
-                            return;
-                        rowNumber.add(row + 1);
-                        columnNumber.add(col + offset);
                         rotationAngle.add(FacingDirection.EAST);
                         break;
                     case FacingDirection.EAST:
-                        if((row - offset) == -1)
-                            return;
-                        rowNumber.add(row - offset);
-                        columnNumber.add(col + 1);
                         rotationAngle.add(FacingDirection.NORTH);
                         break;
                     case FacingDirection.WEST:
-                        if((row + offset) == 20)
-                            return;
-                        rowNumber.add(row + offset);
-                        columnNumber.add(col - 1);
                         rotationAngle.add(FacingDirection.SOUTH);
                         break;
                 }
@@ -353,33 +444,97 @@ public class GridMapUpdateManager {
         }
 
         void updateArrow(){
-            while(rowNumberRemove.size()>0){
-                GridMapHandler2D.removeArrowPicture(context, rowNumberRemove.get(0), columnNumberRemove.get(0));
-                rowNumberRemove.remove(0);
-                columnNumberRemove.remove(0);
-            }
-            while(rotationAngle.size()>0){
-                setArrowPicture(context, rotationAngle.get(0), rowNumber.get(0), columnNumber.get(0));
+
+            //remove all arrows
+            //if(GridMapFragment.isExploring) {
+                for (int r = 0; r < 20; r++) {
+                    for (int c = 0; c < 15; c++) {
+                        //GridMapHandler2D.removeArrowPicture(context, r, c);
+                    }
+                }
+            //}
+            for(int i = 0; i < rotationAngle.size(); i++){
                 String direction = "";
-                switch (rotationAngle.get(0)){
+                int rowOffset = 0;
+                int colOffset = 0;
+                int rowGridOffset = 0;
+                int colGridOffset = 0;
+
+                int gridOffset = 0;
+                switch (whichGrid.get(i)){
+                    case"F":
+                        gridOffset = 1;
+                        break;
+                    case"M":
+                        gridOffset = 0;
+                        break;
+                    case"B":
+                        gridOffset = -1;
+                        break;
+                }
+
+                //set offset
+                switch (rotationAngle.get(i)){
                     case FacingDirection.NORTH:
+                        rowOffset = -1;
+                        //colOffset = -1;
+                        colGridOffset = gridOffset;
                         direction = "D";
                         break;
                     case FacingDirection.SOUTH:
+                        rowOffset = 1;
+                        //colOffset = 1;
+                        colGridOffset = -gridOffset;
                         direction = "U";
                         break;
                     case FacingDirection.EAST:
+                        colOffset = 1;
+                        //rowOffset = -1;
+                        rowGridOffset = gridOffset;
                         direction = "L";
                         break;
                     case FacingDirection.WEST:
+                        colOffset = -1;
+                        //rowOffset = 1;
+                        rowGridOffset = -gridOffset;
                         direction = "R";
                         break;
 
                 }
-                imagePositionArrayList.add( "(" + (19 - rowNumber.get(0)) + ","  + columnNumber.get(0) + "," + direction + ")");
-                rotationAngle.remove(0);
-                rowNumber.remove(0);
-                columnNumber.remove(0);
+
+                //Algo to fix image on nearest wall
+                try{
+                    int[][] mapArr = MapDescriptor.getMapArr();
+                    int row = rowNumber.get(i);
+                    int col = columnNumber.get(i);
+                    Boolean haveArrow = false;
+
+                    for(int j = 0; j < 20; j++){
+                        if(haveArrow)break;
+                        for(int k = 0; k < 15; k++){
+                            if(mapArr[row + j*rowOffset + rowGridOffset][col + k*colOffset + colGridOffset] == 2){
+                                setArrowPicture(context, rotationAngle.get(i),
+                                        row + j*rowOffset + rowGridOffset,
+                                        col + k*colOffset + colGridOffset);
+                                haveArrow = true;
+                                rowNumber.set(i,row + j*rowOffset);
+                                columnNumber.set(i,col + k*colOffset);
+                                break;
+                            }
+                        }
+                    }
+                    if(!haveArrow){
+                        rotationAngle.remove(i);
+                        rowNumber.remove(i);
+                        columnNumber.remove(i);
+                        whichGrid.remove(i);
+                    }
+                }catch (Exception e){
+                    rotationAngle.remove(i);
+                    rowNumber.remove(i);
+                    columnNumber.remove(i);
+                    whichGrid.remove(i);
+                }
             }
         }
     }
@@ -419,68 +574,12 @@ public class GridMapUpdateManager {
                     fastestPathWithDirection(context, decoded[1]);
                     break;
                 case "MDF STRING DONE":
-                    GridMapFragment.isExploring = false;
-                    GridMapFragment.timer.cancel();
-                    GridMapFragment.timer = null;
-
-                    TextView textView = ((Activity)context).findViewById(R.id.exploreBtn);
-                    if(GridMapUpdateManager.MDFArrayList.size() > 0){
-                        Button playbackForward = ((Activity) context).findViewById(R.id.playback_forward);
-                        Button playbackBackward = ((Activity) context).findViewById(R.id.playback_backward);
-                        playbackForward.setEnabled(true);
-                        playbackBackward.setEnabled(true);
-                        GridMapFragment.playbackCounter = MDFArrayList.size() - 1;
-                    }
-
-                    String timeTaken = textView.getText().toString();
-                    textView.setText("Explore");
-                    textView.setEnabled(true);
-
-                    GridMapFragment.addTextToStatusWindow((Activity) context,
-                            "==Exploration Done==");
-                    GridMapFragment.addTextToStatusWindow((Activity) context,
-                            "Time taken : " + timeTaken);
-                    GridMapFragment.addTextToStatusWindow((Activity) context,
-                            "Part 1\n"+ fullMapStr);
-                    GridMapFragment.addTextToStatusWindow((Activity) context,
-                            "Part 2\n" + obstaclesStr);
-                    GridMapFragment.addTextToStatusWindow((Activity) context,
-                            "\nImage Position:");
-                    String imagePositionStr = "";
-                    for(int i = 0; i < ArrowDescriptor.imagePositionArrayList.size(); i++){
-                        imagePositionStr += ArrowDescriptor.imagePositionArrayList.get(i) + ",";
-                    }
-                    ArrowDescriptor.imagePositionArrayList = new ArrayList<>();
-                    if(imagePositionStr.length() != 0){
-                        imagePositionStr = imagePositionStr.substring(0, imagePositionStr.length()-1);
-                    }else {
-                        //imagePositionStr = "none!";
-                        int rowNumber = 5;
-                        int columnNumber = 5;
-                        String direction = arrowFacing;
-                        int arrowAngle = 0;
-                        switch (arrowFacing){
-                            case "U":arrowAngle = 0;
-                                break;
-                            case "D":arrowAngle = 180;
-                                break;
-                            case "L":arrowAngle = 270;
-                                break;
-                            case "R":arrowAngle = 90;
-                                break;
-                        }
-                        if(arrowObstacleRow != -1 && arrowObstacleCol != -1){
-                            rowNumber = arrowObstacleRow;
-                            columnNumber = arrowObstacleCol;
-                            int[][] mapArr = MapDescriptor.getMapArr();
-                            //direction = getDirectionString(rowNumber, columnNumber);
-                        }
-                        setArrowPicture(context, arrowAngle,rowNumber, columnNumber);
-                        imagePositionStr = "(" + (19 - rowNumber) + ","  + columnNumber + "," + direction + ")";
-                    }
-
-                    GridMapFragment.addTextToStatusWindow((Activity) context,
-                            imagePositionStr);
+                    //for simulator
+                case "MDF STRING DON0":
+                case "MDF STRING DONF":
+                case "MDF STRING DONM":
+                case "MDF STRING DONB":
+                    explorationDone(context);
                     break;
                 //case "ARW":
                 //arrow.addArrowFromString(decoded[1], decoded[2],decoded[3]);
@@ -491,6 +590,73 @@ public class GridMapUpdateManager {
                 // break;
             }
         }
+    }
+
+    public static void explorationDone(Context context){
+        GridMapFragment.isExploring = false;
+        if(GridMapFragment.timer != null) {
+            GridMapFragment.timer.cancel();
+            GridMapFragment.timer = null;
+        }
+
+        TextView textView = ((Activity)context).findViewById(R.id.exploreBtn);
+        if(GridMapUpdateManager.MDFArrayList.size() > 0){
+            Button playbackForward = ((Activity) context).findViewById(R.id.playback_forward);
+            Button playbackBackward = ((Activity) context).findViewById(R.id.playback_backward);
+            playbackForward.setEnabled(true);
+            playbackBackward.setEnabled(true);
+            GridMapFragment.playbackCounter = MDFArrayList.size() - 1;
+        }
+
+        String timeTaken = textView.getText().toString();
+        textView.setText("Explore");
+        textView.setEnabled(true);
+
+        GridMapFragment.addTextToStatusWindow((Activity) context,
+                "==Exploration Done==");
+        GridMapFragment.addTextToStatusWindow((Activity) context,
+                "Time taken : " + timeTaken);
+        GridMapFragment.addTextToStatusWindow((Activity) context,
+                "Part 1\n"+ fullMapStr);
+        GridMapFragment.addTextToStatusWindow((Activity) context,
+                "Part 2\n" + obstaclesStr);
+        GridMapFragment.addTextToStatusWindow((Activity) context,
+                "\nImage Position:");
+
+        String imagePositionStr = "";
+        for (int r = 0; r < 20; r++) {
+            for (int c = 0; c < 15; c++) {
+                String direction = "";
+                switch (GridMapHandler2D.getGridArrowRotation(context, r, c)){
+                    case FacingDirection.NORTH:
+                        direction = "D";
+                        break;
+                    case FacingDirection.SOUTH:
+                        direction = "U";
+                        break;
+                    case FacingDirection.WEST:
+                        direction = "R";
+                        break;
+                    case FacingDirection.EAST:
+                        direction = "L";
+                        break;
+                    case -1:
+                        continue;
+                }
+
+                imagePositionStr += "(" + c + "," +
+                        (19 - r) + "," + direction + ") , ";
+            }
+        }
+
+        if(imagePositionStr.length() != 0){
+            imagePositionStr = imagePositionStr.substring(0, imagePositionStr.length()-2);
+        }
+        else {
+            imagePositionStr = "none!";
+        }
+        GridMapFragment.addTextToStatusWindow((Activity) context,
+                imagePositionStr);
     }
 
     private String getDirectionString(int rowNumber, int columnNumber){

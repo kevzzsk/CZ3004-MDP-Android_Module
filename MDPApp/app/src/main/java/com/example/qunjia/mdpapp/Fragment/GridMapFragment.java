@@ -55,8 +55,9 @@ public class GridMapFragment extends Fragment {
     public static Boolean isExploring = false;
 
     //debug var
+    public static int arrowCounter = 0;
     public static Boolean isDebug = false;
-    private static int debugCounter = 0, debugdirection = 0;
+    private static int  debugCounter = 0, debugdirection = 0;
     private static String[] debugDirectionStr = {"N", "E", "S", "W"};
 
     //for demo
@@ -107,6 +108,7 @@ public class GridMapFragment extends Fragment {
                 String savedMDF = prefs.getString("MDFArrayList", "");
                 if(!savedMDF.equals("")){
                     String[] decoded = savedMDF.split("divider");
+
                     GridMapUpdateManager.MDFArrayList = new ArrayList<>(Arrays.asList(decoded));
                 }
 
@@ -225,45 +227,6 @@ public class GridMapFragment extends Fragment {
         });
     }
 
-    private static void showDirectionAlertDialog(final Context context, final CompoundButton compoundButton){
-        final Activity activity = (Activity) context;
-        final ToggleButton autoManualToggleBtn = activity.findViewById(R.id.autoManualToggleBtn);
-        final Switch accelerometerSwitch = activity.findViewById(R.id.directionToggleBtn);
-        final Button updateBtn = activity.findViewById(R.id.updateBtn);
-        final Button exploreBtn = activity.findViewById(R.id.exploreBtn);
-        final Button fastestBtn = activity.findViewById(R.id.fastestBtn);
-        final Button stopBtn = activity.findViewById(R.id.stopBtn);
-
-        AlertDialog.Builder adb = new AlertDialog.Builder(context);
-        CharSequence items[] = new CharSequence[] {"North", "South", "East", "West"};
-        adb.setSingleChoiceItems(items, 0, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface d, int n) {
-                GridMapHandler2D.robotStartCoordinateDirection = n;
-            }
-
-        });
-        adb.setNegativeButton("Confirm", null);
-        adb.setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                GridMapHandler2D.SetRobotDragListener(context, false);
-                directionViewSetEnabled(activity, true);
-
-                autoManualToggleBtn.setEnabled(true);
-                accelerometerSwitch.setEnabled(true);
-                updateBtn.setEnabled(true);
-                exploreBtn.setEnabled(true);
-                fastestBtn.setEnabled(true);
-                stopBtn.setEnabled(true);
-                compoundButton.toggle();
-            }
-        });
-        adb.setTitle("Choose a direction");
-        adb.setCancelable(false);
-        adb.show();
-    }
-
     private void initAutoManualToggleBtnListener() {
         ToggleButton toggleButton = getActivity().findViewById(R.id.autoManualToggleBtn);
         toggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -341,13 +304,7 @@ public class GridMapFragment extends Fragment {
                 TextView statusWindowTV3D = ((Activity) v.getContext()).findViewById(R.id.statusWindowTV3D);
                 statusWindowTV3D.setText("");
 
-                //to enable debugging mode
-                debugCounter++;
-                if(debugCounter >= 10){
-                    isDebug = true;
-                    addTextToStatusWindow((Activity) v.getContext(), "Debugging Mode Enabled!");
-                }
-
+                arrowCounter++;
                 return;
             case R.id.reconfigureBtn:
                 ReconfigureHandler.reconfigBtnOnClick(v.getContext());
@@ -359,22 +316,12 @@ public class GridMapFragment extends Fragment {
                 ReconfigureHandler.F2BtnOnCLick(v.getContext());
                 return;
             case R.id.stopBtn:
-                isExploring = false;
-                if(GridMapUpdateManager.MDFArrayList.size() > 0){
-                    playbackForward.setEnabled(true);
-                    playbackBackward.setEnabled(true);
-                }
-                exploreBtn.setEnabled(true);
-                exploreBtn.setText("Explore");
-                if(timer != null){
-                    timer.cancel();
-                    timer = null;
-                }
+                addTextToStatusWindow((Activity)v.getContext(), "Stop");
+                GridMapUpdateManager.explorationDone(v.getContext());
 
                 //send stop message to rpi
                 String stopMsg = "SZ";
                 //BluetoothService.getInstance(null, null).sendMessage(stopMsg);
-                addTextToStatusWindow((Activity)v.getContext(), "Stop");
                 if(isDebug){
                     addTextToStatusWindow((Activity) v.getContext(), "Bluetooth:" + stopMsg);
                 }
@@ -394,7 +341,6 @@ public class GridMapFragment extends Fragment {
             case R.id.exploreBtn:
                 isExploring = true;
                 GridMapUpdateManager.MDFArrayList = new ArrayList<>();
-                GridMapUpdateManager.ArrowDescriptor.imagePositionArrayList = new ArrayList<>();
                 playbackCounter = 0;
                 playbackForward.setEnabled(false);
                 playbackBackward.setEnabled(false);
@@ -439,7 +385,8 @@ public class GridMapFragment extends Fragment {
                 if(isDebug){
                     addTextToStatusWindow((Activity) v.getContext(), "Bluetooth:" + exploreMsg);
                 }
-                //robotExploreSimulator(v);
+                //isExploring = false;
+                robotExploreSimulator(v);
                 return;
             case R.id.rotateRightBtn:
                 myRenderer.rotateRight();
@@ -530,6 +477,8 @@ public class GridMapFragment extends Fragment {
                 } else {
                     addTextToStatusWindow((Activity) context, "NORTH");
                     payload += "S" + getRotationPayload(facing, GridMapUpdateManager.FacingDirection.NORTH) + "S1";
+                    GridMapUpdateManager.RobotDescriptor.setRowNumber(GridMapUpdateManager.RobotDescriptor.getRowNumber()-1);
+                    GridMapUpdateManager.RobotDescriptor.setFaceAngle(180);
                 }
                 break;
             case MOVE_DOWN:
@@ -541,6 +490,8 @@ public class GridMapFragment extends Fragment {
                 } else {
                     addTextToStatusWindow((Activity) context, "SOUTH");
                     payload += "S" + getRotationPayload(facing, GridMapUpdateManager.FacingDirection.SOUTH) + "S1";
+                    GridMapUpdateManager.RobotDescriptor.setRowNumber(GridMapUpdateManager.RobotDescriptor.getRowNumber()+1);
+                    GridMapUpdateManager.RobotDescriptor.setFaceAngle(0);
                 }
                 break;
             case MOVE_LEFT:
@@ -568,6 +519,8 @@ public class GridMapFragment extends Fragment {
                 } else {
                     addTextToStatusWindow((Activity) context, "WEST");
                     payload += "S" + getRotationPayload(facing, GridMapUpdateManager.FacingDirection.WEST) + "S1";
+                    GridMapUpdateManager.RobotDescriptor.setColumnNumber(GridMapUpdateManager.RobotDescriptor.getColumnNumber()-1);
+                    GridMapUpdateManager.RobotDescriptor.setFaceAngle(90);
                 }
                 break;
             case MOVE_RIGHT:
@@ -593,65 +546,18 @@ public class GridMapFragment extends Fragment {
                 } else {
                     addTextToStatusWindow((Activity) context, "EAST");
                     payload += "S" + getRotationPayload(facing, GridMapUpdateManager.FacingDirection.EAST) + "S1";
+                    GridMapUpdateManager.RobotDescriptor.setColumnNumber(GridMapUpdateManager.RobotDescriptor.getColumnNumber()+1);
+                    GridMapUpdateManager.RobotDescriptor.setFaceAngle(270);
                 }
                 break;
         }
 
         if (!payload.equals("")) {
+            mapUpdateManager.updateAll(context);
             BluetoothService.getInstance(null, null).sendMessage(payload);
         }
     }
 
-    public static int rotateDirection(int direction){
-        int[] d = new int[4];
-        int facing = (int)myRenderer.getRotation()%360;
-        switch (facing){
-            case 0://face north
-                d[0] = MOVE_UP;
-                d[1] = MOVE_DOWN;
-                d[2] = MOVE_LEFT;
-                d[3] = MOVE_RIGHT;
-                break;
-            case 90://face east
-            case -270:
-                d[0] = MOVE_RIGHT;
-                d[1] = MOVE_LEFT;
-                d[2] = MOVE_UP;
-                d[3] = MOVE_DOWN;
-                break;
-            case 180://face south
-            case -180:
-                d[0] = MOVE_DOWN;
-                d[1] = MOVE_UP;
-                d[2] = MOVE_RIGHT;
-                d[3] = MOVE_LEFT;
-                break;
-            case 270://face west
-            case -90:
-                d[0] = MOVE_LEFT;
-                d[1] = MOVE_RIGHT;
-                d[2] = MOVE_DOWN;
-                d[3]= MOVE_UP;
-                break;
-            default: return MOVE_NONE; //error
-        }
-
-        switch (direction){
-            case MOVE_UP:
-                direction = d[0];
-                break;
-            case MOVE_DOWN:
-                direction = d[1];
-                break;
-            case MOVE_LEFT:
-                direction = d[2];
-                break;
-            case MOVE_RIGHT:
-                direction = d[3];
-                break;
-        }
-        return direction;
-    }
 
     public static void addTextToStatusWindow(Activity activity, String stringToAdd) {
         try {
@@ -685,7 +591,7 @@ public class GridMapFragment extends Fragment {
         }
         final Context context = v.getContext();
         final Handler handler = new Handler();
-        final int delay = 100; //milliseconds
+        final int delay = 300; //milliseconds
 
         handler.postDelayed(new Runnable(){
             public void run(){
@@ -694,10 +600,23 @@ public class GridMapFragment extends Fragment {
                     Random rand = new Random();
                     int n = rand.nextInt(100);
                     String[] decoded = jsonArray.getString(democounter).split("\\|");
-                    if(n < 90)msg = jsonArray.getString(democounter) + "|0";
-                    else {
-                        msg = jsonArray.getString(democounter) + "|0";
-                        addTextToStatusWindow((Activity)v.getContext(), "R" + decoded[4] + " C" + decoded[5] + decoded[3]);
+                    if(n < 90)
+                        msg = jsonArray.getString(democounter).substring(0,jsonArray.getString(democounter).length() - 1)
+                            + "0";
+                    else if (n < 93){
+                        msg = jsonArray.getString(democounter).substring(0,jsonArray.getString(democounter).length() - 1)
+                                + "F";
+                        //addTextToStatusWindow((Activity)v.getContext(), "F " + "R" + decoded[4] + " C" + decoded[5] + decoded[3]);
+                    }
+                    else if (n < 96){
+                        msg = jsonArray.getString(democounter).substring(0,jsonArray.getString(democounter).length() - 1)
+                                + "M";
+                        //addTextToStatusWindow((Activity)v.getContext(), "M " + "R" + decoded[4] + " C" + decoded[5] + decoded[3]);
+                    }
+                    else if (n < 100){
+                        msg = jsonArray.getString(democounter).substring(0,jsonArray.getString(democounter).length() - 1)
+                                + "B";
+                        //addTextToStatusWindow((Activity)v.getContext(), "B " + "R" + decoded[4] + " C" + decoded[5] + decoded[3]);
                     }
                 }catch (Exception e){
                     return;
@@ -714,45 +633,4 @@ public class GridMapFragment extends Fragment {
         String fastString = "F|RS9S3LLS4RS5RS4LS9S3";
         mapUpdateManager.decodeMessage(c, fastString);
     }
-
-    /*
-    //temporary variables for testing
-    private static int timer = 39;
-    private static Handler handler = new Handler();
-    private static Runnable runnable;
-
-    private static void RobotMovingSimulator(final View v) {
-        if (handler.hasMessages(0)) {
-            handler.removeCallbacks(runnable);
-        } else {
-            runnable = new Runnable() {
-                @Override
-                public void run() {
-                    timer++;
-                    timer = timer % 40;
-
-                    if (timer < 10) {
-                        GridMapHandler2D.robotCurrentRow--;
-                        SetArrowPicture(v.getContext(), 0, GridMapHandler2D.robotCurrentRow, 4);
-                        SetArrowPicture(v.getContext(), 90, GridMapHandler2D.robotCurrentRow, 5);
-                    } else if (timer < 20) {
-                        GridMapHandler2D.robotCurrentColumn++;
-                        changeCellColor(v.getContext(), Color.BLACK, 2, GridMapHandler2D.robotCurrentColumn);
-                    } else if (timer < 30) {
-                        GridMapHandler2D.robotCurrentRow++;
-                        RemoveArrowPicture(v.getContext(), GridMapHandler2D.robotCurrentRow, 4);
-                        RemoveArrowPicture(v.getContext(), GridMapHandler2D.robotCurrentRow, 5);
-                    } else {
-                        GridMapHandler2D.robotCurrentColumn--;
-                        changeCellColor(v.getContext(), Color.WHITE, 2, GridMapHandler2D.robotCurrentColumn);
-                    }
-
-                    setRobotPosition(v.getContext(), false);
-
-                    handler.postDelayed(this, 100);
-                }
-            };
-            handler.postDelayed(runnable, 100);
-        }
-    }*/
 }

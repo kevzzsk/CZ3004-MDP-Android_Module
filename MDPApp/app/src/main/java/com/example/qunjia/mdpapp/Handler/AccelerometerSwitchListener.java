@@ -45,7 +45,7 @@ public class AccelerometerSwitchListener implements Switch.OnCheckedChangeListen
     }
 
     private void accelerometerMoveRobotHandler(final Context context, final int direction) {
-        final int delay = 2000; //milliseconds
+        final int delay = 500; //milliseconds
 
         if (handler != null) {
             handler.removeCallbacks(myRunnable);
