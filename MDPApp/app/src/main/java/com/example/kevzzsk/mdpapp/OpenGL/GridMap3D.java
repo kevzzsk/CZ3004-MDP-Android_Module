@@ -1,4 +1,4 @@
-package com.example.qunjia.mdpapp.OpenGL;
+package com.example.kevzzsk.mdpapp.OpenGL;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

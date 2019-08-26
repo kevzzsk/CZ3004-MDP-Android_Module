@@ -1,11 +1,9 @@
-package com.example.qunjia.mdpapp.OpenGL;
+package com.example.kevzzsk.mdpapp.OpenGL;
 import android.content.Context;
 import android.opengl.GLES30;
 import android.opengl.Matrix;
 import android.opengl.GLSurfaceView;
 import android.util.Log;
-
-import java.util.Random;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;

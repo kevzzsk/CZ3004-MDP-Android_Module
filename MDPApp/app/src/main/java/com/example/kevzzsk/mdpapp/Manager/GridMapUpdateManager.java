@@ -1,31 +1,25 @@
-package com.example.qunjia.mdpapp.Manager;
+package com.example.kevzzsk.mdpapp.Manager;
 
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 
-import com.example.qunjia.mdpapp.Fragment.GridMapFragment;
-import com.example.qunjia.mdpapp.Manager.GridMapHandler2D;
-import com.example.qunjia.mdpapp.OpenGL.myGlSurfaceView;
-import com.example.qunjia.mdpapp.OpenGL.myRenderer;
+import com.example.kevzzsk.mdpapp.Fragment.GridMapFragment;
+import com.example.kevzzsk.mdpapp.OpenGL.myGlSurfaceView;
+import com.example.kevzzsk.mdpapp.OpenGL.myRenderer;
 import com.example.qunjia.mdpapp.R;
-
-import org.json.JSONArray;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 
-import static com.example.qunjia.mdpapp.Manager.GridMapHandler2D.*;
 import static java.lang.Integer.parseInt;
 
 /**
@@ -68,7 +62,7 @@ public class GridMapUpdateManager {
         if (map != null) {
             map.update();
         }
-        setRobotPosition(context, RobotDescriptor.getFaceAngle() + 180, RobotDescriptor.rowNumber, RobotDescriptor.columnNumber);
+        GridMapHandler2D.setRobotPosition(context, RobotDescriptor.getFaceAngle() + 180, RobotDescriptor.rowNumber, RobotDescriptor.columnNumber);
         myRenderer.setX(-RobotDescriptor.columnNumber);
         myRenderer.setZ(-RobotDescriptor.rowNumber);
 
@@ -146,11 +140,11 @@ public class GridMapUpdateManager {
                 for (int col=0; col < MapArr[0].length; col++) {
                     int code = MapArr[row][col];
                     if (code == unexploredNo) {
-                        changeCellColor(context, ContextCompat.getColor(context, R.color.unexplored), row, col);
+                        GridMapHandler2D.changeCellColor(context, ContextCompat.getColor(context, R.color.unexplored), row, col);
                     } else if (code == exploredNo) {
-                        changeCellColor(context, ContextCompat.getColor(context, R.color.explored), row, col);
+                        GridMapHandler2D.changeCellColor(context, ContextCompat.getColor(context, R.color.explored), row, col);
                     } else  if (code == obstaclesNo) {
-                        changeCellColor(context, ContextCompat.getColor(context, R.color.obstacle), row, col);
+                        GridMapHandler2D.changeCellColor(context, ContextCompat.getColor(context, R.color.obstacle), row, col);
                     }
                 }
             }
@@ -513,7 +507,7 @@ public class GridMapUpdateManager {
                         if(haveArrow)break;
                         for(int k = 0; k < 15; k++){
                             if(mapArr[row + j*rowOffset + rowGridOffset][col + k*colOffset + colGridOffset] == 2){
-                                setArrowPicture(context, rotationAngle.get(i),
+                                GridMapHandler2D.setArrowPicture(context, rotationAngle.get(i),
                                         row + j*rowOffset + rowGridOffset,
                                         col + k*colOffset + colGridOffset);
                                 haveArrow = true;
@@ -747,7 +741,7 @@ public class GridMapUpdateManager {
                     counter = 0;
                     if(RobotDescriptor.getRowNumber() == GridMapHandler2D.robotWaypointRow &&
                             RobotDescriptor.getColumnNumber() == GridMapHandler2D.robotWaypointColumn){
-                        setRobotWaypointPosition(c, -2, -2);//remove robot waypoint forever
+                        GridMapHandler2D.setRobotWaypointPosition(c, -2, -2);//remove robot waypoint forever
                     }
                     return;
                 }

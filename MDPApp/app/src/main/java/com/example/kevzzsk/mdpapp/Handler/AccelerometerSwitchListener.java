@@ -1,4 +1,4 @@
-package com.example.qunjia.mdpapp.Handler;
+package com.example.kevzzsk.mdpapp.Handler;
 
 import android.app.Activity;
 import android.content.Context;
@@ -11,8 +11,8 @@ import android.widget.CompoundButton;
 import android.widget.Switch;
 
 import com.andretietz.android.controller.DirectionView;
-import com.example.qunjia.mdpapp.Fragment.GridMapFragment;
-import com.example.qunjia.mdpapp.R;
+import com.example.kevzzsk.mdpapp.Fragment.GridMapFragment;
+import com.example.kevzzsk.mdpapp.R;
 
 public class AccelerometerSwitchListener implements Switch.OnCheckedChangeListener {
 

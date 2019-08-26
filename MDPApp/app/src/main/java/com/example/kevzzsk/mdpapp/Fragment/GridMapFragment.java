@@ -1,4 +1,4 @@
-package com.example.qunjia.mdpapp.Fragment;
+package com.example.kevzzsk.mdpapp.Fragment;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -13,7 +13,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,12 +27,12 @@ import android.widget.ToggleButton;
 import com.andretietz.android.controller.DirectionView;
 import com.andretietz.android.controller.InputView;
 import com.example.qunjia.mdpapp.*;
-import com.example.qunjia.mdpapp.Handler.AccelerometerSwitchListener;
-import com.example.qunjia.mdpapp.Handler.ReconfigureHandler;
-import com.example.qunjia.mdpapp.Manager.BluetoothService;
-import com.example.qunjia.mdpapp.Manager.GridMapHandler2D;
-import com.example.qunjia.mdpapp.Manager.GridMapUpdateManager;
-import com.example.qunjia.mdpapp.OpenGL.myRenderer;
+import com.example.kevzzsk.mdpapp.Handler.AccelerometerSwitchListener;
+import com.example.kevzzsk.mdpapp.Handler.ReconfigureHandler;
+import com.example.kevzzsk.mdpapp.Manager.BluetoothService;
+import com.example.kevzzsk.mdpapp.Manager.GridMapHandler2D;
+import com.example.kevzzsk.mdpapp.Manager.GridMapUpdateManager;
+import com.example.kevzzsk.mdpapp.OpenGL.myRenderer;
 
 import org.json.JSONArray;
 

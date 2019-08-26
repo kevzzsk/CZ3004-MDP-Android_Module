@@ -1,4 +1,4 @@
-package com.example.qunjia.mdpapp;
+package com.example.kevzzsk.mdpapp;
 
 import android.content.pm.ActivityInfo;
 import android.support.v4.app.Fragment;
@@ -10,9 +10,10 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.astuetz.PagerSlidingTabStrip;
-import com.example.qunjia.mdpapp.Fragment.BluetoothFragment;
-import com.example.qunjia.mdpapp.Fragment.GridMapFragment;
-import com.example.qunjia.mdpapp.Manager.GridMapUpdateManager;
+import com.example.kevzzsk.mdpapp.Fragment.BluetoothFragment;
+import com.example.kevzzsk.mdpapp.Fragment.GridMapFragment;
+import com.example.kevzzsk.mdpapp.Manager.GridMapUpdateManager;
+import com.example.qunjia.mdpapp.R;
 
 public class MainActivity extends AppCompatActivity{
     private GridMapUpdateManager gridMapUpdateManager;

@@ -1,4 +1,4 @@
-package com.example.qunjia.mdpapp.Adapter;
+package com.example.kevzzsk.mdpapp.Adapter;
 
 import android.bluetooth.BluetoothDevice;
 import android.support.annotation.NonNull;

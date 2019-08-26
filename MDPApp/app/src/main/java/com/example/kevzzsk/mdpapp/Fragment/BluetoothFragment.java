@@ -1,4 +1,4 @@
-package com.example.qunjia.mdpapp.Fragment;
+package com.example.kevzzsk.mdpapp.Fragment;
 
 import android.Manifest;
 import android.app.Activity;
@@ -24,9 +24,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.example.qunjia.mdpapp.Manager.BluetoothService;
-import com.example.qunjia.mdpapp.Adapter.BluetoothDataAdapter;
-import com.example.qunjia.mdpapp.Manager.GridMapUpdateManager;
+import com.example.kevzzsk.mdpapp.Manager.BluetoothService;
+import com.example.kevzzsk.mdpapp.Adapter.BluetoothDataAdapter;
+import com.example.kevzzsk.mdpapp.Manager.GridMapUpdateManager;
 import com.example.qunjia.mdpapp.R;
 
 import java.util.ArrayList;

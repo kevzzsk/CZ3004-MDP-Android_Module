@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    tools:context="com.example.kevzzsk.mdpapp.MainActivity">
     <android.support.constraint.ConstraintLayout
         android:id="@+id/topLayout"
         android:layout_width="match_parent"

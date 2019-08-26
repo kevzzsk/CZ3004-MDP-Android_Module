@@ -1,4 +1,4 @@
-package com.example.qunjia.mdpapp.Manager;
+package com.example.kevzzsk.mdpapp.Manager;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -24,8 +24,8 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
-import com.example.qunjia.mdpapp.Fragment.BluetoothFragment;
-import com.example.qunjia.mdpapp.Fragment.GridMapFragment;
+
+import com.example.kevzzsk.mdpapp.Fragment.GridMapFragment;
 import com.example.qunjia.mdpapp.R;
 
 import java.io.InputStream;
@@ -223,19 +223,19 @@ public class GridMapHandler2D {
                                     switch (robotStartCoordinateDirection){
                                         case 0:
                                             direction = "N";
-                                            GridMapUpdateManager.arrowFacing = "U";
+                                            //GridMapUpdateManager.arrowFacing = "U";
                                             break;
                                         case 1:
                                             direction = "S";
-                                            GridMapUpdateManager.arrowFacing = "D";
+                                            //GridMapUpdateManager.arrowFacing = "D";
                                             break;
                                         case 2:
                                             direction = "E";
-                                            GridMapUpdateManager.arrowFacing = "R";
+                                            //GridMapUpdateManager.arrowFacing = "R";
                                             break;
                                         case 3:
                                             direction = "W";
-                                            GridMapUpdateManager.arrowFacing = "L";
+                                            //GridMapUpdateManager.arrowFacing = "L";
                                             break;
                                     }
                                     robotStartCoordinateDirection = 0;//reset to north
