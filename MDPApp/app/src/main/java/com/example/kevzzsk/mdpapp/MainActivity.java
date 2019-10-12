@@ -13,7 +13,7 @@ import com.astuetz.PagerSlidingTabStrip;
 import com.example.kevzzsk.mdpapp.Fragment.BluetoothFragment;
 import com.example.kevzzsk.mdpapp.Fragment.GridMapFragment;
 import com.example.kevzzsk.mdpapp.Manager.GridMapUpdateManager;
-import com.example.qunjia.mdpapp.R;
+import com.example.kevzzsk.mdpapp.R;
 
 public class MainActivity extends AppCompatActivity{
     private GridMapUpdateManager gridMapUpdateManager;

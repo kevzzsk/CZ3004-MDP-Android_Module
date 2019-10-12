@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import com.example.qunjia.mdpapp.R;
+import com.example.kevzzsk.mdpapp.R;
 
 import java.util.ArrayList;
 

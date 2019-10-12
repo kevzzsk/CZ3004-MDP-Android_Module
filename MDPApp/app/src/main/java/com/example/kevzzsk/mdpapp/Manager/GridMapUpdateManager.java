@@ -15,7 +15,7 @@ import android.widget.TextView;
 import com.example.kevzzsk.mdpapp.Fragment.GridMapFragment;
 import com.example.kevzzsk.mdpapp.OpenGL.myGlSurfaceView;
 import com.example.kevzzsk.mdpapp.OpenGL.myRenderer;
-import com.example.qunjia.mdpapp.R;
+import com.example.kevzzsk.mdpapp.R;
 
 import java.math.BigInteger;
 import java.util.ArrayList;

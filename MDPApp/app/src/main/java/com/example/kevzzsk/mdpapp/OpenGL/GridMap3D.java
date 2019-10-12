@@ -12,7 +12,7 @@ import android.opengl.GLES30;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
-import com.example.qunjia.mdpapp.R;
+import com.example.kevzzsk.mdpapp.R;
 
 public class GridMap3D {
     private int mProgramObject;

@@ -26,7 +26,7 @@ import android.widget.ToggleButton;
 
 import com.andretietz.android.controller.DirectionView;
 import com.andretietz.android.controller.InputView;
-import com.example.qunjia.mdpapp.*;
+import com.example.kevzzsk.mdpapp.*;
 import com.example.kevzzsk.mdpapp.Handler.AccelerometerSwitchListener;
 import com.example.kevzzsk.mdpapp.Handler.ReconfigureHandler;
 import com.example.kevzzsk.mdpapp.Manager.BluetoothService;

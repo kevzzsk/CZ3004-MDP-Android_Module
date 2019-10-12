@@ -26,7 +26,7 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.example.kevzzsk.mdpapp.Fragment.GridMapFragment;
-import com.example.qunjia.mdpapp.R;
+import com.example.kevzzsk.mdpapp.R;
 
 import java.io.InputStream;
 

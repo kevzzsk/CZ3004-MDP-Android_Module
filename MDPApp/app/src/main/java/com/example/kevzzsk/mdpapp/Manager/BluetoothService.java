@@ -105,7 +105,7 @@ public class BluetoothService {
     private BluetoothService(Context context, Handler handler) {
         mAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mAdapter == null) {
-            throw new RuntimeException("Bluetooth is not supported!");
+            //throw new RuntimeException("Bluetooth is not supported!");
         }
 
         mState = ConnectionConstants.STATE_DISCONNECTED;

@@ -27,7 +27,7 @@ import android.widget.Toast;
 import com.example.kevzzsk.mdpapp.Manager.BluetoothService;
 import com.example.kevzzsk.mdpapp.Adapter.BluetoothDataAdapter;
 import com.example.kevzzsk.mdpapp.Manager.GridMapUpdateManager;
-import com.example.qunjia.mdpapp.R;
+import com.example.kevzzsk.mdpapp.R;
 
 import java.util.ArrayList;
 import java.util.Set;
